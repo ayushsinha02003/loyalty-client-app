@@ -5,12 +5,11 @@ import {
   StyleSheet,
 } from 'react-native';
 import PrimaryHeader from '../../components/common/PrimaryHeader';
-
+import PrimaryStampProgressCard from '../../components/cards/stampProgressCard/PrimaryStampProgressCard';
 
 const HomeScreen = () => {
   return (
     <View style={styles.container}>
-
       <PrimaryHeader
         name="Ayush"
         subtitle="Collect stamps. Earn rewards."
@@ -24,6 +23,10 @@ const HomeScreen = () => {
       />
 
       <View style={styles.content}>
+        <PrimaryStampProgressCard
+          currentStamps={7}
+          totalStamps={10}
+        />
         <Text>Home Screen</Text>
       </View>
 
@@ -41,6 +44,6 @@ const styles = StyleSheet.create({
 
   content: {
     flex: 1,
-    padding: 16,
+    padding: 5,
   },
 });
