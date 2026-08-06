@@ -6,7 +6,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
-import BottomNav, { type TabId } from './src/components/BottomNav';
+import BottomNav, { type TabId } from './src/components/common/BottomNav';
 import HomeScreen from './src/screens/home/HomeScreen';
 import MyCardsScreen from './src/screens/my-cards/MyCardsScreen';
 import RewardsScreen from './src/screens/rewards/RewardsScreen';

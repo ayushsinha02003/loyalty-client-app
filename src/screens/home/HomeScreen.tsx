@@ -1,14 +1,32 @@
 import React from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+} from 'react-native';
+import PrimaryHeader from '../../components/common/PrimaryHeader';
+
 
 const HomeScreen = () => {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Welcome to LoyaltyApp</Text>
 
-      <Text style={styles.subtitle}>
-        Collect stamps and unlock rewards.
-      </Text>
+      <PrimaryHeader
+        name="Ayush"
+        subtitle="Collect stamps. Earn rewards."
+        notificationCount={3}
+        onMenuPress={() => {
+          console.log('Menu pressed');
+        }}
+        onNotificationPress={() => {
+          console.log('Notification pressed');
+        }}
+      />
+
+      <View style={styles.content}>
+        <Text>Home Screen</Text>
+      </View>
+
     </View>
   );
 };
@@ -18,19 +36,11 @@ export default HomeScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#F8FAFC',
   },
 
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#111827',
-  },
-
-  subtitle: {
-    marginTop: 8,
-    fontSize: 16,
-    color: '#6b7280',
+  content: {
+    flex: 1,
+    padding: 16,
   },
 });
