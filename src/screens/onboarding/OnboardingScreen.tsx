@@ -1,13 +1,10 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import {
     View,
     StyleSheet,
     Image,
-    FlatList,
     Dimensions,
     Pressable,
-    NativeSyntheticEvent,
-    NativeScrollEvent,
     ImageSourcePropType,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -55,79 +52,50 @@ const onboardingData: OnboardingItem[] = [
 const OnboardingScreen = ({
     onGetStarted,
 }: OnboardingScreenProps) => {
-    const [currentIndex, setCurrentIndex] = useState(0);
-    const flatListRef = useRef<FlatList<OnboardingItem>>(null);
-
-    const handleScroll = (
-        event: NativeSyntheticEvent<NativeScrollEvent>,
-    ) => {
-        const offsetX = event.nativeEvent.contentOffset.x;
-        const index = Math.round(offsetX / width);
-        setCurrentIndex(index);
+    const [currentPage, setCurrentPage] = useState(0);
+    const currentItem = onboardingData[currentPage];
+    const handleNext = () => {
+        if (currentPage < onboardingData.length - 1) {
+            setCurrentPage(currentPage + 1);
+        } else {
+            onGetStarted();
+        }
     };
-
-    const handleGetStarted = () => {
-        onGetStarted();
-    };
-
     const handleSignIn = () => {
         console.log('Go to Login Screen');
     };
 
-    const renderItem = ({
-        item,
-    }: {
-        item: OnboardingItem;
-    }) => {
-        return (
-            <View style={styles.slide}>
-                <View style={styles.textSection}>
-                    <PrimaryText
-                        text={item.title}
-                        customStyle={styles.title}
-                    />
-                    <PrimaryText
-                        text={item.highlight}
-                        customStyle={styles.highlight}
-                    />
-                    <PrimaryText
-                        text={item.description}
-                        customStyle={styles.description}
-                    />
-                </View>
-
-                <View style={styles.imageContainer}>
-                    <Image
-                        source={item.image}
-                        style={styles.image}
-                        resizeMode="contain"
-                    />
-                </View>
-            </View>
-        );
-    };
-
     return (
         <SafeAreaView style={styles.container}>
-            <FlatList
-                ref={flatListRef}
-                data={onboardingData}
-                renderItem={renderItem}
-                keyExtractor={item => item.id.toString()}
-                horizontal
-                pagingEnabled
-                showsHorizontalScrollIndicator={false}
-                bounces={false}
-                onMomentumScrollEnd={handleScroll}
-            />
-
+            <View style={styles.textSection}>
+                <PrimaryText
+                    text={currentItem.title}
+                    customStyle={styles.title}
+                />
+                <PrimaryText
+                    text={currentItem.highlight}
+                    customStyle={styles.highlight}
+                />
+                <PrimaryText
+                    text={currentItem.description}
+                    customStyle={styles.description}
+                />
+            </View>
+            <View style={styles.imageContainer}>
+                <Image
+                    key={currentPage}
+                    source={currentItem.image}
+                    resizeMode="contain"
+                    style={styles.image}
+                />
+            </View>
             <View style={styles.indicatorContainer}>
                 {onboardingData.map((_, index) => (
                     <View
                         key={index}
                         style={[
                             styles.indicator,
-                            currentIndex === index &&
+                            currentPage === index &&
                             styles.activeIndicator,
                         ]}
                     />
@@ -136,13 +104,14 @@ const OnboardingScreen = ({
 
             <View style={styles.bottomSection}>
                 <Pressable
-                    style={({ pressed }) => [
-                        styles.button,
-                        pressed && styles.buttonPressed,
-                    ]}
-                    onPress={handleGetStarted}>
+                    style={styles.button}
+                    onPress={handleNext}>
                     <PrimaryText
-                        text="Get Started"
+                        text={
+                            currentPage === onboardingData.length - 1
+                                ? 'Get Started'
+                                : 'Next'
+                        }
                         customStyle={styles.buttonText}
                     />
                 </Pressable>
