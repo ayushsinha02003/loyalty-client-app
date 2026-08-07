@@ -45,7 +45,6 @@ const PrimaryStampProgressCard = ({
 
     return (
         <View style={[styles.card, customStyle]}>
-
             <View style={styles.imageContainer}>
                 <Image
                     source={image}
@@ -53,7 +52,6 @@ const PrimaryStampProgressCard = ({
                     resizeMode="contain"
                 />
             </View>
-
             <View style={styles.content}>
                 <PrimaryText
                     text={title}
@@ -80,7 +78,6 @@ const PrimaryStampProgressCard = ({
                     </View>
                 )}
             </View>
-
             <View style={styles.progressContainer}>
                 <Svg width={size} height={size} style={styles.progressSvg}>
                     <Defs>
@@ -90,7 +87,6 @@ const PrimaryStampProgressCard = ({
                             <Stop offset="100%" stopColor="#8B5CF6" stopOpacity="1" />
                         </LinearGradient>
                     </Defs>
-
                     <Circle
                         cx={size / 2}
                         cy={size / 2}
@@ -99,7 +95,6 @@ const PrimaryStampProgressCard = ({
                         strokeWidth={strokeWidth}
                         fill="transparent"
                     />
-
                     <Circle
                         cx={size / 2}
                         cy={size / 2}

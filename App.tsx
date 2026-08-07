@@ -5,15 +5,25 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
-import BottomNav, { type TabId } from './src/components/common/BottomNav';
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
+
+import BottomNav, {
+  type TabId,
+} from './src/components/common/BottomNav';
+
 import HomeScreen from './src/screens/home/HomeScreen';
 import MyCardsScreen from './src/screens/my-cards/MyCardsScreen';
 import RewardsScreen from './src/screens/rewards/RewardsScreen';
 import ProfileScreen from './src/screens/profile/ProfileScreen';
+import OnboardingScreen from './src/screens/onboarding/OnboardingScreen';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
+
+  const [showOnboarding, setShowOnboarding] = useState(true);
 
   return (
     <SafeAreaProvider>
@@ -22,25 +32,36 @@ function App() {
         backgroundColor={isDarkMode ? '#111' : '#fff'}
       />
 
-      <AppContent />
+      {showOnboarding ? (
+        <OnboardingScreen
+          onGetStarted={() => setShowOnboarding(false)}
+        />
+      ) : (
+        <AppContent />
+      )}
     </SafeAreaProvider>
   );
 }
 
 function AppContent() {
   const [activeTab, setActiveTab] = useState<TabId>('Home');
+
   const insets = useSafeAreaInsets();
 
   const renderScreen = () => {
     switch (activeTab) {
       case 'Home':
         return <HomeScreen />;
+
       case 'MyCards':
         return <MyCardsScreen />;
+
       case 'Rewards':
         return <RewardsScreen />;
+
       case 'Profile':
         return <ProfileScreen />;
+
       default:
         return <HomeScreen />;
     }
@@ -61,6 +82,8 @@ function AppContent() {
   );
 }
 
+export default App;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -70,5 +93,3 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
-
-export default App;
