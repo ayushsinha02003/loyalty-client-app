@@ -19,10 +19,11 @@ import MyCardsScreen from './src/screens/my-cards/MyCardsScreen';
 import RewardsScreen from './src/screens/rewards/RewardsScreen';
 import ProfileScreen from './src/screens/profile/ProfileScreen';
 import OnboardingScreen from './src/screens/onboarding/OnboardingScreen';
+import SplashScreen from './src/screens/auth/splashScreen/SplashScreen';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
-
+  const [showSplash, setShowSplash] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(true);
 
   return (
@@ -32,7 +33,11 @@ function App() {
         backgroundColor={isDarkMode ? '#111' : '#fff'}
       />
 
-      {showOnboarding ? (
+      {showSplash ? (
+        <SplashScreen
+          onFinish={() => setShowSplash(false)}
+        />
+      ) : showOnboarding ? (
         <OnboardingScreen
           onGetStarted={() => setShowOnboarding(false)}
         />
@@ -87,9 +92,11 @@ export default App;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#F8FAFC',
   },
 
   content: {
     flex: 1,
+    backgroundColor: '#F8FAFC',
   },
 });
