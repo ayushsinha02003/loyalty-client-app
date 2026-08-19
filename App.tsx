@@ -19,12 +19,15 @@ import MyCardsScreen from './src/screens/my-cards/MyCardsScreen';
 import RewardsScreen from './src/screens/rewards/RewardsScreen';
 import ProfileScreen from './src/screens/profile/ProfileScreen';
 import OnboardingScreen from './src/screens/onboarding/OnboardingScreen';
-import SplashScreen from './src/screens/auth/splashScreen/SplashScreen';
+import SplashScreen from '#/screens/auth/splashScreen/SplashScreen';
+import LoginScreen from '#/screens/auth/login/LoginScreen';
+
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
   const [showSplash, setShowSplash] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(true);
+  const [showLogin, setShowLogin] = useState(false);
 
   return (
     <SafeAreaProvider>
@@ -39,7 +42,16 @@ function App() {
         />
       ) : showOnboarding ? (
         <OnboardingScreen
-          onGetStarted={() => setShowOnboarding(false)}
+          onGetStarted={() => {
+            setShowOnboarding(false);
+            setShowLogin(true);
+          }}
+        />
+      ) : showLogin ? (
+        <LoginScreen
+          role="customer"
+          onLogin={() => setShowLogin(false)}
+          onSignup={() => { }}
         />
       ) : (
         <AppContent />
