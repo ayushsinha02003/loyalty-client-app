@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 
-type TabId = 'Home' | 'MyCards' | 'Rewards' | 'Profile';
+type TabId = 'All' | 'Home' | 'MyCards' | 'Rewards' | 'Profile';
 interface BottomNavProps {
     activeTab: TabId;
     onTabPress: (tab: TabId) => void;
@@ -30,6 +30,12 @@ const tabs: Array<{
             id: 'MyCards',
             label: 'My Cards',
             icon: 'credit-card-outline',
+            activeIcon: 'credit-card',
+        },
+        {
+            id: 'All',
+            label: 'All',
+            icon: 'all',
             activeIcon: 'credit-card',
         },
         {

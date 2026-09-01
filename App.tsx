@@ -21,6 +21,9 @@ import ProfileScreen from './src/screens/profile/ProfileScreen';
 import OnboardingScreen from './src/screens/onboarding/OnboardingScreen';
 import SplashScreen from '#/screens/auth/splashScreen/SplashScreen';
 import LoginScreen from '#/screens/auth/login/LoginScreen';
+import ScreenAccessScreen, {
+  type ScreenId,
+} from './src/screens/ScreenAccessScreen';
 
 
 function App() {
@@ -61,12 +64,34 @@ function App() {
 }
 
 function AppContent() {
-  const [activeTab, setActiveTab] = useState<TabId>('Home');
+  const [activeTab, setActiveTab] = useState<TabId>('All');
+  const [selectedScreen, setSelectedScreen] = useState<ScreenId | null>(null);
 
   const insets = useSafeAreaInsets();
 
+  const handleTabPress = (tab: TabId) => {
+    setActiveTab(tab);
+    setSelectedScreen(tab);
+  };
+
+  const handleScreenSelect = (screen: ScreenId) => {
+    if (screen === 'Splash' || screen === 'Onboarding' || screen === 'Login') {
+      setActiveTab('Home');
+    } else if (screen === 'All') {
+      setActiveTab('Home');
+    } else {
+      setActiveTab(screen);
+    }
+
+    setSelectedScreen(screen);
+  };
+
   const renderScreen = () => {
-    switch (activeTab) {
+    if (selectedScreen === null || selectedScreen === 'All') {
+      return <ScreenAccessScreen onSelectScreen={handleScreenSelect} />;
+    }
+
+    switch (selectedScreen) {
       case 'Home':
         return <HomeScreen />;
 
@@ -78,6 +103,27 @@ function AppContent() {
 
       case 'Profile':
         return <ProfileScreen />;
+
+      case 'Splash':
+        return <SplashScreen onFinish={() => setSelectedScreen('Home')} />;
+
+      case 'Onboarding':
+        return (
+          <OnboardingScreen
+            onGetStarted={() => {
+              setSelectedScreen('Login');
+            }}
+          />
+        );
+
+      case 'Login':
+        return (
+          <LoginScreen
+            role="customer"
+            onLogin={() => setSelectedScreen('Home')}
+            onSignup={() => setSelectedScreen('Home')}
+          />
+        );
 
       default:
         return <HomeScreen />;
@@ -92,7 +138,7 @@ function AppContent() {
 
       <BottomNav
         activeTab={activeTab}
-        onTabPress={setActiveTab}
+        onTabPress={handleTabPress}
         bottomInset={insets.bottom}
       />
     </View>
