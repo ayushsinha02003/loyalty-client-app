@@ -9,13 +9,20 @@ import {
 
 import type { TabId } from '../components/common/BottomNav';
 
-export type ScreenId = TabId | 'Splash' | 'Onboarding' | 'Login' | 'Signup';
+export type ScreenId =
+  | TabId
+  | 'AdminHome'
+  | 'Splash'
+  | 'Onboarding'
+  | 'Login'
+  | 'Signup';
 
 export const SCREEN_OPTIONS: Array<{ id: ScreenId; label: string }> = [
   { id: 'Home', label: 'Home Screen' },
   { id: 'MyCards', label: 'My Cards Screen' },
   { id: 'Rewards', label: 'Rewards Screen' },
   { id: 'Profile', label: 'Profile Screen' },
+  { id: 'AdminHome', label: 'Admin Dashboard' },
   { id: 'Splash', label: 'Splash Screen' },
   { id: 'Onboarding', label: 'Onboarding Screen' },
   { id: 'Login', label: 'Login Screen' },

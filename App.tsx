@@ -8,8 +8,10 @@ import {
 import PrimaryBottomNav, {
   type TabId,
 } from './src/components/common/BottomNav';
+import PrimaryAdminBottomNav from './src/components/admin/PrimaryAdminBottomNav';
 
 import HomeScreen from './src/screens/home/HomeScreen';
+import AdminHomeScreen from './src/screens/home/AdminHomeScreen';
 import MyCardsScreen from './src/screens/my-cards/MyCardsScreen';
 import RewardsScreen from './src/screens/rewards/RewardsScreen';
 import ProfileScreen from './src/screens/profile/ProfileScreen';
@@ -84,7 +86,8 @@ function AppContent() {
       screen === 'Splash' ||
       screen === 'Onboarding' ||
       screen === 'Login' ||
-      screen === 'Signup'
+      screen === 'Signup' ||
+      screen === 'AdminHome'
     ) {
       setActiveTab('Home');
     } else if (screen === 'All') {
@@ -94,6 +97,24 @@ function AppContent() {
     }
 
     setSelectedScreen(screen);
+  };
+
+  const handleAdminNavPress = (item: string) => {
+    switch (item) {
+      case 'Home':
+        setSelectedScreen('AdminHome');
+        break;
+      case 'Customers':
+        setSelectedScreen('MyCards');
+        break;
+      case 'Rewards':
+        setSelectedScreen('Rewards');
+        break;
+      case 'Stamps':
+      case 'More':
+      default:
+        setSelectedScreen('AdminHome');
+    }
   };
 
   const renderScreen = () => {
@@ -113,6 +134,9 @@ function AppContent() {
 
       case 'Profile':
         return <ProfileScreen />;
+
+      case 'AdminHome':
+        return <AdminHomeScreen />;
 
       case 'Splash':
         return <SplashScreen onFinish={() => setSelectedScreen('Home')} />;
@@ -152,11 +176,18 @@ function AppContent() {
     <View style={styles.container}>
       <View style={styles.content}>{renderScreen()}</View>
 
-      <PrimaryBottomNav
-        activeTab={activeTab}
-        onTabPress={handleTabPress}
-        bottomInset={insets.bottom}
-      />
+      {selectedScreen === 'AdminHome' ? (
+        <PrimaryAdminBottomNav
+          onPress={handleAdminNavPress}
+          bottomInset={insets.bottom}
+        />
+      ) : (
+        <PrimaryBottomNav
+          activeTab={activeTab}
+          onTabPress={handleTabPress}
+          bottomInset={insets.bottom}
+        />
+      )}
     </View>
   );
 }
