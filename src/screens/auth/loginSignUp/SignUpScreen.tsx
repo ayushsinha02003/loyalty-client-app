@@ -19,10 +19,13 @@ interface SignUpScreenProps {
 
 const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignup, onLogin }) => {
   const [role, setRole] = useState<'customer' | 'business'>('customer');
+  const [businessName, setBusinessName] = useState('');
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [adminCode, setAdminCode] = useState('');
+  const [category, setCategory] = useState('');
+  const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -63,34 +66,76 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignup, onLogin }) => {
           />
         </View>
 
-        <PrimaryFormInput
-          label="Full Name"
-          placeholder="Enter full name"
-          value={fullName}
-          onChangeText={setFullName}
-        />
-        <PrimaryFormInput
-          label="Phone Number"
-          placeholder="Enter phone number"
-          keyboardType="phone-pad"
-          value={phone}
-          onChangeText={setPhone}
-        />
-        <PrimaryFormInput
-          label="Email"
-          placeholder="Enter email"
-          keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
-        />
-
-        {role === 'business' && (
-          <PrimaryFormInput
-            label="Admin Code"
-            placeholder="Enter admin code"
-            value={adminCode}
-            onChangeText={setAdminCode}
-          />
+        {role === 'business' ? (
+          <>
+            <PrimaryFormInput
+              label="Business Name"
+              placeholder="Enter business name"
+              value={businessName}
+              onChangeText={setBusinessName}
+            />
+            <PrimaryFormInput
+              label="Owner Name"
+              placeholder="Enter owner name"
+              value={fullName}
+              onChangeText={setFullName}
+            />
+            <PrimaryFormInput
+              label="Mobile Number"
+              placeholder="Enter mobile number"
+              keyboardType="phone-pad"
+              value={phone}
+              onChangeText={setPhone}
+            />
+            <PrimaryFormInput
+              label="Email (optional)"
+              placeholder="Enter email"
+              keyboardType="email-address"
+              value={email}
+              onChangeText={setEmail}
+            />
+            <PrimaryFormInput
+              label="Business Category"
+              placeholder="Cafe, Salon, Restaurant, etc."
+              value={category}
+              onChangeText={setCategory}
+            />
+            <PrimaryFormInput
+              label="Address"
+              placeholder="Enter business address"
+              value={address}
+              onChangeText={setAddress}
+            />
+            <PrimaryFormInput
+              label="City"
+              placeholder="Enter city"
+              value={city}
+              onChangeText={setCity}
+            />
+          </>
+        ) : (
+          <>
+            <PrimaryFormInput
+              label="Full Name"
+              placeholder="Enter full name"
+              value={fullName}
+              onChangeText={setFullName}
+            />
+            <PrimaryFormInput
+              label="Phone Number"
+              placeholder="Enter phone number"
+              keyboardType="phone-pad"
+              value={phone}
+              onChangeText={setPhone}
+            />
+            <PrimaryFormInput
+              label="Email"
+              placeholder="Enter email"
+              keyboardType="email-address"
+              value={email}
+              onChangeText={setEmail}
+            />
+          </>
         )}
 
         <PrimaryPasswordField
@@ -116,9 +161,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignup, onLogin }) => {
           activeOpacity={0.85}
         >
           <PrimaryText
-            text={
-              role === 'business' ? 'Create Admin Account' : 'Create Account'
-            }
+            text="Create Account"
             customStyle={styles.signupButtonText}
           />
         </TouchableOpacity>
