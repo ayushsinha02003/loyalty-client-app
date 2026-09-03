@@ -1,16 +1,11 @@
 import React, { useState } from 'react';
-import {
-  StatusBar,
-  StyleSheet,
-  useColorScheme,
-  View,
-} from 'react-native';
+import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
 
-import BottomNav, {
+import PrimaryBottomNav, {
   type TabId,
 } from './src/components/common/BottomNav';
 
@@ -20,17 +15,18 @@ import RewardsScreen from './src/screens/rewards/RewardsScreen';
 import ProfileScreen from './src/screens/profile/ProfileScreen';
 import OnboardingScreen from './src/screens/onboarding/OnboardingScreen';
 import SplashScreen from '#/screens/auth/splashScreen/SplashScreen';
-import LoginScreen from '#/screens/auth/login/LoginScreen';
+import LoginScreen from '#/screens/auth/loginSignUp/LoginScreen';
 import ScreenAccessScreen, {
   type ScreenId,
 } from './src/screens/ScreenAccessScreen';
-
+import SignUpScreen from './src/screens/auth/loginSignUp/SignUpScreen';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
   const [showSplash, setShowSplash] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(true);
   const [showLogin, setShowLogin] = useState(false);
+  const [showSignup, setShowSignup] = useState(false);
 
   return (
     <SafeAreaProvider>
@@ -40,9 +36,7 @@ function App() {
       />
 
       {showSplash ? (
-        <SplashScreen
-          onFinish={() => setShowSplash(false)}
-        />
+        <SplashScreen onFinish={() => setShowSplash(false)} />
       ) : showOnboarding ? (
         <OnboardingScreen
           onGetStarted={() => {
@@ -54,7 +48,18 @@ function App() {
         <LoginScreen
           role="customer"
           onLogin={() => setShowLogin(false)}
-          onSignup={() => { }}
+          onSignup={() => {
+            setShowLogin(false);
+            setShowSignup(true);
+          }}
+        />
+      ) : showSignup ? (
+        <SignUpScreen
+          onLogin={() => {
+            setShowSignup(false);
+            setShowLogin(true);
+          }}
+          onSignup={() => setShowSignup(false)}
         />
       ) : (
         <AppContent />
@@ -75,7 +80,12 @@ function AppContent() {
   };
 
   const handleScreenSelect = (screen: ScreenId) => {
-    if (screen === 'Splash' || screen === 'Onboarding' || screen === 'Login') {
+    if (
+      screen === 'Splash' ||
+      screen === 'Onboarding' ||
+      screen === 'Login' ||
+      screen === 'Signup'
+    ) {
       setActiveTab('Home');
     } else if (screen === 'All') {
       setActiveTab('Home');
@@ -121,7 +131,15 @@ function AppContent() {
           <LoginScreen
             role="customer"
             onLogin={() => setSelectedScreen('Home')}
+            onSignup={() => setSelectedScreen('Signup')}
+          />
+        );
+
+      case 'Signup':
+        return (
+          <SignUpScreen
             onSignup={() => setSelectedScreen('Home')}
+            onLogin={() => setSelectedScreen('Login')}
           />
         );
 
@@ -132,11 +150,9 @@ function AppContent() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
-        {renderScreen()}
-      </View>
+      <View style={styles.content}>{renderScreen()}</View>
 
-      <BottomNav
+      <PrimaryBottomNav
         activeTab={activeTab}
         onTabPress={handleTabPress}
         bottomInset={insets.bottom}
