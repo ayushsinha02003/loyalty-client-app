@@ -14,19 +14,31 @@ export type ScreenId =
   | 'AdminHome'
   | 'Splash'
   | 'Onboarding'
+  | 'Welcome'
   | 'Login'
-  | 'Signup';
+  | 'Signup'
+  | 'Otp'
+  | 'QrScanner'
+  | 'ScanSuccess'
+  | 'RewardDetails'
+  | 'Activity';
 
 export const SCREEN_OPTIONS: Array<{ id: ScreenId; label: string }> = [
-  { id: 'Home', label: 'Home Screen' },
-  { id: 'MyCards', label: 'My Cards Screen' },
-  { id: 'Rewards', label: 'Rewards Screen' },
-  { id: 'Profile', label: 'Profile Screen' },
+  { id: 'Splash', label: '1. Splash Screen' },
+  { id: 'Onboarding', label: '2-4. Onboarding Screens' },
+  { id: 'Welcome', label: '5. Welcome Screen' },
+  { id: 'Login', label: '6. Sign In Screen' },
+  { id: 'Signup', label: '7. Sign Up Screen' },
+  { id: 'Otp', label: '8. OTP Verification' },
+  { id: 'Home', label: '9. Home Screen' },
+  { id: 'MyCards', label: '10. My Cards Screen' },
+  { id: 'QrScanner', label: '11. QR Scanner Screen' },
+  { id: 'ScanSuccess', label: '12. Scan Success Screen' },
+  { id: 'Rewards', label: '13. Rewards Screen' },
+  { id: 'RewardDetails', label: '14. Reward Details Screen' },
+  { id: 'Activity', label: '15. Activity Screen' },
+  { id: 'Profile', label: '16. Profile Screen' },
   { id: 'AdminHome', label: 'Admin Dashboard' },
-  { id: 'Splash', label: 'Splash Screen' },
-  { id: 'Onboarding', label: 'Onboarding Screen' },
-  { id: 'Login', label: 'Login Screen' },
-  { id: 'Signup', label: 'SignUp Screen' },
 ];
 
 type ScreenAccessScreenProps = {
@@ -70,7 +82,7 @@ const styles = StyleSheet.create({
   },
   list: {
     gap: 12,
-    paddingBottom: 20,
+    paddingBottom: 120,
   },
   button: {
     backgroundColor: '#7C3AED',

@@ -7,6 +7,7 @@ import {
 
 import PrimaryBottomNav, {
   type TabId,
+  isTabId,
 } from './src/components/common/BottomNav';
 import PrimaryAdminBottomNav from './src/components/admin/PrimaryAdminBottomNav';
 
@@ -18,10 +19,16 @@ import ProfileScreen from './src/screens/profile/ProfileScreen';
 import OnboardingScreen from './src/screens/onboarding/OnboardingScreen';
 import SplashScreen from '#/screens/auth/splashScreen/SplashScreen';
 import LoginScreen from '#/screens/auth/loginSignUp/LoginScreen';
+import SignUpScreen from './src/screens/auth/loginSignUp/SignUpScreen';
 import ScreenAccessScreen, {
   type ScreenId,
 } from './src/screens/ScreenAccessScreen';
-import SignUpScreen from './src/screens/auth/loginSignUp/SignUpScreen';
+import WelcomeScreen from './src/screens/welcome/WelcomeScreen';
+import OtpVerificationScreen from './src/screens/otp/OtpVerificationScreen';
+import QrScannerScreen from './src/screens/qr/QrScannerScreen';
+import ScanSuccessScreen from './src/screens/qr/ScanSuccessScreen';
+import RewardDetailsScreen from './src/screens/rewards/RewardDetailsScreen';
+import ActivityScreen from './src/screens/activity/ActivityScreen';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -82,18 +89,12 @@ function AppContent() {
   };
 
   const handleScreenSelect = (screen: ScreenId) => {
-    if (
-      screen === 'Splash' ||
-      screen === 'Onboarding' ||
-      screen === 'Login' ||
-      screen === 'Signup' ||
-      screen === 'AdminHome'
-    ) {
-      setActiveTab('Home');
-    } else if (screen === 'All') {
-      setActiveTab('Home');
-    } else {
+    if (screen === 'All') {
+      setActiveTab('All');
+    } else if (isTabId(screen)) {
       setActiveTab(screen);
+    } else {
+      setActiveTab('All');
     }
 
     setSelectedScreen(screen);
@@ -139,14 +140,20 @@ function AppContent() {
         return <AdminHomeScreen />;
 
       case 'Splash':
-        return <SplashScreen onFinish={() => setSelectedScreen('Home')} />;
+        return <SplashScreen onFinish={() => setSelectedScreen('All')} />;
 
       case 'Onboarding':
         return (
           <OnboardingScreen
-            onGetStarted={() => {
-              setSelectedScreen('Login');
-            }}
+            onGetStarted={() => setSelectedScreen('Welcome')}
+          />
+        );
+
+      case 'Welcome':
+        return (
+          <WelcomeScreen
+            onCreateAccount={() => setSelectedScreen('Signup')}
+            onSignIn={() => setSelectedScreen('Login')}
           />
         );
 
@@ -162,8 +169,48 @@ function AppContent() {
       case 'Signup':
         return (
           <SignUpScreen
-            onSignup={() => setSelectedScreen('Home')}
+            onSignup={() => setSelectedScreen('Otp')}
             onLogin={() => setSelectedScreen('Login')}
+          />
+        );
+
+      case 'Otp':
+        return (
+          <OtpVerificationScreen
+            onBack={() => setSelectedScreen('Signup')}
+            onVerify={() => setSelectedScreen('Home')}
+          />
+        );
+
+      case 'QrScanner':
+        return (
+          <QrScannerScreen
+            onBack={() => setSelectedScreen('Home')}
+            onScanSuccess={() => setSelectedScreen('ScanSuccess')}
+            onEnterCode={() => setSelectedScreen('ScanSuccess')}
+          />
+        );
+
+      case 'ScanSuccess':
+        return (
+          <ScanSuccessScreen
+            onViewCard={() => setSelectedScreen('MyCards')}
+            onDone={() => setSelectedScreen('Home')}
+          />
+        );
+
+      case 'RewardDetails':
+        return (
+          <RewardDetailsScreen
+            onBack={() => setSelectedScreen('Rewards')}
+            onRedeem={() => setSelectedScreen('Rewards')}
+          />
+        );
+
+      case 'Activity':
+        return (
+          <ActivityScreen
+            onBack={() => setSelectedScreen('Profile')}
           />
         );
 
