@@ -18,7 +18,7 @@ interface LoginScreenProps {
 }
 
 const LoginScreen: React.FC<LoginScreenProps> = ({
-    role = 'customer',
+    role: _role = 'customer',
     onLogin,
     onSignup,
 }) => {
@@ -98,7 +98,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
                 <Text style={styles.title}>Welcome Back 👋</Text>
 
                 <Text style={styles.subtitle}>
-                    Login as {role === 'customer' ? 'Customer' : 'Business Owner'}
+                    Please sign in to continue
                 </Text>
 
                 {/* Phone Number Input Section */}

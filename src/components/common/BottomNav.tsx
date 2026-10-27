@@ -91,7 +91,7 @@ export default function BottomNav({
                                     selected && styles.iconContainerActive,
                                 ]}>
                                 <MaterialDesignIcons
-                                    name={selected ? tab.activeIcon : tab.icon}
+                                    name={(selected ? tab.activeIcon : tab.icon) as any}
                                     size={24}
                                     color={selected ? '#FFFFFF' : '#9CA3AF'}
                                 />

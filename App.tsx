@@ -30,12 +30,43 @@ import ScanSuccessScreen from './src/screens/qr/ScanSuccessScreen';
 import RewardDetailsScreen from './src/screens/rewards/RewardDetailsScreen';
 import ActivityScreen from './src/screens/activity/ActivityScreen';
 
+// Admin Screen Imports
+import BusinessSetupScreen1 from './src/screens/admin/setup/BusinessSetupScreen1';
+import BusinessSetupScreen2 from './src/screens/admin/setup/BusinessSetupScreen2';
+import BusinessSetupScreen3 from './src/screens/admin/setup/BusinessSetupScreen3';
+import AdminCustomersScreen from './src/screens/admin/customers/AdminCustomersScreen';
+import AdminStampCardsScreen from './src/screens/admin/stamp-cards/AdminStampCardsScreen';
+import AdminAddStampCardScreen from './src/screens/admin/stamp-cards/AdminAddStampCardScreen';
+import AdminRewardsScreen from './src/screens/admin/rewards/AdminRewardsScreen';
+import AdminAddRewardScreen from './src/screens/admin/rewards/AdminAddRewardScreen';
+import AdminQrCodeScreen from './src/screens/admin/qr/AdminQrCodeScreen';
+import AdminAnalyticsScreen from './src/screens/admin/analytics/AdminAnalyticsScreen';
+import AdminActivityScreen from './src/screens/admin/activity/AdminActivityScreen';
+import AdminBusinessProfileScreen from './src/screens/admin/profile/AdminBusinessProfileScreen';
+import AdminMoreScreen from './src/screens/admin/more/AdminMoreScreen';
+
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
   const [showSplash, setShowSplash] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState(true);
   const [showLogin, setShowLogin] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
+  const [initialScreen, setInitialScreen] = useState<ScreenId | null>(null);
+
+  const handleAuthSuccess = (data?: any) => {
+    const role =
+      data?.data?.user?.role ||
+      data?.user?.role ||
+      data?.data?.role ||
+      data?.role;
+    setShowLogin(false);
+    setShowSignup(false);
+    if (role === 'business' || role === 'admin') {
+      setInitialScreen('AdminHome');
+    } else {
+      setInitialScreen('Home');
+    }
+  };
 
   return (
     <SafeAreaProvider>
@@ -55,8 +86,7 @@ function App() {
         />
       ) : showLogin ? (
         <LoginScreen
-          role="customer"
-          onLogin={() => setShowLogin(false)}
+          onLogin={handleAuthSuccess}
           onSignup={() => {
             setShowLogin(false);
             setShowSignup(true);
@@ -68,18 +98,22 @@ function App() {
             setShowSignup(false);
             setShowLogin(true);
           }}
-          onSignup={() => setShowSignup(false)}
+          onSignup={handleAuthSuccess}
         />
       ) : (
-        <AppContent />
+        <AppContent initialScreen={initialScreen || undefined} />
       )}
     </SafeAreaProvider>
   );
 }
 
-function AppContent() {
-  const [activeTab, setActiveTab] = useState<TabId>('All');
-  const [selectedScreen, setSelectedScreen] = useState<ScreenId | null>(null);
+function AppContent({ initialScreen }: { initialScreen?: ScreenId }) {
+  const [activeTab, setActiveTab] = useState<TabId>(
+    initialScreen === 'Home' ? 'Home' : 'All'
+  );
+  const [selectedScreen, setSelectedScreen] = useState<ScreenId | null>(
+    initialScreen || null
+  );
 
   const insets = useSafeAreaInsets();
 
@@ -106,15 +140,55 @@ function AppContent() {
         setSelectedScreen('AdminHome');
         break;
       case 'Customers':
-        setSelectedScreen('MyCards');
-        break;
-      case 'Rewards':
-        setSelectedScreen('Rewards');
+        setSelectedScreen('AdminCustomers');
         break;
       case 'Stamps':
+        setSelectedScreen('AdminStampCards');
+        break;
+      case 'Rewards':
+        setSelectedScreen('AdminRewards');
+        break;
       case 'More':
+        setSelectedScreen('AdminMore');
+        break;
       default:
         setSelectedScreen('AdminHome');
+    }
+  };
+
+  const isAdminTabScreen =
+    selectedScreen === 'AdminHome' ||
+    selectedScreen === 'AdminCustomers' ||
+    selectedScreen === 'AdminStampCards' ||
+    selectedScreen === 'AdminAddStampCard' ||
+    selectedScreen === 'AdminRewards' ||
+    selectedScreen === 'AdminAddReward' ||
+    selectedScreen === 'AdminQrCode' ||
+    selectedScreen === 'AdminAnalytics' ||
+    selectedScreen === 'AdminActivity' ||
+    selectedScreen === 'AdminBusinessProfile' ||
+    selectedScreen === 'AdminMore';
+
+  const getAdminActiveItem = () => {
+    switch (selectedScreen) {
+      case 'AdminHome':
+        return 'Home';
+      case 'AdminCustomers':
+        return 'Customers';
+      case 'AdminStampCards':
+      case 'AdminAddStampCard':
+        return 'Stamps';
+      case 'AdminRewards':
+      case 'AdminAddReward':
+        return 'Rewards';
+      case 'AdminMore':
+      case 'AdminBusinessProfile':
+      case 'AdminAnalytics':
+      case 'AdminActivity':
+      case 'AdminQrCode':
+        return 'More';
+      default:
+        return 'Home';
     }
   };
 
@@ -124,6 +198,7 @@ function AppContent() {
     }
 
     switch (selectedScreen) {
+      // Customer Screens
       case 'Home':
         return <HomeScreen />;
 
@@ -135,9 +210,6 @@ function AppContent() {
 
       case 'Profile':
         return <ProfileScreen />;
-
-      case 'AdminHome':
-        return <AdminHomeScreen />;
 
       case 'Splash':
         return <SplashScreen onFinish={() => setSelectedScreen('All')} />;
@@ -160,8 +232,17 @@ function AppContent() {
       case 'Login':
         return (
           <LoginScreen
-            role="customer"
-            onLogin={() => setSelectedScreen('Home')}
+            onLogin={data => {
+              const role =
+                data?.data?.user?.role ||
+                data?.user?.role ||
+                (data as any)?.role;
+              if (role === 'business' || role === 'admin') {
+                setSelectedScreen('AdminHome');
+              } else {
+                setSelectedScreen('Home');
+              }
+            }}
             onSignup={() => setSelectedScreen('Signup')}
           />
         );
@@ -169,7 +250,18 @@ function AppContent() {
       case 'Signup':
         return (
           <SignUpScreen
-            onSignup={() => setSelectedScreen('Otp')}
+            onSignup={data => {
+              const role =
+                data?.data?.user?.role ||
+                data?.user?.role ||
+                data?.data?.role ||
+                (data as any)?.role;
+              if (role === 'business' || role === 'admin') {
+                setSelectedScreen('AdminHome');
+              } else {
+                setSelectedScreen('Home');
+              }
+            }}
             onLogin={() => setSelectedScreen('Login')}
           />
         );
@@ -214,6 +306,113 @@ function AppContent() {
           />
         );
 
+      // Admin Screens
+      case 'AdminLogin':
+        return (
+          <LoginScreen
+            onLogin={data => {
+              const role =
+                data?.data?.user?.role ||
+                data?.user?.role ||
+                (data as any)?.role;
+              if (role === 'business' || role === 'admin') {
+                setSelectedScreen('AdminHome');
+              } else {
+                setSelectedScreen('Home');
+              }
+            }}
+            onSignup={() => setSelectedScreen('Signup')}
+          />
+        );
+
+      case 'BusinessSetup1':
+        return (
+          <BusinessSetupScreen1
+            onBack={() => setSelectedScreen('All')}
+            onNext={() => setSelectedScreen('BusinessSetup2')}
+          />
+        );
+
+      case 'BusinessSetup2':
+        return (
+          <BusinessSetupScreen2
+            onBack={() => setSelectedScreen('BusinessSetup1')}
+            onNext={() => setSelectedScreen('BusinessSetup3')}
+          />
+        );
+
+      case 'BusinessSetup3':
+        return (
+          <BusinessSetupScreen3
+            onBack={() => setSelectedScreen('BusinessSetup2')}
+            onEdit={() => setSelectedScreen('BusinessSetup1')}
+            onCreateBusiness={() => setSelectedScreen('AdminHome')}
+          />
+        );
+
+      case 'AdminHome':
+        return <AdminHomeScreen />;
+
+      case 'AdminCustomers':
+        return <AdminCustomersScreen />;
+
+      case 'AdminStampCards':
+        return (
+          <AdminStampCardsScreen
+            onAddCard={() => setSelectedScreen('AdminAddStampCard')}
+          />
+        );
+
+      case 'AdminAddStampCard':
+        return (
+          <AdminAddStampCardScreen
+            onBack={() => setSelectedScreen('AdminStampCards')}
+            onSave={() => setSelectedScreen('AdminStampCards')}
+          />
+        );
+
+      case 'AdminRewards':
+        return (
+          <AdminRewardsScreen
+            onAddReward={() => setSelectedScreen('AdminAddReward')}
+          />
+        );
+
+      case 'AdminAddReward':
+        return (
+          <AdminAddRewardScreen
+            onBack={() => setSelectedScreen('AdminRewards')}
+            onSave={() => setSelectedScreen('AdminRewards')}
+          />
+        );
+
+      case 'AdminQrCode':
+        return <AdminQrCodeScreen />;
+
+      case 'AdminAnalytics':
+        return <AdminAnalyticsScreen />;
+
+      case 'AdminActivity':
+        return <AdminActivityScreen />;
+
+      case 'AdminBusinessProfile':
+        return (
+          <AdminBusinessProfileScreen
+            onEdit={() => setSelectedScreen('BusinessSetup1')}
+          />
+        );
+
+      case 'AdminMore':
+        return (
+          <AdminMoreScreen
+            onSelectOption={option => {
+              if (option === 'profile') setSelectedScreen('AdminBusinessProfile');
+              else if (option === 'staff') setSelectedScreen('AdminCustomers');
+            }}
+            onLogout={() => setSelectedScreen('All')}
+          />
+        );
+
       default:
         return <HomeScreen />;
     }
@@ -223,10 +422,11 @@ function AppContent() {
     <View style={styles.container}>
       <View style={styles.content}>{renderScreen()}</View>
 
-      {selectedScreen === 'AdminHome' ? (
+      {isAdminTabScreen ? (
         <PrimaryAdminBottomNav
           onPress={handleAdminNavPress}
           bottomInset={insets.bottom}
+          activeItem={getAdminActiveItem()}
         />
       ) : (
         <PrimaryBottomNav
