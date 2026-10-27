@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import {
-    ActivityIndicator,
     SafeAreaView,
     StyleSheet,
     Text,
-    TextInput,
     TouchableOpacity,
     View,
     StatusBar,
 } from 'react-native';
 import { loginUser, LoginResponse } from '../../../services/authService';
+import PrimaryInputField from '../../../components/input/PrimaryInputField';
+import PrimaryPasswordField from '../../../components/input/PrimaryPasswordField';
+import PrimaryButton from '../../../components/button/PrimaryButton';
+import PrimaryErrorBanner from '../../../components/common/PrimaryErrorBanner';
 
 interface LoginScreenProps {
     role?: 'customer' | 'business';
@@ -81,7 +83,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
                 }
             }
         } catch (error: any) {
-            setGeneralError(error?.message || 'Unable to connect to the server. Please check your internet connection.');
+            setGeneralError(
+                error?.message ||
+                'Unable to connect to the server. Please check your internet connection.'
+            );
         } finally {
             setLoading(false);
         }
@@ -101,71 +106,39 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
                     Please sign in to continue
                 </Text>
 
-                {/* Phone Number Input Section */}
-                <View style={styles.inputContainer}>
-                    <Text style={styles.label}>Enter Phone Number</Text>
+                {/* Phone Number Input */}
+                <PrimaryInputField
+                    label="Enter Phone Number"
+                    placeholder="Enter phone number"
+                    keyboardType="phone-pad"
+                    value={phone}
+                    onChangeText={(text) => {
+                        setPhone(text);
+                        if (phoneError) setPhoneError('');
+                        if (generalError) setGeneralError('');
+                    }}
+                    maxLength={10}
+                    editable={!loading}
+                    error={phoneError}
+                    hasError={Boolean(generalError)}
+                />
 
-                    <TextInput
-                        style={[
-                            styles.input,
-                            (!!phoneError || !!generalError) && styles.inputErrorBorder,
-                        ]}
-                        placeholder="Enter phone number"
-                        placeholderTextColor="#94A3B8"
-                        keyboardType="phone-pad"
-                        value={phone}
-                        onChangeText={(text) => {
-                            setPhone(text);
-                            if (phoneError) setPhoneError('');
-                            if (generalError) setGeneralError('');
-                        }}
-                        maxLength={10}
-                        editable={!loading}
-                    />
-
-                    {phoneError ? (
-                        <Text style={styles.fieldError}>{phoneError}</Text>
-                    ) : null}
-                </View>
-
-                {/* Password Input Section */}
-                <View style={styles.inputContainer}>
-                    <Text style={styles.label}>Enter Password</Text>
-
-                    <View
-                        style={[
-                            styles.passwordContainer,
-                            (!!passwordError || !!generalError) && styles.inputErrorBorder,
-                        ]}
-                    >
-                        <TextInput
-                            style={styles.passwordInput}
-                            placeholder="Enter password"
-                            placeholderTextColor="#94A3B8"
-                            secureTextEntry={!showPassword}
-                            value={password}
-                            onChangeText={(text) => {
-                                setPassword(text);
-                                if (passwordError) setPasswordError('');
-                                if (generalError) setGeneralError('');
-                            }}
-                            editable={!loading}
-                        />
-
-                        <TouchableOpacity
-                            onPress={() => setShowPassword(!showPassword)}
-                            disabled={loading}
-                        >
-                            <Text style={styles.showText}>
-                                {showPassword ? 'Hide' : 'Show'}
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    {passwordError ? (
-                        <Text style={styles.fieldError}>{passwordError}</Text>
-                    ) : null}
-                </View>
+                {/* Password Input */}
+                <PrimaryPasswordField
+                    label="Enter Password"
+                    placeholder="Enter password"
+                    value={password}
+                    visible={showPassword}
+                    onToggle={() => setShowPassword(!showPassword)}
+                    onChangeText={(text) => {
+                        setPassword(text);
+                        if (passwordError) setPasswordError('');
+                        if (generalError) setGeneralError('');
+                    }}
+                    editable={!loading}
+                    error={passwordError}
+                    hasError={Boolean(generalError)}
+                />
 
                 <TouchableOpacity disabled={loading}>
                     <Text style={styles.forgotPassword}>
@@ -173,26 +146,15 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
                     </Text>
                 </TouchableOpacity>
 
-                {generalError ? (
-                    <View style={styles.errorBanner}>
-                        <Text style={styles.errorBannerIcon}>⚠️</Text>
-                        <Text style={styles.errorBannerText}>{generalError}</Text>
-                    </View>
-                ) : null}
+                {/* Error Banner */}
+                <PrimaryErrorBanner message={generalError} />
 
-                <TouchableOpacity
-                    style={[styles.loginButton, loading && styles.loginButtonDisabled]}
+                {/* Login Button */}
+                <PrimaryButton
+                    title="Login"
+                    loading={loading}
                     onPress={handleLogin}
-                    disabled={loading}
-                >
-                    {loading ? (
-                        <ActivityIndicator color="#FFFFFF" size="small" />
-                    ) : (
-                        <Text style={styles.loginButtonText}>
-                            Login
-                        </Text>
-                    )}
-                </TouchableOpacity>
+                />
             </View>
 
             <View style={styles.footer}>
@@ -237,107 +199,11 @@ const styles = StyleSheet.create({
         marginBottom: 40,
     },
 
-    inputContainer: {
-        marginBottom: 24,
-    },
-
-    label: {
-        fontSize: 15,
-        fontWeight: '600',
-        color: '#334155',
-        marginBottom: 10,
-    },
-
-    input: {
-        height: 55,
-        borderWidth: 1,
-        borderColor: '#CBD5E1',
-        borderRadius: 14,
-        paddingHorizontal: 16,
-        fontSize: 16,
-        color: '#000',
-    },
-
-    passwordContainer: {
-        height: 55,
-        borderWidth: 1,
-        borderColor: '#CBD5E1',
-        borderRadius: 14,
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 16,
-    },
-
-    passwordInput: {
-        flex: 1,
-        fontSize: 16,
-        color: '#000',
-        paddingVertical: 0,
-    },
-
-    showText: {
-        color: '#7B3FF2',
-        fontWeight: '600',
-    },
-
     forgotPassword: {
         textAlign: 'right',
         color: '#7B3FF2',
         marginBottom: 30,
         fontWeight: '600',
-    },
-
-    loginButton: {
-        backgroundColor: '#7B3FF2',
-        height: 56,
-        borderRadius: 16,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-
-    loginButtonDisabled: {
-        opacity: 0.6,
-    },
-
-    inputErrorBorder: {
-        borderColor: '#DC2626',
-    },
-
-    fieldError: {
-        color: '#DC2626',
-        fontSize: 13,
-        marginTop: 6,
-        fontWeight: '500',
-    },
-
-    errorBanner: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#FEF2F2',
-        borderWidth: 1,
-        borderColor: '#FECACA',
-        borderRadius: 12,
-        paddingVertical: 12,
-        paddingHorizontal: 14,
-        marginBottom: 20,
-    },
-
-    errorBannerIcon: {
-        fontSize: 16,
-        marginRight: 10,
-    },
-
-    errorBannerText: {
-        flex: 1,
-        color: '#DC2626',
-        fontSize: 14,
-        fontWeight: '600',
-    },
-
-    loginButtonText: {
-        color: '#FFFFFF',
-        fontSize: 18,
-        fontWeight: '700',
     },
 
     footer: {

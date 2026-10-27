@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
+import PrimaryButton from '../../components/button/PrimaryButton';
 
 interface WelcomeScreenProps {
   onCreateAccount?: () => void;
@@ -112,13 +113,10 @@ export default function WelcomeScreen({
 
         {/* Button Section */}
         <View style={styles.actionContainer}>
-          <TouchableOpacity
-            style={styles.primaryButton}
+          <PrimaryButton
+            title="Create Account"
             onPress={onCreateAccount}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.primaryButtonText}>Create Account</Text>
-          </TouchableOpacity>
+          />
 
           <View style={styles.footerRow}>
             <Text style={styles.footerText}>Already have an account? </Text>

@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import PrimaryCard from '../../../components/cards/PrimaryCard';
+import PrimaryButton from '../../../components/button/PrimaryButton';
 
 interface BusinessSetupScreen3Props {
   onBack?: () => void;
@@ -60,7 +62,7 @@ export default function BusinessSetupScreen3({
         <View style={styles.previewSection}>
           <Text style={styles.previewHeading}>Business Preview</Text>
 
-          <View style={styles.previewCard}>
+          <PrimaryCard style={styles.previewCard}>
             {/* Business Logo & Name Row */}
             <View style={styles.cardHeader}>
               <View style={styles.logoCircle}>
@@ -94,17 +96,14 @@ export default function BusinessSetupScreen3({
               <Text style={styles.detailIcon}>✉️</Text>
               <Text style={styles.detailText}>{email}</Text>
             </View>
-          </View>
+          </PrimaryCard>
         </View>
 
         {/* Submit Button */}
-        <TouchableOpacity
-          style={styles.createButton}
+        <PrimaryButton
+          title="Create Business"
           onPress={onCreateBusiness}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.createButtonText}>Create Business</Text>
-        </TouchableOpacity>
+        />
       </View>
     </SafeAreaView>
   );
@@ -188,16 +187,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   previewCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
     padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -252,22 +242,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#475569',
     flex: 1,
-  },
-  createButton: {
-    backgroundColor: '#4F46E5',
-    height: 56,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#4F46E5',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  createButtonText: {
-    color: '#FFFFFF',
-    fontSize: 17,
-    fontWeight: '700',
   },
 });

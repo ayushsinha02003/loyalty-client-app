@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
@@ -8,11 +7,16 @@ import {
   StatusBar,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { registerUser, RegisterResponse } from '../../../services/authService';
+import PrimaryInputField from '../../../components/input/PrimaryInputField';
+import PrimaryPasswordField from '../../../components/input/PrimaryPasswordField';
+import PrimaryButton from '../../../components/button/PrimaryButton';
+import PrimaryErrorBanner from '../../../components/common/PrimaryErrorBanner';
+import PrimaryCard from '../../../components/cards/PrimaryCard';
+import PrimaryRoleButton from '../../../components/button/PrimaryRoleButton';
 
 interface SignUpScreenProps {
   onSignup?: (data?: RegisterResponse) => void;
@@ -246,7 +250,6 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignup, onLogin }) => {
         setGeneralError(rawMessage);
         if (rawMessage.toLowerCase().includes('phone')) {
           setBusinessPhoneError(rawMessage);
-          // Jump back to Step 2 so user can correct the phone
           setAdminStep(2);
         }
       }
@@ -343,47 +346,22 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignup, onLogin }) => {
           {/* Role Toggle Selector (Only on Step 1 if Admin, or always in User mode) */}
           {(role === 'customer' || adminStep === 1) && (
             <View style={styles.roleContainer}>
-              <TouchableOpacity
-                style={[
-                  styles.roleButton,
-                  role === 'customer' && styles.roleButtonActive,
-                ]}
+              <PrimaryRoleButton
+                label="👤 User"
+                active={role === 'customer'}
                 onPress={() => {
                   setRole('customer');
                   setGeneralError('');
                 }}
-                disabled={loading}
-              >
-                <Text
-                  style={[
-                    styles.roleButtonText,
-                    role === 'customer' && styles.roleButtonTextActive,
-                  ]}
-                >
-                  👤 User
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.roleButton,
-                  role === 'business' && styles.roleButtonActive,
-                ]}
+              />
+              <PrimaryRoleButton
+                label="💼 Admin (Business)"
+                active={role === 'business'}
                 onPress={() => {
                   setRole('business');
                   setGeneralError('');
                 }}
-                disabled={loading}
-              >
-                <Text
-                  style={[
-                    styles.roleButtonText,
-                    role === 'business' && styles.roleButtonTextActive,
-                  ]}
-                >
-                  💼 Admin (Business)
-                </Text>
-              </TouchableOpacity>
+              />
             </View>
           )}
 
@@ -391,260 +369,147 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignup, onLogin }) => {
           {role === 'customer' && (
             <View style={styles.formContainer}>
               {/* Full Name */}
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Full Name</Text>
-                <TextInput
-                  style={[
-                    styles.input,
-                    (!!nameError || !!generalError) && styles.inputErrorBorder,
-                  ]}
-                  placeholder="Enter full name"
-                  placeholderTextColor="#94A3B8"
-                  value={fullName}
-                  onChangeText={text => {
-                    setFullName(text);
-                    if (nameError) setNameError('');
-                    if (generalError) setGeneralError('');
-                  }}
-                  editable={!loading}
-                />
-                {nameError ? (
-                  <Text style={styles.fieldError}>{nameError}</Text>
-                ) : null}
-              </View>
+              <PrimaryInputField
+                label="Full Name"
+                placeholder="Enter full name"
+                value={fullName}
+                onChangeText={text => {
+                  setFullName(text);
+                  if (nameError) setNameError('');
+                  if (generalError) setGeneralError('');
+                }}
+                editable={!loading}
+                error={nameError}
+                hasError={Boolean(generalError)}
+              />
 
               {/* Phone Number */}
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Phone Number</Text>
-                <TextInput
-                  style={[
-                    styles.input,
-                    (!!phoneError || !!generalError) && styles.inputErrorBorder,
-                  ]}
-                  placeholder="Enter 10-digit mobile number"
-                  placeholderTextColor="#94A3B8"
-                  keyboardType="phone-pad"
-                  maxLength={10}
-                  value={phone}
-                  onChangeText={text => {
-                    setPhone(text);
-                    if (phoneError) setPhoneError('');
-                    if (generalError) setGeneralError('');
-                  }}
-                  editable={!loading}
-                />
-                {phoneError ? (
-                  <Text style={styles.fieldError}>{phoneError}</Text>
-                ) : null}
-              </View>
+              <PrimaryInputField
+                label="Phone Number"
+                placeholder="Enter 10-digit mobile number"
+                keyboardType="phone-pad"
+                maxLength={10}
+                value={phone}
+                onChangeText={text => {
+                  setPhone(text);
+                  if (phoneError) setPhoneError('');
+                  if (generalError) setGeneralError('');
+                }}
+                editable={!loading}
+                error={phoneError}
+                hasError={Boolean(generalError)}
+              />
 
               {/* Email (Optional) */}
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Email Address (Optional)</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Enter email address"
-                  placeholderTextColor="#94A3B8"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  value={email}
-                  onChangeText={setEmail}
-                  editable={!loading}
-                />
-              </View>
+              <PrimaryInputField
+                label="Email Address (Optional)"
+                placeholder="Enter email address"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                value={email}
+                onChangeText={setEmail}
+                editable={!loading}
+              />
 
               {/* Password */}
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Create Password</Text>
-                <View
-                  style={[
-                    styles.passwordContainer,
-                    (!!passwordError || !!generalError) && styles.inputErrorBorder,
-                  ]}
-                >
-                  <TextInput
-                    style={styles.passwordInput}
-                    placeholder="Enter password (min. 6 characters)"
-                    placeholderTextColor="#94A3B8"
-                    secureTextEntry={!showPassword}
-                    value={password}
-                    onChangeText={text => {
-                      setPassword(text);
-                      if (passwordError) setPasswordError('');
-                      if (generalError) setGeneralError('');
-                    }}
-                    editable={!loading}
-                  />
-                  <TouchableOpacity
-                    onPress={() => setShowPassword(!showPassword)}
-                    disabled={loading}
-                  >
-                    <Text style={styles.showText}>
-                      {showPassword ? 'Hide' : 'Show'}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-                {passwordError ? (
-                  <Text style={styles.fieldError}>{passwordError}</Text>
-                ) : null}
-              </View>
+              <PrimaryPasswordField
+                label="Create Password"
+                placeholder="Enter password (min. 6 characters)"
+                secureTextEntry={!showPassword}
+                value={password}
+                visible={showPassword}
+                onToggle={() => setShowPassword(!showPassword)}
+                onChangeText={text => {
+                  setPassword(text);
+                  if (passwordError) setPasswordError('');
+                  if (generalError) setGeneralError('');
+                }}
+                editable={!loading}
+                error={passwordError}
+                hasError={Boolean(generalError)}
+              />
 
               {/* Confirm Password */}
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Confirm Password</Text>
-                <View
-                  style={[
-                    styles.passwordContainer,
-                    (!!confirmPasswordError || !!generalError) &&
-                      styles.inputErrorBorder,
-                  ]}
-                >
-                  <TextInput
-                    style={styles.passwordInput}
-                    placeholder="Confirm your password"
-                    placeholderTextColor="#94A3B8"
-                    secureTextEntry={!showConfirmPassword}
-                    value={confirmPassword}
-                    onChangeText={text => {
-                      setConfirmPassword(text);
-                      if (confirmPasswordError) setConfirmPasswordError('');
-                      if (generalError) setGeneralError('');
-                    }}
-                    editable={!loading}
-                  />
-                  <TouchableOpacity
-                    onPress={() =>
-                      setShowConfirmPassword(!showConfirmPassword)
-                    }
-                    disabled={loading}
-                  >
-                    <Text style={styles.showText}>
-                      {showConfirmPassword ? 'Hide' : 'Show'}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-                {confirmPasswordError ? (
-                  <Text style={styles.fieldError}>{confirmPasswordError}</Text>
-                ) : null}
-              </View>
+              <PrimaryPasswordField
+                label="Confirm Password"
+                placeholder="Confirm your password"
+                secureTextEntry={!showConfirmPassword}
+                value={confirmPassword}
+                visible={showConfirmPassword}
+                onToggle={() => setShowConfirmPassword(!showConfirmPassword)}
+                onChangeText={text => {
+                  setConfirmPassword(text);
+                  if (confirmPasswordError) setConfirmPasswordError('');
+                  if (generalError) setGeneralError('');
+                }}
+                editable={!loading}
+                error={confirmPasswordError}
+                hasError={Boolean(generalError)}
+              />
 
               {/* General Error Banner */}
-              {generalError ? (
-                <View style={styles.errorBanner}>
-                  <Text style={styles.errorBannerIcon}>⚠️</Text>
-                  <Text style={styles.errorBannerText}>{generalError}</Text>
-                </View>
-              ) : null}
+              <PrimaryErrorBanner message={generalError} />
 
               {/* Submit Button */}
-              <TouchableOpacity
-                style={[
-                  styles.primaryButton,
-                  loading && styles.buttonDisabled,
-                ]}
+              <PrimaryButton
+                title="Create Account"
+                loading={loading}
                 onPress={handleUserSignup}
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#FFFFFF" size="small" />
-                ) : (
-                  <Text style={styles.primaryButtonText}>Create Account</Text>
-                )}
-              </TouchableOpacity>
+              />
             </View>
           )}
 
           {/* ADMIN BUSINESS SETUP - STEP 1: BUSINESS INFO */}
           {role === 'business' && adminStep === 1 && (
             <View style={styles.formContainer}>
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Business Name</Text>
-                <TextInput
-                  style={[
-                    styles.input,
-                    !!businessNameError && styles.inputErrorBorder,
-                  ]}
-                  placeholder="e.g. Brew & Beans Cafe"
-                  placeholderTextColor="#94A3B8"
-                  value={businessName}
-                  onChangeText={text => {
-                    setBusinessName(text);
-                    if (businessNameError) setBusinessNameError('');
-                  }}
-                />
-                {businessNameError ? (
-                  <Text style={styles.fieldError}>{businessNameError}</Text>
-                ) : null}
-              </View>
+              <PrimaryInputField
+                label="Business Name"
+                placeholder="e.g. Brew & Beans Cafe"
+                value={businessName}
+                onChangeText={text => {
+                  setBusinessName(text);
+                  if (businessNameError) setBusinessNameError('');
+                }}
+                error={businessNameError}
+              />
 
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Business Category</Text>
-                <TextInput
-                  style={[
-                    styles.input,
-                    !!categoryError && styles.inputErrorBorder,
-                  ]}
-                  placeholder="e.g. Coffee Shop, Salon, Restaurant, Retail"
-                  placeholderTextColor="#94A3B8"
-                  value={category}
-                  onChangeText={text => {
-                    setCategory(text);
-                    if (categoryError) setCategoryError('');
-                  }}
-                />
-                {categoryError ? (
-                  <Text style={styles.fieldError}>{categoryError}</Text>
-                ) : null}
-              </View>
+              <PrimaryInputField
+                label="Business Category"
+                placeholder="e.g. Coffee Shop, Salon, Restaurant, Retail"
+                value={category}
+                onChangeText={text => {
+                  setCategory(text);
+                  if (categoryError) setCategoryError('');
+                }}
+                error={categoryError}
+              />
 
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Business Address</Text>
-                <TextInput
-                  style={[
-                    styles.input,
-                    !!addressError && styles.inputErrorBorder,
-                  ]}
-                  placeholder="Enter street address"
-                  placeholderTextColor="#94A3B8"
-                  value={address}
-                  onChangeText={text => {
-                    setAddress(text);
-                    if (addressError) setAddressError('');
-                  }}
-                />
-                {addressError ? (
-                  <Text style={styles.fieldError}>{addressError}</Text>
-                ) : null}
-              </View>
+              <PrimaryInputField
+                label="Business Address"
+                placeholder="Enter street address"
+                value={address}
+                onChangeText={text => {
+                  setAddress(text);
+                  if (addressError) setAddressError('');
+                }}
+                error={addressError}
+              />
 
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>City</Text>
-                <TextInput
-                  style={[
-                    styles.input,
-                    !!cityError && styles.inputErrorBorder,
-                  ]}
-                  placeholder="Enter city"
-                  placeholderTextColor="#94A3B8"
-                  value={city}
-                  onChangeText={text => {
-                    setCity(text);
-                    if (cityError) setCityError('');
-                  }}
-                />
-                {cityError ? (
-                  <Text style={styles.fieldError}>{cityError}</Text>
-                ) : null}
-              </View>
+              <PrimaryInputField
+                label="City"
+                placeholder="Enter city"
+                value={city}
+                onChangeText={text => {
+                  setCity(text);
+                  if (cityError) setCityError('');
+                }}
+                error={cityError}
+              />
 
-              <TouchableOpacity
-                style={styles.primaryButton}
+              <PrimaryButton
+                title="Continue to Step 2 →"
                 onPress={handleAdminStep1Next}
-              >
-                <Text style={styles.primaryButtonText}>
-                  Continue to Step 2 →
-                </Text>
-              </TouchableOpacity>
+              />
             </View>
           )}
 
@@ -673,153 +538,83 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignup, onLogin }) => {
                 </TouchableOpacity>
               </View>
 
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Owner / Admin Name</Text>
-                <TextInput
-                  style={[
-                    styles.input,
-                    !!ownerNameError && styles.inputErrorBorder,
-                  ]}
-                  placeholder="Enter owner or manager name"
-                  placeholderTextColor="#94A3B8"
-                  value={ownerName}
-                  onChangeText={text => {
-                    setOwnerName(text);
-                    if (ownerNameError) setOwnerNameError('');
-                  }}
-                />
-                {ownerNameError ? (
-                  <Text style={styles.fieldError}>{ownerNameError}</Text>
-                ) : null}
-              </View>
+              <PrimaryInputField
+                label="Owner / Admin Name"
+                placeholder="Enter owner or manager name"
+                value={ownerName}
+                onChangeText={text => {
+                  setOwnerName(text);
+                  if (ownerNameError) setOwnerNameError('');
+                }}
+                error={ownerNameError}
+              />
 
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Contact Mobile Number</Text>
-                <TextInput
-                  style={[
-                    styles.input,
-                    !!businessPhoneError && styles.inputErrorBorder,
-                  ]}
-                  placeholder="Enter 10-digit mobile number"
-                  placeholderTextColor="#94A3B8"
-                  keyboardType="phone-pad"
-                  maxLength={10}
-                  value={businessPhone}
-                  onChangeText={text => {
-                    setBusinessPhone(text);
-                    if (businessPhoneError) setBusinessPhoneError('');
-                  }}
-                />
-                {businessPhoneError ? (
-                  <Text style={styles.fieldError}>{businessPhoneError}</Text>
-                ) : null}
-              </View>
+              <PrimaryInputField
+                label="Contact Mobile Number"
+                placeholder="Enter 10-digit mobile number"
+                keyboardType="phone-pad"
+                maxLength={10}
+                value={businessPhone}
+                onChangeText={text => {
+                  setBusinessPhone(text);
+                  if (businessPhoneError) setBusinessPhoneError('');
+                }}
+                error={businessPhoneError}
+              />
 
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Business Email (Optional)</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="e.g. contact@business.com"
-                  placeholderTextColor="#94A3B8"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  value={businessEmail}
-                  onChangeText={setBusinessEmail}
-                />
-              </View>
+              <PrimaryInputField
+                label="Business Email (Optional)"
+                placeholder="e.g. contact@business.com"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                value={businessEmail}
+                onChangeText={setBusinessEmail}
+              />
 
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Password</Text>
-                <View
-                  style={[
-                    styles.passwordContainer,
-                    !!businessPasswordError && styles.inputErrorBorder,
-                  ]}
-                >
-                  <TextInput
-                    style={styles.passwordInput}
-                    placeholder="Enter password (min. 6 characters)"
-                    placeholderTextColor="#94A3B8"
-                    secureTextEntry={!showBusinessPassword}
-                    value={businessPassword}
-                    onChangeText={text => {
-                      setBusinessPassword(text);
-                      if (businessPasswordError)
-                        setBusinessPasswordError('');
-                    }}
-                  />
-                  <TouchableOpacity
-                    onPress={() =>
-                      setShowBusinessPassword(!showBusinessPassword)
-                    }
-                  >
-                    <Text style={styles.showText}>
-                      {showBusinessPassword ? 'Hide' : 'Show'}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-                {businessPasswordError ? (
-                  <Text style={styles.fieldError}>
-                    {businessPasswordError}
-                  </Text>
-                ) : null}
-              </View>
+              <PrimaryPasswordField
+                label="Password"
+                placeholder="Enter password (min. 6 characters)"
+                secureTextEntry={!showBusinessPassword}
+                value={businessPassword}
+                visible={showBusinessPassword}
+                onToggle={() => setShowBusinessPassword(!showBusinessPassword)}
+                onChangeText={text => {
+                  setBusinessPassword(text);
+                  if (businessPasswordError) setBusinessPasswordError('');
+                }}
+                error={businessPasswordError}
+              />
 
-              <View style={styles.inputContainer}>
-                <Text style={styles.label}>Confirm Password</Text>
-                <View
-                  style={[
-                    styles.passwordContainer,
-                    !!businessConfirmPasswordError && styles.inputErrorBorder,
-                  ]}
-                >
-                  <TextInput
-                    style={styles.passwordInput}
-                    placeholder="Confirm your password"
-                    placeholderTextColor="#94A3B8"
-                    secureTextEntry={!showBusinessConfirmPassword}
-                    value={businessConfirmPassword}
-                    onChangeText={text => {
-                      setBusinessConfirmPassword(text);
-                      if (businessConfirmPasswordError)
-                        setBusinessConfirmPasswordError('');
-                    }}
-                  />
-                  <TouchableOpacity
-                    onPress={() =>
-                      setShowBusinessConfirmPassword(
-                        !showBusinessConfirmPassword
-                      )
-                    }
-                  >
-                    <Text style={styles.showText}>
-                      {showBusinessConfirmPassword ? 'Hide' : 'Show'}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-                {businessConfirmPasswordError ? (
-                  <Text style={styles.fieldError}>
-                    {businessConfirmPasswordError}
-                  </Text>
-                ) : null}
-              </View>
+              <PrimaryPasswordField
+                label="Confirm Password"
+                placeholder="Confirm your password"
+                secureTextEntry={!showBusinessConfirmPassword}
+                value={businessConfirmPassword}
+                visible={showBusinessConfirmPassword}
+                onToggle={() =>
+                  setShowBusinessConfirmPassword(!showBusinessConfirmPassword)
+                }
+                onChangeText={text => {
+                  setBusinessConfirmPassword(text);
+                  if (businessConfirmPasswordError)
+                    setBusinessConfirmPasswordError('');
+                }}
+                error={businessConfirmPasswordError}
+              />
 
               <View style={styles.buttonRow}>
-                <TouchableOpacity
-                  style={styles.secondaryButton}
+                <PrimaryButton
+                  variant="secondary"
+                  title="Back"
                   onPress={() => setAdminStep(1)}
-                >
-                  <Text style={styles.secondaryButtonText}>Back</Text>
-                </TouchableOpacity>
+                  style={styles.secondaryButton}
+                />
 
-                <TouchableOpacity
-                  style={[styles.primaryButton, styles.flexButton]}
+                <PrimaryButton
+                  title="Review & Confirm →"
                   onPress={handleAdminStep2Next}
-                >
-                  <Text style={styles.primaryButtonText}>
-                    Review & Confirm →
-                  </Text>
-                </TouchableOpacity>
+                  style={styles.flexButton}
+                />
               </View>
             </View>
           )}
@@ -827,7 +622,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignup, onLogin }) => {
           {/* ADMIN BUSINESS SETUP - STEP 3: REVIEW & CONFIRM */}
           {role === 'business' && adminStep === 3 && (
             <View style={styles.formContainer}>
-              <View style={styles.previewCard}>
+              <PrimaryCard style={styles.previewCard}>
                 {/* Header */}
                 <View style={styles.previewHeader}>
                   <View style={styles.previewLogo}>
@@ -880,42 +675,26 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignup, onLogin }) => {
                     <Text style={styles.previewText}>{businessEmail}</Text>
                   </View>
                 ) : null}
-              </View>
+              </PrimaryCard>
 
               {/* Error Banner if registration fails */}
-              {generalError ? (
-                <View style={styles.errorBanner}>
-                  <Text style={styles.errorBannerIcon}>⚠️</Text>
-                  <Text style={styles.errorBannerText}>{generalError}</Text>
-                </View>
-              ) : null}
+              <PrimaryErrorBanner message={generalError} />
 
               <View style={styles.buttonRow}>
-                <TouchableOpacity
-                  style={styles.secondaryButton}
+                <PrimaryButton
+                  variant="secondary"
+                  title="Back"
                   onPress={() => setAdminStep(2)}
                   disabled={loading}
-                >
-                  <Text style={styles.secondaryButtonText}>Back</Text>
-                </TouchableOpacity>
+                  style={styles.secondaryButton}
+                />
 
-                <TouchableOpacity
-                  style={[
-                    styles.primaryButton,
-                    styles.flexButton,
-                    loading && styles.buttonDisabled,
-                  ]}
+                <PrimaryButton
+                  title="Create Business"
+                  loading={loading}
                   onPress={handleAdminRegister}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <ActivityIndicator color="#FFFFFF" size="small" />
-                  ) : (
-                    <Text style={styles.primaryButtonText}>
-                      Create Business
-                    </Text>
-                  )}
-                </TouchableOpacity>
+                  style={styles.flexButton}
+                />
               </View>
             </View>
           )}
@@ -1018,33 +797,7 @@ const styles = StyleSheet.create({
     gap: 12,
     marginBottom: 24,
   },
-  roleButton: {
-    flex: 1,
-    height: 52,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-  },
-  roleButtonActive: {
-    borderColor: '#7B3FF2',
-    backgroundColor: '#F3EEFF',
-  },
-  roleButtonText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#64748B',
-  },
-  roleButtonTextActive: {
-    color: '#7B3FF2',
-    fontWeight: '700',
-  },
   formContainer: {
-    marginBottom: 20,
-  },
-  inputContainer: {
     marginBottom: 20,
   },
   label: {
@@ -1052,68 +805,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#334155',
     marginBottom: 8,
-  },
-  input: {
-    height: 54,
-    borderWidth: 1,
-    borderColor: '#CBD5E1',
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    color: '#0F172A',
-    backgroundColor: '#FFFFFF',
-  },
-  passwordContainer: {
-    height: 54,
-    borderWidth: 1,
-    borderColor: '#CBD5E1',
-    borderRadius: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    backgroundColor: '#FFFFFF',
-  },
-  passwordInput: {
-    flex: 1,
-    fontSize: 16,
-    color: '#0F172A',
-    paddingVertical: 0,
-  },
-  showText: {
-    color: '#7B3FF2',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  inputErrorBorder: {
-    borderColor: '#DC2626',
-    borderWidth: 1.5,
-  },
-  fieldError: {
-    color: '#DC2626',
-    fontSize: 13,
-    marginTop: 6,
-    fontWeight: '500',
-  },
-  errorBanner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FEF2F2',
-    borderWidth: 1,
-    borderColor: '#FECACA',
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    marginBottom: 20,
-  },
-  errorBannerIcon: {
-    fontSize: 16,
-    marginRight: 10,
-  },
-  errorBannerText: {
-    flex: 1,
-    color: '#DC2626',
-    fontSize: 14,
-    fontWeight: '600',
   },
   uploadSection: {
     marginBottom: 20,
@@ -1155,56 +846,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 10,
   },
-  primaryButton: {
-    backgroundColor: '#7B3FF2',
-    height: 56,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#7B3FF2',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 3,
-  },
   flexButton: {
     flex: 1,
   },
   secondaryButton: {
-    height: 56,
     paddingHorizontal: 22,
-    borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: '#CBD5E1',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-  },
-  secondaryButtonText: {
-    color: '#475569',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  primaryButtonText: {
-    color: '#FFFFFF',
-    fontSize: 17,
-    fontWeight: '700',
-  },
-  buttonDisabled: {
-    opacity: 0.6,
   },
   previewCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    padding: 20,
     marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
   },
   previewHeader: {
     flexDirection: 'row',

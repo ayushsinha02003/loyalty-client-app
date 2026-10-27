@@ -7,10 +7,11 @@ import {
   StatusBar,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import PrimaryInputField from '../../../components/input/PrimaryInputField';
+import PrimaryButton from '../../../components/button/PrimaryButton';
 
 interface BusinessSetupScreen2Props {
   onBack?: () => void;
@@ -83,39 +84,28 @@ export default function BusinessSetupScreen2({
 
           {/* Form Fields */}
           <View style={styles.formContainer}>
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Contact Number</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="+91  98765 43210"
-                placeholderTextColor="#94A3B8"
-                keyboardType="phone-pad"
-                value={contactNumber}
-                onChangeText={setContactNumber}
-              />
-            </View>
+            <PrimaryInputField
+              label="Contact Number"
+              placeholder="+91  98765 43210"
+              keyboardType="phone-pad"
+              value={contactNumber}
+              onChangeText={setContactNumber}
+            />
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Email</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="business@email.com"
-                placeholderTextColor="#94A3B8"
-                keyboardType="email-address"
-                value={email}
-                onChangeText={setEmail}
-              />
-            </View>
+            <PrimaryInputField
+              label="Email"
+              placeholder="business@email.com"
+              keyboardType="email-address"
+              value={email}
+              onChangeText={setEmail}
+            />
           </View>
 
           {/* Next Button */}
-          <TouchableOpacity
-            style={styles.nextButton}
+          <PrimaryButton
+            title="Next"
             onPress={handleNext}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.nextButtonText}>Next</Text>
-          </TouchableOpacity>
+          />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -234,37 +224,6 @@ const styles = StyleSheet.create({
     color: '#4F46E5',
   },
   formContainer: {
-    marginBottom: 24,
-  },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  input: {
-    height: 54,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    color: '#0F172A',
-    backgroundColor: '#FFFFFF',
-  },
-  nextButton: {
-    backgroundColor: '#4F46E5',
-    height: 56,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 12,
-    shadowColor: '#4F46E5',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  nextButtonText: {
-    color: '#FFFFFF',
-    fontSize: 17,
-    fontWeight: '700',
+    marginBottom: 16,
   },
 });

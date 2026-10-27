@@ -56,7 +56,7 @@ const LoyaltySteps = () => {
                                     },
                                 ]}>
                                 <MaterialDesignIcons
-                                    name={step.icon}
+                                    name={step.icon as any}
                                     size={24}
                                     color={step.iconColor}
                                 />

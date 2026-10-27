@@ -7,10 +7,11 @@ import {
   StatusBar,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import PrimaryInputField from '../../../components/input/PrimaryInputField';
+import PrimaryButton from '../../../components/button/PrimaryButton';
 
 interface BusinessSetupScreen1Props {
   onBack?: () => void;
@@ -78,59 +79,40 @@ export default function BusinessSetupScreen1({
 
           {/* Form Fields */}
           <View style={styles.formContainer}>
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Business Name</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter business name"
-                placeholderTextColor="#94A3B8"
-                value={businessName}
-                onChangeText={setBusinessName}
-              />
-            </View>
+            <PrimaryInputField
+              label="Business Name"
+              placeholder="Enter business name"
+              value={businessName}
+              onChangeText={setBusinessName}
+            />
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Business Category</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Select category (e.g. Coffee Shop, Salon)"
-                placeholderTextColor="#94A3B8"
-                value={category}
-                onChangeText={setCategory}
-              />
-            </View>
+            <PrimaryInputField
+              label="Business Category"
+              placeholder="Select category (e.g. Coffee Shop, Salon)"
+              value={category}
+              onChangeText={setCategory}
+            />
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Business Address</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter address"
-                placeholderTextColor="#94A3B8"
-                value={address}
-                onChangeText={setAddress}
-              />
-            </View>
+            <PrimaryInputField
+              label="Business Address"
+              placeholder="Enter address"
+              value={address}
+              onChangeText={setAddress}
+            />
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>City</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter city"
-                placeholderTextColor="#94A3B8"
-                value={city}
-                onChangeText={setCity}
-              />
-            </View>
+            <PrimaryInputField
+              label="City"
+              placeholder="Enter city"
+              value={city}
+              onChangeText={setCity}
+            />
           </View>
 
           {/* Next Button */}
-          <TouchableOpacity
-            style={styles.nextButton}
+          <PrimaryButton
+            title="Next"
             onPress={handleNext}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.nextButtonText}>Next</Text>
-          </TouchableOpacity>
+          />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -213,43 +195,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   formContainer: {
-    marginBottom: 24,
-  },
-  inputGroup: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#334155',
-    marginBottom: 8,
-  },
-  input: {
-    height: 54,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    color: '#0F172A',
-    backgroundColor: '#FFFFFF',
-  },
-  nextButton: {
-    backgroundColor: '#4F46E5',
-    height: 56,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 12,
-    shadowColor: '#4F46E5',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  nextButtonText: {
-    color: '#FFFFFF',
-    fontSize: 17,
-    fontWeight: '700',
+    marginBottom: 16,
   },
 });
