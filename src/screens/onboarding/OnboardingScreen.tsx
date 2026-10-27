@@ -59,9 +59,6 @@ const OnboardingScreen = ({ onGetStarted }: OnboardingScreenProps) => {
       onGetStarted();
     }
   };
-  const handleSignIn = () => {
-    console.log('Go to Login Screen');
-  };
 
   return (
     <SafeAreaView style={styles.container}>

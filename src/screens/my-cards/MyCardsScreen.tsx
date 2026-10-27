@@ -16,9 +16,11 @@ const MyCardsScreen = () => {
                     text="My Cards"
                     customStyle={styles.title}
                 />
-            </View>
-            <PrimarySearchBar />
-            <View style={{ gap: 15, marginVertical: 10 }}>
+            <PrimarySearchBar
+                value=""
+                onChangeText={() => {}}
+                placeholder="Search Cards"
+            />
                 <PrimaryLoyaltyStampCard
                     merchantName="Brew & Beans"
                     rewardText="Buy 10 coffees, get 1 free!"
