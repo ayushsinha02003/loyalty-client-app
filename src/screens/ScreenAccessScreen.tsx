@@ -11,20 +11,39 @@ import type { TabId } from '../components/common/BottomNav';
 
 export type ScreenId =
   | TabId
-  | 'AdminHome'
   | 'Splash'
   | 'Onboarding'
   | 'Welcome'
   | 'Login'
   | 'Signup'
   | 'Otp'
+  | 'Home'
+  | 'MyCards'
   | 'QrScanner'
   | 'ScanSuccess'
+  | 'Rewards'
   | 'RewardDetails'
-  | 'Activity';
+  | 'Activity'
+  | 'Profile'
+  | 'AdminLogin'
+  | 'BusinessSetup1'
+  | 'BusinessSetup2'
+  | 'BusinessSetup3'
+  | 'AdminHome'
+  | 'AdminCustomers'
+  | 'AdminStampCards'
+  | 'AdminAddStampCard'
+  | 'AdminRewards'
+  | 'AdminAddReward'
+  | 'AdminQrCode'
+  | 'AdminAnalytics'
+  | 'AdminActivity'
+  | 'AdminBusinessProfile'
+  | 'AdminMore';
 
-export const SCREEN_OPTIONS: Array<{ id: ScreenId; label: string }> = [
-  { id: 'Splash', label: '1. Splash Screen' },
+export const SCREEN_OPTIONS: Array<{ id: ScreenId; label: string; section?: string }> = [
+  // Customer Screens
+  { id: 'Splash', label: '1. Splash Screen', section: 'CUSTOMER' },
   { id: 'Onboarding', label: '2-4. Onboarding Screens' },
   { id: 'Welcome', label: '5. Welcome Screen' },
   { id: 'Login', label: '6. Sign In Screen' },
@@ -38,7 +57,22 @@ export const SCREEN_OPTIONS: Array<{ id: ScreenId; label: string }> = [
   { id: 'RewardDetails', label: '14. Reward Details Screen' },
   { id: 'Activity', label: '15. Activity Screen' },
   { id: 'Profile', label: '16. Profile Screen' },
-  { id: 'AdminHome', label: 'Admin Dashboard' },
+
+  // Admin Screens
+  { id: 'BusinessSetup1', label: '1. Business Setup (Step 1)', section: 'ADMIN' },
+  { id: 'BusinessSetup2', label: '2. Business Setup (Step 2)' },
+  { id: 'BusinessSetup3', label: '3. Review & Confirm (Step 3)' },
+  { id: 'AdminHome', label: '4. Admin Dashboard' },
+  { id: 'AdminCustomers', label: '5. Customers Screen' },
+  { id: 'AdminStampCards', label: '6. Stamp Cards (Manage)' },
+  { id: 'AdminAddStampCard', label: '7. Add Stamp Card Screen' },
+  { id: 'AdminRewards', label: '8. Admin Rewards Screen' },
+  { id: 'AdminAddReward', label: '9. Add Reward Screen' },
+  { id: 'AdminQrCode', label: '10. Business QR Code Screen' },
+  { id: 'AdminAnalytics', label: '11. Analytics Screen' },
+  { id: 'AdminActivity', label: '12. Activity / Transactions' },
+  { id: 'AdminBusinessProfile', label: '13. Business Profile Screen' },
+  { id: 'AdminMore', label: '14. More / Settings Screen' },
 ];
 
 type ScreenAccessScreenProps = {
@@ -54,13 +88,23 @@ export default function ScreenAccessScreen({
 
       <ScrollView contentContainerStyle={styles.list}>
         {SCREEN_OPTIONS.map(screen => (
-          <TouchableOpacity
-            key={screen.id}
-            style={styles.button}
-            onPress={() => onSelectScreen(screen.id)}
-          >
-            <Text style={styles.buttonText}>{screen.label}</Text>
-          </TouchableOpacity>
+          <React.Fragment key={screen.id}>
+            {screen.section ? (
+              <Text style={styles.sectionHeading}>
+                {screen.section === 'CUSTOMER' ? '👤 CUSTOMER SCREENS' : '💼 ADMIN / BUSINESS SCREENS'}
+              </Text>
+            ) : null}
+            <TouchableOpacity
+              style={[
+                styles.button,
+                (screen.id.startsWith('Admin') || screen.id.startsWith('Business')) &&
+                  styles.adminButton,
+              ]}
+              onPress={() => onSelectScreen(screen.id)}
+            >
+              <Text style={styles.buttonText}>{screen.label}</Text>
+            </TouchableOpacity>
+          </React.Fragment>
         ))}
       </ScrollView>
     </View>
@@ -78,7 +122,15 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
     color: '#111827',
-    marginBottom: 20,
+    marginBottom: 10,
+  },
+  sectionHeading: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#4F46E5',
+    marginTop: 18,
+    marginBottom: 6,
+    letterSpacing: 1,
   },
   list: {
     gap: 12,
@@ -86,15 +138,18 @@ const styles = StyleSheet.create({
   },
   button: {
     backgroundColor: '#7C3AED',
-    borderRadius: 18,
-    paddingVertical: 16,
+    borderRadius: 16,
+    paddingVertical: 15,
     paddingHorizontal: 18,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  adminButton: {
+    backgroundColor: '#3730A3',
+  },
   buttonText: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
   },
 });
