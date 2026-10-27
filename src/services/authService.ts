@@ -26,6 +26,26 @@ export interface LoginResponse {
   user?: UserProfile;
 }
 
+export interface RegisterPayload {
+  name: string;
+  phone: string;
+  password: string;
+  email?: string;
+  role: 'customer' | 'business';
+  businessName?: string;
+  category?: string;
+  address?: string;
+  city?: string;
+}
+
+export interface RegisterResponse {
+  success: boolean;
+  message: string;
+  data?: UserProfile;
+  token?: string;
+  user?: UserProfile;
+}
+
 /**
  * Sends phone and password to the backend login endpoint.
  */
@@ -41,3 +61,20 @@ export async function loginUser(credentials: LoginCredentials): Promise<LoginRes
   const result = await response.json();
   return result;
 }
+
+/**
+ * Sends user registration details to the backend register endpoint.
+ */
+export async function registerUser(payload: RegisterPayload): Promise<RegisterResponse> {
+  const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const result = await response.json();
+  return result;
+}
+
