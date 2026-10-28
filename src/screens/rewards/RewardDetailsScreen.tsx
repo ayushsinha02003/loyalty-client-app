@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import PrimaryButton from '../../components/button/PrimaryButton';
 
 interface RewardDetailsScreenProps {
   title?: string;
@@ -103,13 +104,10 @@ export default function RewardDetailsScreen({
 
       {/* Fixed Bottom Action Bar */}
       <View style={styles.bottomBar}>
-        <TouchableOpacity
-          style={styles.redeemButton}
+        <PrimaryButton
+          title="Redeem Now"
           onPress={onRedeem}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.redeemButtonText}>Redeem Now</Text>
-        </TouchableOpacity>
+        />
       </View>
     </SafeAreaView>
   );

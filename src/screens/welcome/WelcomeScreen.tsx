@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   signInLink: {
-    color: '#6366F1',
+    color: '#7B3FF2',
     fontSize: 14,
     fontWeight: '700',
   },

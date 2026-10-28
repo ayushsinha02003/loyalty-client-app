@@ -18,7 +18,11 @@ const menuItems = [
 
 const ProfileScreen = () => {
     return (
-        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        <ScrollView
+            style={styles.container}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+        >
 
             {/* Header */}
             <View style={styles.header}>
@@ -86,8 +90,12 @@ const styles = StyleSheet.create({
         backgroundColor: '#F8FAFC',
     },
 
+    scrollContent: {
+        paddingBottom: 100,
+    },
+
     header: {
-        backgroundColor: '#6D28D9',
+        backgroundColor: '#7B3FF2',
         paddingTop: 60,
         paddingBottom: 35,
         alignItems: 'center',

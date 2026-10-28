@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import {
+    KeyboardAvoidingView,
+    Platform,
     SafeAreaView,
+    ScrollView,
+    StatusBar,
     StyleSheet,
     Text,
     TouchableOpacity,
     View,
-    StatusBar,
 } from 'react-native';
 import { loginUser, LoginResponse } from '../../../services/authService';
 import PrimaryInputField from '../../../components/input/PrimaryInputField';
@@ -99,75 +102,93 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
                 backgroundColor="#FFFFFF"
             />
 
-            <View style={styles.content}>
-                <Text style={styles.title}>Welcome Back 👋</Text>
+            <KeyboardAvoidingView
+                style={styles.keyboardView}
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            >
+                <ScrollView
+                    contentContainerStyle={styles.scrollContent}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                >
+                    <View style={styles.header}>
+                        <Text style={styles.title}>Welcome Back 👋</Text>
+                        <Text style={styles.subtitle}>
+                            Please sign in to continue
+                        </Text>
+                    </View>
 
-                <Text style={styles.subtitle}>
-                    Please sign in to continue
-                </Text>
+                    {/* Inputs Card Container */}
+                    <View style={styles.formContainer}>
+                        {/* Phone Number Input */}
+                        <PrimaryInputField
+                            label="Enter Phone Number"
+                            placeholder="Enter 10-digit phone number"
+                            keyboardType="phone-pad"
+                            value={phone}
+                            onChangeText={(text) => {
+                                setPhone(text);
+                                if (phoneError) setPhoneError('');
+                                if (generalError) setGeneralError('');
+                            }}
+                            maxLength={10}
+                            editable={!loading}
+                            error={phoneError}
+                            hasError={Boolean(generalError)}
+                        />
 
-                {/* Phone Number Input */}
-                <PrimaryInputField
-                    label="Enter Phone Number"
-                    placeholder="Enter phone number"
-                    keyboardType="phone-pad"
-                    value={phone}
-                    onChangeText={(text) => {
-                        setPhone(text);
-                        if (phoneError) setPhoneError('');
-                        if (generalError) setGeneralError('');
-                    }}
-                    maxLength={10}
-                    editable={!loading}
-                    error={phoneError}
-                    hasError={Boolean(generalError)}
-                />
+                        {/* Password Input */}
+                        <PrimaryPasswordField
+                            label="Enter Password"
+                            placeholder="Enter password"
+                            value={password}
+                            visible={showPassword}
+                            onToggle={() => setShowPassword(!showPassword)}
+                            onChangeText={(text) => {
+                                setPassword(text);
+                                if (passwordError) setPasswordError('');
+                                if (generalError) setGeneralError('');
+                            }}
+                            editable={!loading}
+                            error={passwordError}
+                            hasError={Boolean(generalError)}
+                            containerStyle={styles.passwordContainerStyle}
+                        />
 
-                {/* Password Input */}
-                <PrimaryPasswordField
-                    label="Enter Password"
-                    placeholder="Enter password"
-                    value={password}
-                    visible={showPassword}
-                    onToggle={() => setShowPassword(!showPassword)}
-                    onChangeText={(text) => {
-                        setPassword(text);
-                        if (passwordError) setPasswordError('');
-                        if (generalError) setGeneralError('');
-                    }}
-                    editable={!loading}
-                    error={passwordError}
-                    hasError={Boolean(generalError)}
-                />
+                        <TouchableOpacity
+                            onPress={() => {}}
+                            disabled={loading}
+                            style={styles.forgotPasswordTouchable}
+                        >
+                            <Text style={styles.forgotPassword}>
+                                Forgot Password?
+                            </Text>
+                        </TouchableOpacity>
 
-                <TouchableOpacity disabled={loading}>
-                    <Text style={styles.forgotPassword}>
-                        Forgot Password?
-                    </Text>
-                </TouchableOpacity>
+                        {/* Error Banner */}
+                        <PrimaryErrorBanner message={generalError} />
 
-                {/* Error Banner */}
-                <PrimaryErrorBanner message={generalError} />
+                        {/* Login Button */}
+                        <PrimaryButton
+                            title="Login"
+                            loading={loading}
+                            onPress={handleLogin}
+                            style={styles.loginButton}
+                        />
+                    </View>
 
-                {/* Login Button */}
-                <PrimaryButton
-                    title="Login"
-                    loading={loading}
-                    onPress={handleLogin}
-                />
-            </View>
-
-            <View style={styles.footer}>
-                <Text style={styles.footerText}>
-                    Don't have an account?
-                </Text>
-
-                <TouchableOpacity onPress={onSignup} disabled={loading}>
-                    <Text style={styles.signupText}>
-                        Create Account
-                    </Text>
-                </TouchableOpacity>
-            </View>
+                    <View style={styles.footerRow}>
+                        <Text style={styles.footerText}>
+                            Don't have an account?
+                        </Text>
+                        <TouchableOpacity onPress={onSignup} disabled={loading} style={styles.signupTouch}>
+                            <Text style={styles.signupText}>
+                                Create Account
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
         </SafeAreaView>
     );
 };
@@ -178,48 +199,82 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#FFFFFF',
-        paddingHorizontal: 24,
     },
 
-    content: {
+    keyboardView: {
         flex: 1,
+    },
+
+    scrollContent: {
+        flexGrow: 1,
         justifyContent: 'center',
+        paddingHorizontal: 24,
+        paddingVertical: 32,
+    },
+
+    header: {
+        marginBottom: 32,
     },
 
     title: {
         fontSize: 30,
-        fontWeight: '700',
+        fontWeight: '800',
         color: '#1E293B',
+        letterSpacing: -0.5,
     },
 
     subtitle: {
         marginTop: 8,
         fontSize: 16,
         color: '#64748B',
-        marginBottom: 40,
+        fontWeight: '500',
+    },
+
+    formContainer: {
+        marginBottom: 28,
+    },
+
+    passwordContainerStyle: {
+        marginBottom: 12,
+    },
+
+    forgotPasswordTouchable: {
+        alignSelf: 'flex-end',
+        marginBottom: 24,
+        paddingVertical: 4,
     },
 
     forgotPassword: {
-        textAlign: 'right',
         color: '#7B3FF2',
-        marginBottom: 30,
         fontWeight: '600',
+        fontSize: 14,
     },
 
-    footer: {
-        paddingBottom: 30,
+    loginButton: {
+        marginTop: 4,
+    },
+
+    footerRow: {
+        flexDirection: 'row',
+        justifyContent: 'center',
         alignItems: 'center',
+        paddingVertical: 12,
     },
 
     footerText: {
         color: '#64748B',
         fontSize: 15,
+        fontWeight: '500',
+    },
+
+    signupTouch: {
+        paddingVertical: 4,
+        paddingHorizontal: 6,
     },
 
     signupText: {
-        marginTop: 8,
         color: '#7B3FF2',
-        fontSize: 16,
+        fontSize: 15,
         fontWeight: '700',
     },
 });

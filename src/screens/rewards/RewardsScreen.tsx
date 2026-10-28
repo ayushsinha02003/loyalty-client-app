@@ -103,7 +103,10 @@ const RewardsScreen = () => {
                 })}
             </View>
 
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.scrollList}
+            >
                 {filteredRewards.map(item => {
                     const isClaimed = item.status === 'claimed';
 
@@ -167,8 +170,12 @@ const styles = StyleSheet.create({
         borderRadius: 20,
     },
 
+    scrollList: {
+        paddingBottom: 100,
+    },
+
     activeTab: {
-        backgroundColor: '#6D28D9',
+        backgroundColor: '#7B3FF2',
     },
 
     activeText: {
@@ -216,7 +223,7 @@ const styles = StyleSheet.create({
     },
 
     button: {
-        backgroundColor: '#6D28D9',
+        backgroundColor: '#7B3FF2',
         paddingHorizontal: 16,
         paddingVertical: 8,
         borderRadius: 10,

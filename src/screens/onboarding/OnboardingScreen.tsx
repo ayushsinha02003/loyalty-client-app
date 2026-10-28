@@ -126,17 +126,17 @@ const styles = StyleSheet.create({
     paddingTop: 30,
   },
   title: {
-    fontSize: 45,
-    lineHeight: 37,
+    fontSize: 34,
+    lineHeight: 42,
     fontWeight: '800',
     color: '#07123B',
     textAlign: 'center',
   },
   highlight: {
-    fontSize: 40,
-    lineHeight: 37,
+    fontSize: 34,
+    lineHeight: 42,
     fontWeight: '800',
-    color: '#6938EF',
+    color: '#7B3FF2',
     textAlign: 'center',
   },
   description: {

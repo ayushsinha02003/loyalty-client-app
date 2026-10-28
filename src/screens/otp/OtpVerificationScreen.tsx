@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import PrimaryButton from '../../components/button/PrimaryButton';
 
 interface OtpVerificationScreenProps {
   phoneNumber?: string;
@@ -92,7 +93,7 @@ export default function OtpVerificationScreen({
           <View style={styles.titleSection}>
             <Text style={styles.title}>Verify OTP</Text>
             <Text style={styles.subtitle}>
-              Enter the 6 digit code sent to{'\n'}
+              Enter the 6-digit code sent to{'\n'}
               <Text style={styles.phoneHighlight}>{phoneNumber}</Text>
             </Text>
           </View>
@@ -139,13 +140,11 @@ export default function OtpVerificationScreen({
           </View>
 
           {/* Verify Button */}
-          <TouchableOpacity
-            style={styles.verifyButton}
+          <PrimaryButton
+            title="Verify & Continue"
             onPress={handleVerify}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.verifyButtonText}>Verify</Text>
-          </TouchableOpacity>
+            style={styles.verifyButton}
+          />
 
           {/* Security Assurance */}
           <View style={styles.securityRow}>
@@ -198,6 +197,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#1E293B',
     marginBottom: 10,
+    letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: 15,
@@ -227,9 +227,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
   },
   otpBoxFilled: {
-    borderColor: '#6366F1',
+    borderColor: '#7B3FF2',
     backgroundColor: '#FFFFFF',
-    shadowColor: '#6366F1',
+    shadowColor: '#7B3FF2',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
     shadowRadius: 4,
@@ -244,31 +244,16 @@ const styles = StyleSheet.create({
     color: '#64748B',
   },
   timerBold: {
-    color: '#6366F1',
+    color: '#7B3FF2',
     fontWeight: '700',
   },
   resendLink: {
     fontSize: 14,
-    color: '#6366F1',
+    color: '#7B3FF2',
     fontWeight: '700',
   },
   verifyButton: {
-    backgroundColor: '#6366F1',
-    height: 56,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
     marginTop: 36,
-    shadowColor: '#6366F1',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.28,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  verifyButtonText: {
-    color: '#FFFFFF',
-    fontSize: 17,
-    fontWeight: '700',
   },
   securityRow: {
     flexDirection: 'row',

@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
+import PrimaryButton from '../../components/button/PrimaryButton';
 
 interface ScanSuccessScreenProps {
   businessName?: string;
@@ -136,13 +137,10 @@ export default function ScanSuccessScreen({
 
         {/* Action Buttons */}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.viewCardButton}
+          <PrimaryButton
+            title="View Card"
             onPress={onViewCard}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.viewCardText}>View Card</Text>
-          </TouchableOpacity>
+          />
 
           <TouchableOpacity
             style={styles.doneButton}
@@ -219,7 +217,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   stampPillText: {
-    color: '#4F46E5',
+    color: '#7B3FF2',
     fontSize: 14,
     fontWeight: '700',
   },
@@ -261,7 +259,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   stampDotFilled: {
-    backgroundColor: '#6366F1',
+    backgroundColor: '#7B3FF2',
   },
   stampDotGift: {
     backgroundColor: '#FEF3C7',
