@@ -273,8 +273,8 @@ const styles = StyleSheet.create({
     borderColor: '#E2E8F0',
   },
   filterPillActive: {
-    backgroundColor: '#6366F1',
-    borderColor: '#6366F1',
+    backgroundColor: '#7B3FF2',
+    borderColor: '#7B3FF2',
   },
   filterText: {
     fontSize: 14,

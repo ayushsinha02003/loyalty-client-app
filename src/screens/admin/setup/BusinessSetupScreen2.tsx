@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#E2E8F0',
   },
   stepDotActive: {
-    backgroundColor: '#4F46E5',
+    backgroundColor: '#7B3FF2',
     width: 12,
     height: 12,
     borderRadius: 6,
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   stepLineActive: {
-    backgroundColor: '#4F46E5',
+    backgroundColor: '#7B3FF2',
   },
   placeholder: {
     width: 44,
@@ -184,7 +184,7 @@ const styles = StyleSheet.create({
   stepIndicator: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#6366F1',
+    color: '#7B3FF2',
     marginTop: 8,
   },
   uploadSection: {

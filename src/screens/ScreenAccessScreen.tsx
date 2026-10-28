@@ -116,20 +116,20 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F8FAFC',
     paddingHorizontal: 20,
-    paddingTop: 40,
+    paddingTop: 52,
   },
   title: {
     fontSize: 28,
-    fontWeight: '700',
+    fontWeight: '800',
     color: '#111827',
-    marginBottom: 10,
+    marginBottom: 8,
   },
   sectionHeading: {
     fontSize: 13,
     fontWeight: '800',
-    color: '#4F46E5',
-    marginTop: 18,
-    marginBottom: 6,
+    color: '#7B3FF2',
+    marginTop: 20,
+    marginBottom: 8,
     letterSpacing: 1,
   },
   list: {
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     paddingBottom: 120,
   },
   button: {
-    backgroundColor: '#7C3AED',
+    backgroundColor: '#7B3FF2',
     borderRadius: 16,
     paddingVertical: 15,
     paddingHorizontal: 18,
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   adminButton: {
-    backgroundColor: '#3730A3',
+    backgroundColor: '#4C1D95',
   },
   buttonText: {
     color: '#FFFFFF',
