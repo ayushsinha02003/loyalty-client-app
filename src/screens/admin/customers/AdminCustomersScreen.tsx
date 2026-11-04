@@ -10,8 +10,8 @@ import {
   View,
   RefreshControl,
   Alert,
-  ActivityIndicator,
 } from 'react-native';
+import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import { useBusinessCustomers } from '../../../hooks/useApi';
 import PrimaryText from '../../../components/text/PrimaryText';
 import { stampApi, rewardApi } from '../../../services/api';
@@ -42,7 +42,7 @@ export default function AdminCustomersScreen({ onOpenScanner }: AdminCustomersSc
     try {
       const response = await stampApi.addStampByCard(customerCardId);
       if (response.success) {
-        Alert.alert('Stamp Added', `Successfully added 1 stamp to ${customerName}!`);
+        Alert.alert('Stamp Added', `Successfully awarded 1 stamp to ${customerName}.`);
         refetch();
       } else {
         Alert.alert('Error', response.message || 'Failed to add stamp');
@@ -59,7 +59,7 @@ export default function AdminCustomersScreen({ onOpenScanner }: AdminCustomersSc
     try {
       const response = await rewardApi.redeem(customerCardId);
       if (response.success) {
-        Alert.alert('Reward Redeemed', `Reward successfully redeemed for ${customerName}!`);
+        Alert.alert('Reward Redeemed', `Reward successfully claimed for ${customerName}!`);
         refetch();
       } else {
         Alert.alert('Error', response.message || 'Failed to redeem reward');
@@ -81,14 +81,21 @@ export default function AdminCustomersScreen({ onOpenScanner }: AdminCustomersSc
 
       {/* Header */}
       <View style={styles.header}>
-        <PrimaryText text="Customers" customStyle={styles.title} />
+        <View>
+          <PrimaryText text="Customers" customStyle={styles.title} />
+          <Text style={styles.subtitle}>
+            {customers?.length || 0} active {customers?.length === 1 ? 'member' : 'members'} enrolled
+          </Text>
+        </View>
+
         {onOpenScanner && (
           <TouchableOpacity
             style={styles.scanHeaderButton}
             onPress={onOpenScanner}
             activeOpacity={0.8}
           >
-            <Text style={styles.scanHeaderButtonText}>📷 Scan QR</Text>
+            <MaterialDesignIcons name="qrcode-scan" size={16} color="#7C3AED" style={styles.mr6} />
+            <Text style={styles.scanHeaderButtonText}>Scan QR</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -96,14 +103,19 @@ export default function AdminCustomersScreen({ onOpenScanner }: AdminCustomersSc
       {/* Search Bar Row */}
       <View style={styles.searchRow}>
         <View style={styles.searchBox}>
-          <Text style={styles.searchIcon}>🔍</Text>
+          <MaterialDesignIcons name="magnify" size={20} color="#94A3B8" style={styles.mr8} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Search by name or phone..."
+            placeholder="Search by name, phone, or card..."
             placeholderTextColor="#94A3B8"
             value={search}
             onChangeText={setSearch}
           />
+          {search.length > 0 ? (
+            <TouchableOpacity onPress={() => setSearch('')} hitSlop={10}>
+              <MaterialDesignIcons name="close-circle" size={18} color="#94A3B8" />
+            </TouchableOpacity>
+          ) : null}
         </View>
       </View>
 
@@ -115,13 +127,9 @@ export default function AdminCustomersScreen({ onOpenScanner }: AdminCustomersSc
           <RefreshControl refreshing={loading} onRefresh={handleRefresh} />
         }
       >
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#7B3FF2" />
-            <Text style={styles.loadingText}>Loading customers...</Text>
-          </View>
-        ) : error ? (
+        {error ? (
           <View style={styles.errorContainer}>
+            <MaterialDesignIcons name="alert-circle-outline" size={40} color="#EF4444" style={styles.mb8} />
             <Text style={styles.errorText}>{error}</Text>
             <TouchableOpacity style={styles.retryButton} onPress={handleRefresh}>
               <Text style={styles.retryButtonText}>Retry</Text>
@@ -133,27 +141,43 @@ export default function AdminCustomersScreen({ onOpenScanner }: AdminCustomersSc
             const card = customerCard.loyaltyCard || {};
             const isRewardReady = customerCard.isRewardAvailable;
             const isProcessing = actionLoadingId === customerCard._id;
+            const initial = customer.name ? customer.name.charAt(0).toUpperCase() : null;
 
             return (
               <View key={customerCard._id} style={styles.customerCard}>
                 <View style={styles.customerRow}>
                   <View style={styles.avatarCircle}>
-                    <Text style={styles.avatarInitial}>
-                      {customer.name?.charAt(0) || '👤'}
-                    </Text>
+                    {initial ? (
+                      <Text style={styles.avatarInitial}>{initial}</Text>
+                    ) : (
+                      <MaterialDesignIcons name="account" size={22} color="#7C3AED" />
+                    )}
                   </View>
 
                   <View style={styles.customerInfo}>
                     <Text style={styles.customerName}>{customer.name || 'Customer'}</Text>
-                    <Text style={styles.customerPhone}>{customer.phone || 'No phone'}</Text>
-                    <Text style={styles.cardTitle}>{card.title || 'Loyalty Card'}</Text>
+                    <View style={styles.detailRow}>
+                      <MaterialDesignIcons name="phone-outline" size={12} color="#64748B" style={styles.mr4} />
+                      <Text style={styles.customerPhone}>{customer.phone || 'No phone'}</Text>
+                    </View>
+                    <View style={styles.detailRow}>
+                      <MaterialDesignIcons name="credit-card-outline" size={12} color="#7C3AED" style={styles.mr4} />
+                      <Text style={styles.cardTitle}>{card.title || 'Loyalty Program'}</Text>
+                    </View>
                   </View>
 
-                  <View style={styles.stampBadge}>
-                    <Text style={styles.stampValue}>
+                  <View style={[styles.stampBadge, isRewardReady && styles.stampBadgeReady]}>
+                    <Text style={[styles.stampValue, isRewardReady && styles.stampValueReady]}>
                       {customerCard.currentStamps || 0}/{card.totalStamps || 10}
                     </Text>
-                    <Text style={styles.stampLabel}>Stamps</Text>
+                    <View style={styles.stampLabelRow}>
+                      {isRewardReady && (
+                        <MaterialDesignIcons name="gift" size={11} color="#B45309" style={styles.mr2} />
+                      )}
+                      <Text style={[styles.stampLabel, isRewardReady && styles.stampLabelReady]}>
+                        {isRewardReady ? 'Ready' : 'Stamps'}
+                      </Text>
+                    </View>
                   </View>
                 </View>
 
@@ -164,9 +188,11 @@ export default function AdminCustomersScreen({ onOpenScanner }: AdminCustomersSc
                       style={styles.redeemButton}
                       onPress={() => handleRedeemReward(customerCard._id, customer.name || 'Customer')}
                       disabled={isProcessing}
+                      activeOpacity={0.8}
                     >
+                      <MaterialDesignIcons name="gift" size={16} color="#FFFFFF" style={styles.mr6} />
                       <Text style={styles.redeemButtonText}>
-                        {isProcessing ? 'Processing...' : '🎁 Redeem Reward'}
+                        {isProcessing ? 'Redeeming...' : 'Redeem Reward'}
                       </Text>
                     </TouchableOpacity>
                   ) : (
@@ -174,9 +200,11 @@ export default function AdminCustomersScreen({ onOpenScanner }: AdminCustomersSc
                       style={styles.addStampButton}
                       onPress={() => handleAddStamp(customerCard._id, customer.name || 'Customer')}
                       disabled={isProcessing}
+                      activeOpacity={0.8}
                     >
+                      <MaterialDesignIcons name="plus-circle" size={16} color="#FFFFFF" style={styles.mr6} />
                       <Text style={styles.addStampButtonText}>
-                        {isProcessing ? 'Adding...' : '+ Add Stamp'}
+                        {isProcessing ? 'Adding Stamp...' : 'Add 1 Stamp'}
                       </Text>
                     </TouchableOpacity>
                   )}
@@ -186,8 +214,10 @@ export default function AdminCustomersScreen({ onOpenScanner }: AdminCustomersSc
           })
         ) : (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>👥</Text>
-            <Text style={styles.emptyTitle}>No Customers Yet</Text>
+            <View style={styles.emptyIconCircle}>
+              <MaterialDesignIcons name="account-group-outline" size={48} color="#94A3B8" />
+            </View>
+            <Text style={styles.emptyTitle}>No Customers Found</Text>
             <Text style={styles.emptySubtitle}>
               {search
                 ? 'No customers match your search.'
@@ -203,90 +233,103 @@ export default function AdminCustomersScreen({ onOpenScanner }: AdminCustomersSc
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F8FAFC',
   },
   header: {
     paddingHorizontal: 20,
     paddingTop: 16,
-    paddingBottom: 12,
+    paddingBottom: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#0F172A',
+  },
+  subtitle: {
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 2,
   },
   scanHeaderButton: {
     backgroundColor: '#EDE9FE',
     paddingHorizontal: 14,
     paddingVertical: 8,
-    borderRadius: 12,
+    borderRadius: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#DDD6FE',
   },
   scanHeaderButtonText: {
-    color: '#7B3FF2',
+    color: '#7C3AED',
     fontWeight: '700',
     fontSize: 13,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#1E293B',
-  },
   searchRow: {
     paddingHorizontal: 20,
-    marginBottom: 16,
+    paddingVertical: 10,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
   },
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F8FAFC',
-    borderRadius: 14,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 44,
     borderWidth: 1,
     borderColor: '#E2E8F0',
-    paddingHorizontal: 14,
-    height: 48,
-  },
-  searchIcon: {
-    fontSize: 16,
-    marginRight: 8,
   },
   searchInput: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 14,
     color: '#0F172A',
-    paddingVertical: 0,
+    fontWeight: '500',
   },
   listContent: {
     paddingHorizontal: 20,
-    paddingBottom: 100,
-    gap: 12,
+    paddingTop: 14,
+    paddingBottom: 90,
+    gap: 14,
   },
   customerCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    borderRadius: 18,
     padding: 16,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#E2E8F0',
-    elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.04,
     shadowRadius: 6,
+    elevation: 2,
   },
   customerRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 12,
   },
   avatarCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    backgroundColor: '#EEF2FF',
+    width: 46,
+    height: 46,
+    borderRadius: 14,
+    backgroundColor: '#EDE9FE',
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 14,
+    marginRight: 12,
   },
   avatarInitial: {
     fontSize: 18,
-    fontWeight: '700',
-    color: '#4F46E5',
+    fontWeight: '800',
+    color: '#7C3AED',
   },
   customerInfo: {
     flex: 1,
@@ -294,119 +337,141 @@ const styles = StyleSheet.create({
   customerName: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#1E293B',
+    color: '#0F172A',
     marginBottom: 2,
   },
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 2,
+  },
   customerPhone: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#64748B',
-    marginBottom: 2,
   },
   cardTitle: {
     fontSize: 12,
-    color: '#7B3FF2',
+    color: '#7C3AED',
     fontWeight: '600',
   },
   stampBadge: {
-    alignItems: 'flex-end',
-    backgroundColor: '#F5F3FF',
-    paddingHorizontal: 10,
+    backgroundColor: '#F1F5F9',
+    borderRadius: 12,
+    paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 10,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
-  stampLabel: {
-    fontSize: 11,
-    color: '#7B3FF2',
-    fontWeight: '500',
+  stampBadgeReady: {
+    backgroundColor: '#D1FAE5',
+    borderColor: '#A7F3D0',
   },
   stampValue: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '800',
-    color: '#7B3FF2',
+    color: '#1E293B',
+  },
+  stampValueReady: {
+    color: '#059669',
+  },
+  stampLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stampLabel: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#64748B',
+    textTransform: 'uppercase',
+  },
+  stampLabelReady: {
+    color: '#059669',
+  },
+  mr2: {
+    marginRight: 2,
   },
   actionRow: {
-    marginTop: 12,
-    paddingTop: 12,
     borderTopWidth: 1,
     borderTopColor: '#F1F5F9',
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
+    paddingTop: 10,
   },
   addStampButton: {
-    backgroundColor: '#7B3FF2',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 10,
+    backgroundColor: '#7C3AED',
+    borderRadius: 12,
+    paddingVertical: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
   },
   addStampButtonText: {
     color: '#FFFFFF',
-    fontSize: 14,
     fontWeight: '700',
+    fontSize: 14,
   },
   redeemButton: {
     backgroundColor: '#10B981',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 10,
+    borderRadius: 12,
+    paddingVertical: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
   },
   redeemButtonText: {
     color: '#FFFFFF',
-    fontSize: 14,
     fontWeight: '700',
-  },
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 60,
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#64748B',
-  },
-  errorContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-  },
-  errorText: {
-    fontSize: 16,
-    color: '#EF4444',
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  retryButton: {
-    backgroundColor: '#7B3FF2',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    fontSize: 16,
-    color: '#FFFFFF',
-    fontWeight: '600',
+    fontSize: 14,
   },
   emptyState: {
     alignItems: 'center',
-    paddingVertical: 60,
-    paddingHorizontal: 24,
+    paddingVertical: 50,
   },
-  emptyIcon: {
-    fontSize: 48,
-    marginBottom: 12,
+  emptyIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
   },
   emptyTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
     color: '#1E293B',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   emptySubtitle: {
-    fontSize: 15,
+    fontSize: 14,
     color: '#64748B',
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 20,
+    paddingHorizontal: 20,
   },
+  errorContainer: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  errorText: {
+    fontSize: 14,
+    color: '#EF4444',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  retryButton: {
+    backgroundColor: '#7C3AED',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  retryButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+    fontSize: 13,
+  },
+  mr4: { marginRight: 4 },
+  mr6: { marginRight: 6 },
+  mr8: { marginRight: 8 },
+  mb8: { marginBottom: 8 },
 });

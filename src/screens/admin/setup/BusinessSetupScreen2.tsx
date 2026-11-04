@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import PrimaryInputField from '../../../components/input/PrimaryInputField';
 import PrimaryButton from '../../../components/button/PrimaryButton';
 
@@ -50,7 +51,7 @@ export default function BusinessSetupScreen2({
           {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity onPress={onBack} style={styles.backButton}>
-              <Text style={styles.backArrow}>←</Text>
+              <MaterialDesignIcons name="arrow-left" size={24} color="#1E293B" />
             </TouchableOpacity>
 
             {/* Stepper Progress */}
@@ -76,7 +77,7 @@ export default function BusinessSetupScreen2({
             <Text style={styles.label}>Business Logo</Text>
             <TouchableOpacity style={styles.uploadCard} activeOpacity={0.8}>
               <View style={styles.uploadIconCircle}>
-                <Text style={styles.uploadIcon}>☁️</Text>
+                <MaterialDesignIcons name="cloud-upload-outline" size={26} color="#7C3AED" />
               </View>
               <Text style={styles.uploadText}>Upload Logo</Text>
             </TouchableOpacity>

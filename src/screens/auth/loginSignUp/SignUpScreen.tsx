@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import { registerUser, RegisterResponse } from '../../../services/authService';
 import PrimaryInputField from '../../../components/input/PrimaryInputField';
 import PrimaryPasswordField from '../../../components/input/PrimaryPasswordField';
@@ -287,7 +288,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignup, onLogin }) => {
                     style={styles.backButton}
                     disabled={loading}
                   >
-                    <Text style={styles.backArrow}>←</Text>
+                    <MaterialDesignIcons name="arrow-left" size={24} color="#1E293B" />
                   </TouchableOpacity>
                 ) : (
                   <View style={styles.placeholderBox} />
@@ -347,7 +348,8 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignup, onLogin }) => {
           {(role === 'customer' || adminStep === 1) && (
             <View style={styles.roleContainer}>
               <PrimaryRoleButton
-                label="👤 User"
+                label="User"
+                icon="account"
                 active={role === 'customer'}
                 onPress={() => {
                   setRole('customer');
@@ -355,7 +357,8 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignup, onLogin }) => {
                 }}
               />
               <PrimaryRoleButton
-                label="💼 Admin (Business)"
+                label="Business Admin"
+                icon="briefcase"
                 active={role === 'business'}
                 onPress={() => {
                   setRole('business');
@@ -528,9 +531,11 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignup, onLogin }) => {
                   onPress={() => setLogoUploaded(!logoUploaded)}
                 >
                   <View style={styles.uploadIconCircle}>
-                    <Text style={styles.uploadIcon}>
-                      {logoUploaded ? '✓' : '☁️'}
-                    </Text>
+                    {logoUploaded ? (
+                      <MaterialDesignIcons name="check" size={22} color="#16A34A" />
+                    ) : (
+                      <MaterialDesignIcons name="cloud-upload-outline" size={22} color="#7C3AED" />
+                    )}
                   </View>
                   <Text style={styles.uploadText}>
                     {logoUploaded ? 'Logo Added' : 'Upload Business Logo'}
@@ -626,7 +631,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignup, onLogin }) => {
                 {/* Header */}
                 <View style={styles.previewHeader}>
                   <View style={styles.previewLogo}>
-                    <Text style={styles.previewLogoEmoji}>☕</Text>
+                    <MaterialDesignIcons name="storefront-outline" size={24} color="#7C3AED" />
                   </View>
                   <View style={styles.previewHeaderText}>
                     <Text style={styles.previewBusinessName}>
@@ -641,7 +646,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignup, onLogin }) => {
                     style={styles.editButton}
                     disabled={loading}
                   >
-                    <Text style={styles.editIcon}>✏️</Text>
+                    <MaterialDesignIcons name="pencil-outline" size={18} color="#7C3AED" />
                   </TouchableOpacity>
                 </View>
 
@@ -649,21 +654,21 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignup, onLogin }) => {
 
                 {/* Details */}
                 <View style={styles.previewRow}>
-                  <Text style={styles.previewIcon}>📍</Text>
+                  <MaterialDesignIcons name="map-marker-outline" size={16} color="#64748B" style={styles.previewIconMargin} />
                   <Text style={styles.previewText}>
                     {address ? `${address}, ${city}` : 'No address specified'}
                   </Text>
                 </View>
 
                 <View style={styles.previewRow}>
-                  <Text style={styles.previewIcon}>👤</Text>
+                  <MaterialDesignIcons name="account-outline" size={16} color="#64748B" style={styles.previewIconMargin} />
                   <Text style={styles.previewText}>
                     {ownerName || 'Admin Owner'}
                   </Text>
                 </View>
 
                 <View style={styles.previewRow}>
-                  <Text style={styles.previewIcon}>📞</Text>
+                  <MaterialDesignIcons name="phone-outline" size={16} color="#64748B" style={styles.previewIconMargin} />
                   <Text style={styles.previewText}>
                     +91 {businessPhone || '98765 43210'}
                   </Text>
@@ -671,7 +676,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignup, onLogin }) => {
 
                 {businessEmail ? (
                   <View style={styles.previewRow}>
-                    <Text style={styles.previewIcon}>✉️</Text>
+                    <MaterialDesignIcons name="email-outline" size={16} color="#64748B" style={styles.previewIconMargin} />
                     <Text style={styles.previewText}>{businessEmail}</Text>
                   </View>
                 ) : null}
@@ -901,8 +906,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
-  previewIcon: {
-    fontSize: 16,
+  previewIconMargin: {
     marginRight: 10,
   },
   previewText: {

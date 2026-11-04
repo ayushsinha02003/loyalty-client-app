@@ -14,6 +14,7 @@ import {
   PermissionsAndroid,
 } from 'react-native';
 import { Camera, CameraType } from 'react-native-camera-kit';
+import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import { qrApi } from '../../services/api';
 
 interface BarcodeReadEvent {
@@ -172,7 +173,7 @@ export default function QrScannerScreen({
             style={styles.iconButton}
             activeOpacity={0.7}
           >
-            <Text style={styles.headerIconText}>←</Text>
+            <MaterialDesignIcons name="arrow-left" size={24} color="#FFFFFF" />
           </TouchableOpacity>
 
           <Text style={styles.headerTitle}>Scan QR Code</Text>
@@ -182,7 +183,11 @@ export default function QrScannerScreen({
             style={[styles.iconButton, torchOn && styles.iconButtonActive]}
             activeOpacity={0.7}
           >
-            <Text style={styles.headerIconText}>{torchOn ? '⚡' : '💡'}</Text>
+            <MaterialDesignIcons
+              name={torchOn ? 'flashlight' : 'flashlight-off'}
+              size={22}
+              color="#FFFFFF"
+            />
           </TouchableOpacity>
         </View>
 
@@ -190,7 +195,9 @@ export default function QrScannerScreen({
         <View style={styles.centerContainer}>
           {hasPermission === false || cameraError ? (
             <View style={styles.permissionCard}>
-              <Text style={styles.permissionIcon}>📷</Text>
+              <View style={styles.permissionIconCircle}>
+                <MaterialDesignIcons name="camera-off-outline" size={44} color="#C084FC" />
+              </View>
               <Text style={styles.permissionTitle}>
                 {cameraError ? 'Camera Unavailable' : 'Camera Permission Needed'}
               </Text>
@@ -215,7 +222,8 @@ export default function QrScannerScreen({
                 onPress={() => setModalVisible(true)}
                 activeOpacity={0.8}
               >
-                <Text style={styles.manualFallbackText}>⌨️ Enter Code Manually</Text>
+                <MaterialDesignIcons name="keyboard-outline" size={18} color="#CBD5E1" style={styles.fallbackIconMargin} />
+                <Text style={styles.manualFallbackText}>Enter Code Manually</Text>
               </TouchableOpacity>
             </View>
           ) : (
@@ -247,7 +255,7 @@ export default function QrScannerScreen({
             onPress={() => setModalVisible(true)}
             activeOpacity={0.8}
           >
-            <Text style={styles.manualCodeIcon}>⌨️</Text>
+            <MaterialDesignIcons name="keyboard-outline" size={20} color="#FFFFFF" style={styles.manualCodeIconMargin} />
             <Text style={styles.manualCodeText}>Enter Code Manually</Text>
           </TouchableOpacity>
         </View>
@@ -430,9 +438,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#334155',
   },
-  permissionIcon: {
-    fontSize: 48,
-    marginBottom: 12,
+  permissionIconCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: 'rgba(168, 85, 247, 0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
   },
   permissionTitle: {
     fontSize: 18,
@@ -464,16 +477,21 @@ const styles = StyleSheet.create({
   },
   manualFallbackButton: {
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 12,
     width: '100%',
-    alignItems: 'center',
   },
   manualFallbackText: {
     color: '#CBD5E1',
     fontSize: 14,
     fontWeight: '600',
+  },
+  fallbackIconMargin: {
+    marginRight: 8,
   },
   bottomBar: {
     paddingHorizontal: 24,
@@ -490,8 +508,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.25)',
   },
-  manualCodeIcon: {
-    fontSize: 18,
+  manualCodeIconMargin: {
     marginRight: 10,
   },
   manualCodeText: {

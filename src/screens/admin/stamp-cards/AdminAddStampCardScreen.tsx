@@ -12,6 +12,7 @@ import {
   View,
   Alert,
 } from 'react-native';
+import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import { loyaltyCardApi } from '../../../services/api';
 import PrimaryButton from '../../../components/button/PrimaryButton';
 
@@ -78,7 +79,7 @@ export default function AdminAddStampCardScreen({
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
-          <Text style={styles.backArrow}>←</Text>
+          <MaterialDesignIcons name="arrow-left" size={24} color="#1E293B" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Create Stamp Card</Text>
         <View style={styles.placeholder} />
@@ -94,7 +95,9 @@ export default function AdminAddStampCardScreen({
         >
           {/* Card Visual Banner */}
           <View style={styles.cardBanner}>
-            <Text style={styles.bannerEmoji}>🎫</Text>
+            <View style={styles.bannerIconCircle}>
+              <MaterialDesignIcons name="ticket-percent" size={30} color="#7C3AED" />
+            </View>
             <Text style={styles.bannerHeading}>
               {cardName.trim() || 'New Stamp Card'}
             </Text>
@@ -214,9 +217,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginVertical: 14,
   },
-  bannerEmoji: {
-    fontSize: 32,
-    marginBottom: 4,
+  bannerIconCircle: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#EDE9FE',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
   },
   bannerHeading: {
     fontSize: 17,

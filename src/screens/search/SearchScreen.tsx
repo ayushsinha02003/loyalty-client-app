@@ -9,9 +9,9 @@ import {
   TouchableOpacity,
   View,
   RefreshControl,
-  ActivityIndicator,
   Alert,
 } from 'react-native';
+import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import PrimaryText from '../../components/text/PrimaryText';
 import { useExploreCards } from '../../hooks/useApi';
 import { SearchScreenSkeleton } from '../../components/skeleton';
@@ -22,6 +22,18 @@ interface SearchScreenProps {
 }
 
 const categories = ['All', 'Cafe', 'Restaurant', 'Retail', 'Salon', 'Fitness'];
+
+const getCategoryIcon = (
+  cat: string
+): React.ComponentProps<typeof MaterialDesignIcons>['name'] => {
+  const c = cat.toLowerCase();
+  if (c.includes('cafe') || c.includes('coffee')) return 'coffee';
+  if (c.includes('restaurant') || c.includes('food')) return 'silverware-fork-knife';
+  if (c.includes('salon') || c.includes('barber') || c.includes('beauty')) return 'content-cut';
+  if (c.includes('fit') || c.includes('gym')) return 'dumbbell';
+  if (c.includes('retail') || c.includes('shop')) return 'shopping-outline';
+  return 'storefront-outline';
+};
 
 export default function SearchScreen({ onJoinSuccess }: SearchScreenProps) {
   const [search, setSearch] = useState('');
@@ -60,15 +72,24 @@ export default function SearchScreen({ onJoinSuccess }: SearchScreenProps) {
       const response = await customerCardApi.join(cardId);
       if (response.success) {
         Alert.alert(
-          'Joined! 🎉',
-          `You joined the loyalty program for ${businessName}! You can now collect stamps.`
+          'Joined Program',
+          `You've successfully joined ${businessName}'s loyalty program! Start collecting stamps on your next visit.`,
+          [
+            {
+              text: 'View My Cards',
+              onPress: () => onJoinSuccess?.(),
+            },
+            {
+              text: 'Keep Exploring',
+              style: 'cancel',
+            },
+          ]
         );
-        onJoinSuccess?.();
       } else {
-        Alert.alert('Notice', response.message || 'Unable to join card');
+        Alert.alert('Join Status', response.message || 'Could not join program');
       }
     } catch (err: any) {
-      Alert.alert('Notice', err.message || 'Already joined or unable to join');
+      Alert.alert('Error', err.message || 'Failed to join loyalty card');
     } finally {
       setJoiningId(null);
     }
@@ -80,15 +101,16 @@ export default function SearchScreen({ onJoinSuccess }: SearchScreenProps) {
 
       {/* Header */}
       <View style={styles.header}>
-        <PrimaryText text="Discover Programs" customStyle={styles.title} />
-        <Text style={styles.subtitle}>
-          Explore participating shops and earn exciting loyalty rewards
-        </Text>
+        <PrimaryText text="Explore Programs" customStyle={styles.title} />
+        <PrimaryText
+          text="Discover local businesses & start collecting stamps"
+          customStyle={styles.subtitle}
+        />
       </View>
 
-      {/* Search Input */}
+      {/* Search Bar */}
       <View style={styles.searchBox}>
-        <Text style={styles.searchIcon}>🔍</Text>
+        <MaterialDesignIcons name="magnify" size={22} color="#94A3B8" style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           placeholder="Search by store or reward..."
@@ -97,8 +119,8 @@ export default function SearchScreen({ onJoinSuccess }: SearchScreenProps) {
           onChangeText={setSearch}
         />
         {search.length > 0 ? (
-          <TouchableOpacity onPress={() => setSearch('')}>
-            <Text style={styles.clearText}>✕</Text>
+          <TouchableOpacity onPress={() => setSearch('')} hitSlop={10}>
+            <MaterialDesignIcons name="close-circle" size={18} color="#94A3B8" />
           </TouchableOpacity>
         ) : null}
       </View>
@@ -144,13 +166,9 @@ export default function SearchScreen({ onJoinSuccess }: SearchScreenProps) {
           <RefreshControl refreshing={loading} onRefresh={refetch} />
         }
       >
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#7B3FF2" />
-            <Text style={styles.loadingText}>Finding loyalty programs...</Text>
-          </View>
-        ) : error ? (
+        {error ? (
           <View style={styles.errorContainer}>
+            <MaterialDesignIcons name="alert-circle-outline" size={44} color="#EF4444" style={styles.mb12} />
             <Text style={styles.errorText}>{error}</Text>
             <TouchableOpacity style={styles.retryButton} onPress={refetch}>
               <Text style={styles.retryText}>Retry</Text>
@@ -163,27 +181,33 @@ export default function SearchScreen({ onJoinSuccess }: SearchScreenProps) {
             const category = business?.category || 'Retail';
             const address = business?.address ? `${business.address}, ${business.city || ''}` : '';
             const isJoining = joiningId === card._id;
+            const categoryIcon = getCategoryIcon(category);
 
             return (
               <View key={card._id} style={styles.programCard}>
                 <View style={styles.cardHeader}>
                   <View style={styles.storeAvatar}>
-                    <Text style={styles.storeEmoji}>🏪</Text>
+                    <MaterialDesignIcons name={categoryIcon} size={24} color="#7C3AED" />
                   </View>
                   <View style={styles.storeInfo}>
                     <Text style={styles.storeName}>{businessName}</Text>
                     <Text style={styles.storeCategory}>{category}</Text>
                     {address ? (
-                      <Text style={styles.storeAddress} numberOfLines={1}>
-                        📍 {address}
-                      </Text>
+                      <View style={styles.addressRow}>
+                        <MaterialDesignIcons name="map-marker-outline" size={13} color="#94A3B8" style={styles.mr4} />
+                        <Text style={styles.storeAddress} numberOfLines={1}>
+                          {address}
+                        </Text>
+                      </View>
                     ) : null}
                   </View>
                 </View>
 
                 {/* Reward Banner */}
                 <View style={styles.rewardBanner}>
-                  <Text style={styles.rewardIcon}>🎁</Text>
+                  <View style={styles.rewardIconCircle}>
+                    <MaterialDesignIcons name="gift-outline" size={18} color="#7C3AED" />
+                  </View>
                   <View style={styles.rewardTextCol}>
                     <Text style={styles.rewardTitle}>{card.reward || 'Special Gift'}</Text>
                     <Text style={styles.rewardSubtitle}>
@@ -206,8 +230,9 @@ export default function SearchScreen({ onJoinSuccess }: SearchScreenProps) {
                   disabled={isJoining}
                   activeOpacity={0.85}
                 >
+                  <MaterialDesignIcons name="plus-circle-outline" size={18} color="#FFFFFF" style={styles.mr6} />
                   <Text style={styles.joinButtonText}>
-                    {isJoining ? 'Joining...' : '+ Join Loyalty Card'}
+                    {isJoining ? 'Joining...' : 'Join Loyalty Card'}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -215,7 +240,9 @@ export default function SearchScreen({ onJoinSuccess }: SearchScreenProps) {
           })
         ) : (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>🔍</Text>
+            <View style={styles.emptyIconCircle}>
+              <MaterialDesignIcons name="magnify-remove-outline" size={48} color="#94A3B8" />
+            </View>
             <Text style={styles.emptyTitle}>No Programs Found</Text>
             <Text style={styles.emptySubtitle}>
               {search
@@ -237,12 +264,12 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 20,
     paddingTop: 16,
-    paddingBottom: 12,
+    paddingBottom: 8,
   },
   title: {
-    fontSize: 26,
+    fontSize: 24,
     fontWeight: '800',
-    color: '#111827',
+    color: '#0F172A',
   },
   subtitle: {
     fontSize: 13,
@@ -254,30 +281,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
     marginHorizontal: 20,
+    marginTop: 10,
+    marginBottom: 6,
     paddingHorizontal: 14,
-    height: 50,
-    marginBottom: 14,
+    height: 48,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
   },
   searchIcon: {
-    fontSize: 18,
     marginRight: 8,
   },
   searchInput: {
     flex: 1,
-    fontSize: 15,
+    fontSize: 14,
     color: '#0F172A',
-    paddingVertical: 0,
-  },
-  clearText: {
-    fontSize: 16,
-    color: '#94A3B8',
-    padding: 4,
+    fontWeight: '500',
   },
   categoryScrollContainer: {
-    marginBottom: 16,
+    marginTop: 8,
+    marginBottom: 10,
   },
   categoryList: {
     paddingHorizontal: 20,
@@ -292,8 +315,8 @@ const styles = StyleSheet.create({
     borderColor: '#E2E8F0',
   },
   categoryPillActive: {
-    backgroundColor: '#7B3FF2',
-    borderColor: '#7B3FF2',
+    backgroundColor: '#7C3AED',
+    borderColor: '#7C3AED',
   },
   categoryText: {
     fontSize: 13,
@@ -302,23 +325,26 @@ const styles = StyleSheet.create({
   },
   categoryTextActive: {
     color: '#FFFFFF',
+    fontWeight: '700',
   },
   cardsList: {
     paddingHorizontal: 20,
-    paddingBottom: 100,
+    paddingBottom: 90,
     gap: 16,
   },
   programCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
     padding: 18,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#E2E8F0',
-    elevation: 2,
+    borderLeftWidth: 4,
+    borderLeftColor: '#7C3AED',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
     shadowRadius: 8,
+    elevation: 2,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -328,44 +354,53 @@ const styles = StyleSheet.create({
   storeAvatar: {
     width: 48,
     height: 48,
-    borderRadius: 24,
-    backgroundColor: '#F1F5F9',
+    borderRadius: 14,
+    backgroundColor: '#EDE9FE',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
-  },
-  storeEmoji: {
-    fontSize: 22,
   },
   storeInfo: {
     flex: 1,
   },
   storeName: {
     fontSize: 17,
-    fontWeight: '700',
-    color: '#1E293B',
+    fontWeight: '800',
+    color: '#0F172A',
   },
   storeCategory: {
     fontSize: 12,
+    color: '#7C3AED',
     fontWeight: '600',
-    color: '#7B3FF2',
+    marginTop: 2,
+  },
+  addressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginTop: 2,
   },
   storeAddress: {
-    fontSize: 12,
-    color: '#94A3B8',
-    marginTop: 2,
+    fontSize: 11,
+    color: '#64748B',
+    flex: 1,
   },
   rewardBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F5F3FF',
+    backgroundColor: '#FAF5FF',
     borderRadius: 14,
     padding: 12,
     marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#F3E8FF',
   },
-  rewardIcon: {
-    fontSize: 22,
+  rewardIconCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#EDE9FE',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginRight: 10,
   },
   rewardTextCol: {
@@ -374,12 +409,12 @@ const styles = StyleSheet.create({
   rewardTitle: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#1E293B',
+    color: '#581C87',
   },
   rewardSubtitle: {
     fontSize: 12,
-    color: '#64748B',
-    marginTop: 2,
+    color: '#7E22CE',
+    marginTop: 1,
   },
   cardDesc: {
     fontSize: 13,
@@ -388,71 +423,75 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   joinButton: {
-    backgroundColor: '#7B3FF2',
-    height: 46,
-    borderRadius: 12,
+    backgroundColor: '#7C3AED',
+    borderRadius: 14,
+    paddingVertical: 12,
     alignItems: 'center',
     justifyContent: 'center',
+    flexDirection: 'row',
+    shadowColor: '#7C3AED',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 3,
   },
   joinButtonLoading: {
-    backgroundColor: '#A78BFA',
+    opacity: 0.7,
   },
   joinButtonText: {
     color: '#FFFFFF',
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '700',
   },
-  loadingContainer: {
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: 50,
+    paddingHorizontal: 20,
+  },
+  emptyIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#F1F5F9',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: 60,
+    marginBottom: 16,
   },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 15,
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1E293B',
+    marginBottom: 6,
+  },
+  emptySubtitle: {
+    fontSize: 14,
     color: '#64748B',
+    textAlign: 'center',
+    lineHeight: 20,
   },
   errorContainer: {
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-    paddingTop: 40,
+    paddingVertical: 40,
+    paddingHorizontal: 20,
   },
   errorText: {
-    fontSize: 15,
+    fontSize: 14,
     color: '#EF4444',
     textAlign: 'center',
-    marginBottom: 12,
+    marginBottom: 14,
   },
   retryButton: {
-    backgroundColor: '#7B3FF2',
+    backgroundColor: '#7C3AED',
     paddingHorizontal: 20,
     paddingVertical: 10,
-    borderRadius: 8,
+    borderRadius: 10,
   },
   retryText: {
     color: '#FFFFFF',
     fontWeight: '600',
+    fontSize: 13,
   },
-  emptyState: {
-    alignItems: 'center',
-    paddingVertical: 60,
-    paddingHorizontal: 24,
-  },
-  emptyIcon: {
-    fontSize: 48,
-    marginBottom: 12,
-  },
-  emptyTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1E293B',
-    marginBottom: 8,
-  },
-  emptySubtitle: {
-    fontSize: 15,
-    color: '#64748B',
-    textAlign: 'center',
-    lineHeight: 22,
-  },
+  mr4: { marginRight: 4 },
+  mr6: { marginRight: 6 },
+  mb12: { marginBottom: 12 },
 });

@@ -8,6 +8,7 @@ import {
   Alert,
   RefreshControl,
 } from 'react-native';
+import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import PrimaryText from '../../components/text/PrimaryText';
 import { useAvailableRewards, useRewardHistory } from '../../hooks/useApi';
 import { rewardApi } from '../../services/api';
@@ -51,7 +52,7 @@ const RewardsScreen = () => {
     try {
       const response = await rewardApi.redeem(customerCardId);
       if (response.success) {
-        Alert.alert('Success 🎉', 'Reward redeemed successfully! Enjoy your gift.');
+        Alert.alert('Success', 'Reward redeemed successfully! Enjoy your gift.');
         refetchRewards();
         refetchHistory();
       } else {
@@ -134,7 +135,7 @@ const RewardsScreen = () => {
               <View key={item._id} style={styles.card}>
                 <View style={styles.cardContent}>
                   <View style={styles.rewardIcon}>
-                    <Text style={styles.rewardIconText}>🎁</Text>
+                    <MaterialDesignIcons name="gift" size={24} color="#7C3AED" />
                   </View>
 
                   <View style={styles.info}>
@@ -175,7 +176,8 @@ const RewardsScreen = () => {
 
                   {!isAvailable && (
                     <View style={styles.claimedBadge}>
-                      <Text style={styles.claimedBadgeText}>Claimed ✓</Text>
+                      <MaterialDesignIcons name="check" size={13} color="#059669" style={styles.claimedCheckMargin} />
+                      <Text style={styles.claimedBadgeText}>Claimed</Text>
                     </View>
                   )}
                 </View>
@@ -190,7 +192,13 @@ const RewardsScreen = () => {
           })
         ) : (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>🎁</Text>
+            <View style={styles.emptyIconCircle}>
+              <MaterialDesignIcons
+                name={activeTab === 'available' ? 'gift-open-outline' : 'history'}
+                size={44}
+                color="#94A3B8"
+              />
+            </View>
             <Text style={styles.emptyTitle}>
               {activeTab === 'available' ? 'No Available Rewards' : 'No Claimed Rewards'}
             </Text>
@@ -348,14 +356,21 @@ const styles = StyleSheet.create({
   },
   claimedBadge: {
     backgroundColor: '#ECFDF5',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
   },
   claimedBadgeText: {
-    color: '#10B981',
+    color: '#059669',
     fontWeight: '600',
     fontSize: 13,
+  },
+  claimedCheckMargin: {
+    marginRight: 3,
   },
   claimedDate: {
     marginTop: 8,
@@ -367,9 +382,14 @@ const styles = StyleSheet.create({
     paddingVertical: 60,
     paddingHorizontal: 24,
   },
-  emptyIcon: {
-    fontSize: 48,
-    marginBottom: 12,
+  emptyIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
   },
   emptyTitle: {
     fontSize: 20,

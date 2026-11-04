@@ -10,6 +10,7 @@ import {
   RefreshControl,
   ActivityIndicator,
 } from 'react-native';
+import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import { useBusinessStampHistory, useBusinessRewardHistory } from '../../../hooks/useApi';
 import { AdminActivityScreenSkeleton } from '../../../components/skeleton';
 
@@ -118,7 +119,11 @@ export default function AdminActivityScreen() {
               <View
                 style={[styles.avatarCircle, { backgroundColor: item.avatarBg }]}
               >
-                <Text style={styles.avatarInitial}>{item.name.charAt(0)}</Text>
+                <MaterialDesignIcons
+                  name={item.type === 'stamp' ? 'star' : 'gift'}
+                  size={20}
+                  color={item.type === 'stamp' ? '#4F46E5' : '#D97706'}
+                />
               </View>
 
               <View style={styles.itemInfo}>
@@ -141,7 +146,9 @@ export default function AdminActivityScreen() {
           ))
         ) : (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>📋</Text>
+            <View style={styles.emptyIconCircle}>
+              <MaterialDesignIcons name="history" size={42} color="#94A3B8" />
+            </View>
             <Text style={styles.emptyTitle}>No Activity Recorded</Text>
             <Text style={styles.emptySubtitle}>
               Activity will appear here as customers collect stamps and redeem rewards.
@@ -288,9 +295,14 @@ const styles = StyleSheet.create({
     paddingVertical: 60,
     paddingHorizontal: 24,
   },
-  emptyIcon: {
-    fontSize: 48,
-    marginBottom: 12,
+  emptyIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
   },
   emptyTitle: {
     fontSize: 20,

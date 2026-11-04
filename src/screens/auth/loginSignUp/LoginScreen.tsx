@@ -112,7 +112,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
                     showsVerticalScrollIndicator={false}
                 >
                     <View style={styles.header}>
-                        <Text style={styles.title}>Welcome Back 👋</Text>
+                        <Text style={styles.title}>Welcome Back</Text>
                         <Text style={styles.subtitle}>
                             Please sign in to continue
                         </Text>

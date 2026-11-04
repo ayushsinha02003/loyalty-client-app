@@ -7,6 +7,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
+import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 
 export interface PrimaryErrorBannerProps {
   message?: string | null;
@@ -17,7 +18,7 @@ export interface PrimaryErrorBannerProps {
 
 export default function PrimaryErrorBanner({
   message,
-  icon = '⚠️',
+  icon,
   style,
   textStyle,
 }: PrimaryErrorBannerProps) {
@@ -25,7 +26,16 @@ export default function PrimaryErrorBanner({
 
   return (
     <View style={[styles.container, style]}>
-      {icon ? <Text style={styles.icon}>{icon}</Text> : null}
+      {icon ? (
+        <Text style={styles.legacyIcon}>{icon}</Text>
+      ) : (
+        <MaterialDesignIcons
+          name="alert-circle-outline"
+          size={18}
+          color="#DC2626"
+          style={styles.iconMargin}
+        />
+      )}
       <Text style={[styles.text, textStyle]}>{message}</Text>
     </View>
   );
@@ -43,7 +53,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     marginBottom: 20,
   },
-  icon: {
+  iconMargin: {
+    marginRight: 10,
+  },
+  legacyIcon: {
     fontSize: 16,
     marginRight: 10,
   },

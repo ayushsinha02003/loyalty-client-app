@@ -8,8 +8,8 @@ import {
   TouchableOpacity,
   View,
   RefreshControl,
-  ActivityIndicator,
 } from 'react-native';
+import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import { useStampHistory, useRewardHistory } from '../../hooks/useApi';
 import { ActivityScreenSkeleton } from '../../components/skeleton';
 
@@ -93,7 +93,7 @@ export default function ActivityScreen({ onBack }: ActivityScreenProps) {
       stampHistory.forEach((stamp: StampActivity) => {
         const date = new Date(stamp.createdAt);
         const businessName = stamp.business?.businessName || 'Store';
-        const icon = '☕';
+        const icon = 'star';
         const iconBg = '#FEF3C7';
 
         allActivities.push({
@@ -117,7 +117,7 @@ export default function ActivityScreen({ onBack }: ActivityScreenProps) {
         const date = new Date(reward.createdAt);
         const businessName = reward.business?.businessName || 'Store';
         const rewardName = reward.reward || 'Reward';
-        const icon = '🎁';
+        const icon = 'gift';
         const iconBg = '#FCE7F3';
 
         allActivities.push({
@@ -209,7 +209,7 @@ export default function ActivityScreen({ onBack }: ActivityScreenProps) {
             style={styles.headerButton}
             activeOpacity={0.7}
           >
-            <Text style={styles.headerIcon}>←</Text>
+            <MaterialDesignIcons name="arrow-left" size={22} color="#0F172A" />
           </TouchableOpacity>
         ) : (
           <View style={styles.placeholder} />
@@ -257,13 +257,9 @@ export default function ActivityScreen({ onBack }: ActivityScreenProps) {
           <RefreshControl refreshing={loading} onRefresh={handleRefresh} />
         }
       >
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#7B3FF2" />
-            <Text style={styles.loadingText}>Loading activity...</Text>
-          </View>
-        ) : error ? (
+        {error ? (
           <View style={styles.errorContainer}>
+            <MaterialDesignIcons name="alert-circle-outline" size={40} color="#EF4444" style={styles.mb8} />
             <Text style={styles.errorText}>{error}</Text>
             <TouchableOpacity style={styles.retryButton} onPress={handleRefresh}>
               <Text style={styles.retryButtonText}>Retry</Text>
@@ -283,7 +279,11 @@ export default function ActivityScreen({ onBack }: ActivityScreenProps) {
                         { backgroundColor: item.iconBg },
                       ]}
                     >
-                      <Text style={styles.itemEmoji}>{item.icon}</Text>
+                      <MaterialDesignIcons
+                        name={item.type === 'stamp' ? 'star' : 'gift'}
+                        size={20}
+                        color={item.type === 'stamp' ? '#D97706' : '#7C3AED'}
+                      />
                     </View>
 
                     <View style={styles.infoCol}>
@@ -309,7 +309,9 @@ export default function ActivityScreen({ onBack }: ActivityScreenProps) {
           ))
         ) : (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>📋</Text>
+            <View style={styles.emptyIconCircle}>
+              <MaterialDesignIcons name="history" size={48} color="#94A3B8" />
+            </View>
             <Text style={styles.emptyTitle}>No Activity Yet</Text>
             <Text style={styles.emptySubtitle}>
               Your stamp collection and reward redemptions will appear here.
@@ -495,9 +497,14 @@ const styles = StyleSheet.create({
     paddingVertical: 60,
     paddingHorizontal: 24,
   },
-  emptyIcon: {
-    fontSize: 48,
-    marginBottom: 12,
+  emptyIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
   },
   emptyTitle: {
     fontSize: 20,
@@ -510,5 +517,8 @@ const styles = StyleSheet.create({
     color: '#64748B',
     textAlign: 'center',
     lineHeight: 22,
+  },
+  mb8: {
+    marginBottom: 8,
   },
 });

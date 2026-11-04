@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import { getCurrentUser } from '../../services/authService';
 import PrimaryHeader from '../../components/common/PrimaryHeader';
 import PrimaryStampProgressCard from '../../components/cards/stampProgressCard/PrimaryStampProgressCard';
@@ -100,7 +101,8 @@ const HomeScreen = ({ onOpenScanner, onSeeAll }: HomeScreenProps) => {
                 onPress={onOpenScanner}
                 activeOpacity={0.8}
               >
-                <Text style={styles.scanButtonText}>📷 Open QR Scanner</Text>
+                <MaterialDesignIcons name="qrcode-scan" size={18} color="#FFFFFF" style={styles.scanIconMargin} />
+                <Text style={styles.scanButtonText}>Open QR Scanner</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -138,7 +140,8 @@ const HomeScreen = ({ onOpenScanner, onSeeAll }: HomeScreenProps) => {
                 onPress={onOpenScanner}
                 activeOpacity={0.8}
               >
-                <Text style={styles.scanButtonText}>📷 Open QR Scanner</Text>
+                <MaterialDesignIcons name="qrcode-scan" size={18} color="#FFFFFF" style={styles.scanIconMargin} />
+                <Text style={styles.scanButtonText}>Open QR Scanner</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -240,6 +243,9 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   scanButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: '#7B3FF2',
     paddingHorizontal: 20,
     paddingVertical: 12,
@@ -249,6 +255,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 6,
     elevation: 3,
+  },
+  scanIconMargin: {
+    marginRight: 8,
   },
   scanButtonText: {
     color: '#FFFFFF',

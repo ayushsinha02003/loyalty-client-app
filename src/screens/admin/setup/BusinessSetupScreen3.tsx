@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import PrimaryCard from '../../../components/cards/PrimaryCard';
 import PrimaryButton from '../../../components/button/PrimaryButton';
 
@@ -39,7 +40,7 @@ export default function BusinessSetupScreen3({
         {/* Header with Stepper */}
         <View style={styles.header}>
           <TouchableOpacity onPress={onBack} style={styles.backButton}>
-            <Text style={styles.backArrow}>←</Text>
+            <MaterialDesignIcons name="arrow-left" size={24} color="#1E293B" />
           </TouchableOpacity>
 
           <View style={styles.stepperContainer}>
@@ -66,7 +67,7 @@ export default function BusinessSetupScreen3({
             {/* Business Logo & Name Row */}
             <View style={styles.cardHeader}>
               <View style={styles.logoCircle}>
-                <Text style={styles.logoEmoji}>☕</Text>
+                <MaterialDesignIcons name="storefront-outline" size={26} color="#7C3AED" />
               </View>
 
               <View style={styles.cardHeaderInfo}>
@@ -75,7 +76,7 @@ export default function BusinessSetupScreen3({
               </View>
 
               <TouchableOpacity onPress={onEdit} style={styles.editButton}>
-                <Text style={styles.editIcon}>✏️</Text>
+                <MaterialDesignIcons name="pencil-outline" size={18} color="#7C3AED" />
               </TouchableOpacity>
             </View>
 
@@ -83,17 +84,17 @@ export default function BusinessSetupScreen3({
 
             {/* Details List */}
             <View style={styles.detailRow}>
-              <Text style={styles.detailIcon}>📍</Text>
+              <MaterialDesignIcons name="map-marker-outline" size={16} color="#64748B" style={styles.detailIconMargin} />
               <Text style={styles.detailText}>{address}</Text>
             </View>
 
             <View style={styles.detailRow}>
-              <Text style={styles.detailIcon}>📞</Text>
+              <MaterialDesignIcons name="phone-outline" size={16} color="#64748B" style={styles.detailIconMargin} />
               <Text style={styles.detailText}>{phone}</Text>
             </View>
 
             <View style={styles.detailRow}>
-              <Text style={styles.detailIcon}>✉️</Text>
+              <MaterialDesignIcons name="email-outline" size={16} color="#64748B" style={styles.detailIconMargin} />
               <Text style={styles.detailText}>{email}</Text>
             </View>
           </PrimaryCard>
@@ -197,12 +198,9 @@ const styles = StyleSheet.create({
     width: 54,
     height: 54,
     borderRadius: 27,
-    backgroundColor: '#065F46',
+    backgroundColor: '#EDE9FE',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  logoEmoji: {
-    fontSize: 26,
   },
   cardHeaderInfo: {
     flex: 1,
@@ -234,8 +232,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 14,
   },
-  detailIcon: {
-    fontSize: 16,
+  detailIconMargin: {
     marginRight: 12,
   },
   detailText: {

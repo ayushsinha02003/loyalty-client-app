@@ -8,8 +8,8 @@ import {
     ViewStyle,
 } from 'react-native';
 import Svg, { Defs, LinearGradient, Stop, Circle } from 'react-native-svg';
+import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import PrimaryText from '../../text/PrimaryText';
-const defaultStampImage = require('../../../assets/images/stamp-reward.png');
 
 interface PrimaryStampProgressCardProps {
     currentStamps: number;
@@ -17,14 +17,17 @@ interface PrimaryStampProgressCardProps {
     title?: string;
     message?: string;
     image?: ImageSourcePropType;
+    icon?: React.ComponentProps<typeof MaterialDesignIcons>['name'];
     customStyle?: StyleProp<ViewStyle>;
 }
+
 const PrimaryStampProgressCard = ({
     currentStamps,
     totalStamps,
     title = 'TOTAL STAMPS',
-    message = "You're on your way! 🎉",
-    image = defaultStampImage,
+    message = "You're on your way!",
+    image,
+    icon = 'trophy-award',
     customStyle,
 }: PrimaryStampProgressCardProps) => {
     const percentage =
@@ -45,12 +48,22 @@ const PrimaryStampProgressCard = ({
 
     return (
         <View style={[styles.card, customStyle]}>
-            <View style={styles.imageContainer}>
-                <Image
-                    source={image}
-                    style={styles.image}
-                    resizeMode="contain"
-                />
+            <View style={styles.iconContainer}>
+                {image ? (
+                    <Image
+                        source={image}
+                        style={styles.image}
+                        resizeMode="contain"
+                    />
+                ) : (
+                    <View style={styles.vectorIconBox}>
+                        <MaterialDesignIcons
+                            name={icon}
+                            size={36}
+                            color="#FDE047"
+                        />
+                    </View>
+                )}
             </View>
             <View style={styles.content}>
                 <PrimaryText
@@ -72,9 +85,15 @@ const PrimaryStampProgressCard = ({
                     customStyle={styles.message}
                     numberOfLines={1}
                 />
-                {remaining > 0 && (
+                {remaining > 0 ? (
                     <View style={styles.badge}>
+                        <MaterialDesignIcons name="ticket-percent-outline" size={13} color="#FFFFFF" style={styles.badgeIcon} />
                         <PrimaryText text={`${remaining} to go`} customStyle={styles.badgeText} />
+                    </View>
+                ) : (
+                    <View style={[styles.badge, styles.badgeReady]}>
+                        <MaterialDesignIcons name="gift" size={13} color="#FFFFFF" style={styles.badgeIcon} />
+                        <PrimaryText text="Reward Ready!" customStyle={styles.badgeText} />
                     </View>
                 )}
             </View>
@@ -82,9 +101,9 @@ const PrimaryStampProgressCard = ({
                 <Svg width={size} height={size} style={styles.progressSvg}>
                     <Defs>
                         <LinearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <Stop offset="0%" stopColor="#FFD54A" stopOpacity="1" />
-                            <Stop offset="60%" stopColor="#FF6B6B" stopOpacity="1" />
-                            <Stop offset="100%" stopColor="#8B5CF6" stopOpacity="1" />
+                            <Stop offset="0%" stopColor="#FDE047" stopOpacity="1" />
+                            <Stop offset="60%" stopColor="#F59E0B" stopOpacity="1" />
+                            <Stop offset="100%" stopColor="#EC4899" stopOpacity="1" />
                         </LinearGradient>
                     </Defs>
                     <Circle
@@ -140,26 +159,36 @@ const styles = StyleSheet.create({
         shadowRadius: 28,
         elevation: 8,
     },
-    imageContainer: {
-        width: 84,
-        height: 84,
-        borderRadius: 20,
+    iconContainer: {
+        width: 60,
+        height: 60,
+        borderRadius: 18,
         alignItems: 'center',
         justifyContent: 'center',
-        marginRight: 16,
+        marginRight: 14,
+    },
+    vectorIconBox: {
+        width: 56,
+        height: 56,
+        borderRadius: 16,
+        backgroundColor: 'rgba(255, 255, 255, 0.14)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.25)',
     },
     image: {
-        width: 95,
-        height: 140,
+        width: 56,
+        height: 56,
     },
     content: {
         flex: 1,
         justifyContent: 'center',
     },
     title: {
-        fontSize: 15,
+        fontSize: 13,
         fontWeight: '700',
-        color: 'rgba(255,255,255,0.95)',
+        color: 'rgba(255,255,255,0.85)',
         letterSpacing: 1,
         textTransform: 'uppercase',
     },
@@ -168,42 +197,50 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end',
     },
     currentStamp: {
-        fontSize: 38,
-        lineHeight: 44,
+        fontSize: 34,
+        lineHeight: 40,
         fontWeight: '900',
         color: '#FFFFFF',
     },
     totalStamp: {
-        marginLeft: 8,
-        fontSize: 18,
+        marginLeft: 6,
+        fontSize: 17,
         fontWeight: '600',
         color: 'rgba(255,255,255,0.78)',
-        marginBottom: 6,
+        marginBottom: 5,
     },
     message: {
-        fontSize: 13,
+        fontSize: 12,
         fontWeight: '500',
         color: 'rgba(255,255,255,0.9)',
     },
     badge: {
-        marginTop: 10,
+        marginTop: 8,
         alignSelf: 'flex-start',
-        backgroundColor: 'rgba(255,255,255,0.12)',
+        backgroundColor: 'rgba(255,255,255,0.14)',
         paddingHorizontal: 10,
-        paddingVertical: 6,
-        borderRadius: 16,
+        paddingVertical: 4,
+        borderRadius: 12,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    badgeReady: {
+        backgroundColor: '#10B981',
+    },
+    badgeIcon: {
+        marginRight: 4,
     },
     badgeText: {
         fontSize: 11,
         fontWeight: '700',
-        color: 'rgba(255,255,255,0.95)',
+        color: '#FFFFFF',
     },
     progressContainer: {
-        width: 98,
-        height: 98,
+        width: 88,
+        height: 88,
         alignItems: 'center',
         justifyContent: 'center',
-        marginLeft: 12,
+        marginLeft: 8,
     },
     progressSvg: {
         position: 'absolute',
@@ -214,7 +251,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     percentage: {
-        fontSize: 19,
+        fontSize: 18,
         fontWeight: '800',
         color: '#FFFFFF',
     },

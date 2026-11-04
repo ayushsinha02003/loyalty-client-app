@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
+import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import PrimaryButton from '../../components/button/PrimaryButton';
 
 interface ScanSuccessScreenProps {
@@ -34,7 +35,7 @@ export default function ScanSuccessScreen({
       <View style={styles.content}>
         {/* Top Success Badge */}
         <View style={styles.successIconBadge}>
-          <Text style={styles.checkmarkIcon}>✓</Text>
+          <MaterialDesignIcons name="check-bold" size={28} color="#FFFFFF" />
         </View>
 
         {/* Title & Subtitle */}
@@ -126,9 +127,19 @@ export default function ScanSuccessScreen({
                     isLast && styles.stampDotGift,
                   ]}
                 >
-                  <Text style={styles.stampDotEmoji}>
-                    {isLast ? '🎁' : isFilled ? '☕' : ''}
-                  </Text>
+                  {isLast ? (
+                    <MaterialDesignIcons
+                      name={isFilled ? 'gift' : 'gift-outline'}
+                      size={14}
+                      color={isFilled ? '#B45309' : '#D97706'}
+                    />
+                  ) : isFilled ? (
+                    <MaterialDesignIcons
+                      name="star"
+                      size={14}
+                      color="#FFFFFF"
+                    />
+                  ) : null}
                 </View>
               );
             })}

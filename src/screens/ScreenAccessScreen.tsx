@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 
 import type { TabId } from '../components/common/BottomNav';
 
@@ -87,9 +88,17 @@ export default function ScreenAccessScreen({
         {SCREEN_OPTIONS.map(screen => (
           <React.Fragment key={screen.id}>
             {screen.section ? (
-              <Text style={styles.sectionHeading}>
-                {screen.section === 'CUSTOMER' ? '👤 CUSTOMER EXPERIENCE' : '💼 BUSINESS OWNER EXPERIENCE'}
-              </Text>
+              <View style={styles.sectionHeadingRow}>
+                <MaterialDesignIcons
+                  name={screen.section === 'CUSTOMER' ? 'account-outline' : 'briefcase-outline'}
+                  size={16}
+                  color={screen.section === 'CUSTOMER' ? '#7C3AED' : '#D97706'}
+                  style={styles.mr6}
+                />
+                <Text style={styles.sectionHeading}>
+                  {screen.section === 'CUSTOMER' ? 'CUSTOMER EXPERIENCE' : 'BUSINESS OWNER EXPERIENCE'}
+                </Text>
+              </View>
             ) : null}
             <TouchableOpacity
               style={[
@@ -122,12 +131,19 @@ const styles = StyleSheet.create({
     color: '#111827',
     marginBottom: 8,
   },
+  sectionHeadingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 8,
+  },
+  mr6: {
+    marginRight: 6,
+  },
   sectionHeading: {
     fontSize: 13,
     fontWeight: '800',
     color: '#7B3FF2',
-    marginTop: 20,
-    marginBottom: 8,
     letterSpacing: 1,
   },
   list: {

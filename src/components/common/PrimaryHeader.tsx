@@ -28,7 +28,7 @@ const PrimaryHeader = ({
     return (
         <View style={[styles.container, style]}>
             <View style={styles.content}>
-                <PrimaryText text={`Good morning, ${name}! 👋`} customStyle={styles.greeting} />
+                <PrimaryText text={`Good morning, ${name}!`} customStyle={styles.greeting} />
                 <PrimaryText text={subtitle} customStyle={styles.subtitle} />
             </View>
             <Pressable

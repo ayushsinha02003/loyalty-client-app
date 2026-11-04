@@ -9,6 +9,7 @@ import {
   View,
   Alert,
 } from 'react-native';
+import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import { clearAuthData } from '../../../services/authService';
 
 interface AdminMoreScreenProps {
@@ -16,18 +17,68 @@ interface AdminMoreScreenProps {
   onLogout?: () => void;
 }
 
+interface MenuItem {
+  id: string;
+  label: string;
+  icon: React.ComponentProps<typeof MaterialDesignIcons>['name'];
+  iconColor: string;
+  iconBg: string;
+}
+
 export default function AdminMoreScreen({
   onSelectOption,
   onLogout,
 }: AdminMoreScreenProps) {
-  const menuItems = [
-    { id: 'profile', label: 'Business Profile', emoji: '🏢' },
-    { id: 'customers', label: 'Customer Management', emoji: '👥' },
-    { id: 'qr', label: 'Business QR Code', emoji: '📱' },
-    { id: 'analytics', label: 'Analytics & Insights', emoji: '📊' },
-    { id: 'activity', label: 'All Transactions & Activity', emoji: '📋' },
-    { id: 'stamps', label: 'Manage Stamp Cards', emoji: '🎫' },
-    { id: 'rewards', label: 'Manage Rewards', emoji: '🎁' },
+  const menuItems: MenuItem[] = [
+    {
+      id: 'profile',
+      label: 'Business Profile',
+      icon: 'storefront-outline',
+      iconColor: '#7C3AED',
+      iconBg: '#F3E8FF',
+    },
+    {
+      id: 'customers',
+      label: 'Customer Management',
+      icon: 'account-group-outline',
+      iconColor: '#2563EB',
+      iconBg: '#DBEAFE',
+    },
+    {
+      id: 'qr',
+      label: 'Business QR Code',
+      icon: 'qrcode-scan',
+      iconColor: '#059669',
+      iconBg: '#D1FAE5',
+    },
+    {
+      id: 'analytics',
+      label: 'Analytics & Insights',
+      icon: 'chart-bar',
+      iconColor: '#D97706',
+      iconBg: '#FEF3C7',
+    },
+    {
+      id: 'activity',
+      label: 'All Transactions & Activity',
+      icon: 'history',
+      iconColor: '#4F46E5',
+      iconBg: '#EEF2FF',
+    },
+    {
+      id: 'stamps',
+      label: 'Manage Stamp Cards',
+      icon: 'ticket-percent-outline',
+      iconColor: '#0891B2',
+      iconBg: '#CFFAFE',
+    },
+    {
+      id: 'rewards',
+      label: 'Manage Rewards',
+      icon: 'gift-outline',
+      iconColor: '#E11D48',
+      iconBg: '#FFE4E6',
+    },
   ];
 
   const handleLogout = () => {
@@ -65,13 +116,17 @@ export default function AdminMoreScreen({
             activeOpacity={0.7}
           >
             <View style={styles.leftRow}>
-              <View style={styles.iconCircle}>
-                <Text style={styles.iconEmoji}>{item.emoji}</Text>
+              <View style={[styles.iconCircle, { backgroundColor: item.iconBg }]}>
+                <MaterialDesignIcons
+                  name={item.icon}
+                  size={22}
+                  color={item.iconColor}
+                />
               </View>
               <Text style={styles.menuLabel}>{item.label}</Text>
             </View>
 
-            <Text style={styles.arrowIcon}>›</Text>
+            <MaterialDesignIcons name="chevron-right" size={22} color="#94A3B8" />
           </TouchableOpacity>
         ))}
 
@@ -83,10 +138,11 @@ export default function AdminMoreScreen({
         >
           <View style={styles.leftRow}>
             <View style={[styles.iconCircle, styles.logoutIconCircle]}>
-              <Text style={styles.logoutEmoji}>🚪</Text>
+              <MaterialDesignIcons name="logout" size={20} color="#DC2626" />
             </View>
             <Text style={styles.logoutLabel}>Logout</Text>
           </View>
+          <MaterialDesignIcons name="chevron-right" size={22} color="#DC2626" />
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

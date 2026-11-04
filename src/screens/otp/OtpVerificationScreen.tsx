@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import PrimaryButton from '../../components/button/PrimaryButton';
 
 interface OtpVerificationScreenProps {
@@ -85,7 +86,7 @@ export default function OtpVerificationScreen({
               style={styles.backButton}
               activeOpacity={0.7}
             >
-              <Text style={styles.backArrow}>←</Text>
+              <MaterialDesignIcons name="arrow-left" size={24} color="#1E293B" />
             </TouchableOpacity>
           </View>
 
@@ -148,7 +149,7 @@ export default function OtpVerificationScreen({
 
           {/* Security Assurance */}
           <View style={styles.securityRow}>
-            <Text style={styles.shieldIcon}>🛡️</Text>
+            <MaterialDesignIcons name="shield-check-outline" size={18} color="#10B981" style={styles.shieldIconMargin} />
             <Text style={styles.securityText}>
               Your data is 100% secure and will never be shared.
             </Text>
@@ -262,8 +263,7 @@ const styles = StyleSheet.create({
     marginTop: 32,
     paddingHorizontal: 16,
   },
-  shieldIcon: {
-    fontSize: 16,
+  shieldIconMargin: {
     marginRight: 8,
   },
   securityText: {

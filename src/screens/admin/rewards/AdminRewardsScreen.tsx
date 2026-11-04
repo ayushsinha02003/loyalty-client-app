@@ -10,8 +10,8 @@ import {
   View,
   RefreshControl,
   Alert,
-  ActivityIndicator,
 } from 'react-native';
+import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import { useBusinessLoyaltyCards } from '../../../hooks/useApi';
 import PrimaryText from '../../../components/text/PrimaryText';
 import { loyaltyCardApi } from '../../../services/api';
@@ -71,13 +71,20 @@ export default function AdminRewardsScreen({
 
       {/* Header */}
       <View style={styles.header}>
-        <PrimaryText text="Rewards" customStyle={styles.title} />
+        <View>
+          <PrimaryText text="Rewards Catalog" customStyle={styles.title} />
+          <Text style={styles.subtitle}>
+            {rewards.length} active {rewards.length === 1 ? 'reward' : 'rewards'} configured
+          </Text>
+        </View>
+
         <TouchableOpacity
           onPress={onAddReward}
           style={styles.addButton}
           activeOpacity={0.8}
         >
-          <Text style={styles.addIcon}>+</Text>
+          <MaterialDesignIcons name="plus" size={18} color="#FFFFFF" style={styles.mr4} />
+          <Text style={styles.addButtonText}>New Reward</Text>
         </TouchableOpacity>
       </View>
 
@@ -88,13 +95,9 @@ export default function AdminRewardsScreen({
           <RefreshControl refreshing={loading} onRefresh={handleRefresh} />
         }
       >
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#7B3FF2" />
-            <Text style={styles.loadingText}>Loading rewards...</Text>
-          </View>
-        ) : error ? (
+        {error ? (
           <View style={styles.errorContainer}>
+            <MaterialDesignIcons name="alert-circle-outline" size={40} color="#EF4444" style={styles.mb8} />
             <Text style={styles.errorText}>{error}</Text>
             <TouchableOpacity style={styles.retryButton} onPress={handleRefresh}>
               <Text style={styles.retryButtonText}>Retry</Text>
@@ -109,20 +112,23 @@ export default function AdminRewardsScreen({
                   { backgroundColor: reward.backgroundColor || '#EDE9FE' },
                 ]}
               >
-                <Text style={styles.rewardEmoji}>{reward.icon || '🎁'}</Text>
+                <MaterialDesignIcons name="gift" size={24} color="#7C3AED" />
               </View>
 
               <View style={styles.rewardInfo}>
                 <PrimaryText text={reward.reward || 'Reward'} customStyle={styles.rewardName} />
-                <PrimaryText
-                  text={`${reward.totalStamps || 10} Stamps Required • ${reward.title}`}
-                  customStyle={styles.rewardStamps}
-                />
+                <View style={styles.metaRow}>
+                  <MaterialDesignIcons name="star" size={13} color="#F59E0B" style={styles.mr4} />
+                  <PrimaryText
+                    text={`${reward.totalStamps || 10} Stamps Required • ${reward.title}`}
+                    customStyle={styles.rewardStamps}
+                  />
+                </View>
               </View>
 
               <Switch
                 trackColor={{ false: '#CBD5E1', true: '#C4B5FD' }}
-                thumbColor={reward.isActive ? '#7B3FF2' : '#F1F5F9'}
+                thumbColor={reward.isActive !== false ? '#7B3FF2' : '#F1F5F9'}
                 value={reward.isActive !== false}
                 onValueChange={() => toggleReward(reward._id, reward.isActive !== false)}
                 disabled={togglingId === reward._id}
@@ -131,11 +137,21 @@ export default function AdminRewardsScreen({
           ))
         ) : (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>🎁</Text>
+            <View style={styles.emptyIconCircle}>
+              <MaterialDesignIcons name="gift-open-outline" size={48} color="#94A3B8" />
+            </View>
             <Text style={styles.emptyTitle}>No Rewards Yet</Text>
             <Text style={styles.emptySubtitle}>
               Create loyalty cards with rewards to start rewarding your customers!
             </Text>
+            <TouchableOpacity
+              style={styles.emptyActionButton}
+              onPress={onAddReward}
+              activeOpacity={0.8}
+            >
+              <MaterialDesignIcons name="plus" size={18} color="#FFFFFF" style={styles.mr6} />
+              <Text style={styles.emptyActionText}>Add Reward</Text>
+            </TouchableOpacity>
           </View>
         )}
       </ScrollView>
@@ -146,7 +162,7 @@ export default function AdminRewardsScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F8FAFC',
   },
   header: {
     flexDirection: 'row',
@@ -154,116 +170,148 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingTop: 16,
-    paddingBottom: 16,
+    paddingBottom: 12,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
   },
   title: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#1E293B',
+    color: '#0F172A',
+  },
+  subtitle: {
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 2,
   },
   addButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#7B3FF2',
+    backgroundColor: '#7C3AED',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 14,
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    shadowColor: '#7C3AED',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 3,
   },
-  addIcon: {
-    fontSize: 24,
+  addButtonText: {
     color: '#FFFFFF',
     fontWeight: '700',
-    marginTop: -2,
+    fontSize: 13,
   },
   listContent: {
     paddingHorizontal: 20,
-    paddingBottom: 100,
+    paddingTop: 16,
+    paddingBottom: 90,
+    gap: 14,
   },
   rewardCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 18,
+    padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderColor: '#F1F5F9',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
   },
   iconCircle: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
+    width: 48,
+    height: 48,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 14,
   },
-  rewardEmoji: {
-    fontSize: 24,
-  },
   rewardInfo: {
     flex: 1,
+    marginRight: 12,
   },
   rewardName: {
     fontSize: 16,
-    fontWeight: '700',
-    color: '#1E293B',
-    marginBottom: 4,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 3,
+  },
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   rewardStamps: {
-    fontSize: 13,
+    fontSize: 12,
     color: '#64748B',
     fontWeight: '500',
   },
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 60,
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#64748B',
-  },
-  errorContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-  },
-  errorText: {
-    fontSize: 16,
-    color: '#EF4444',
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  retryButton: {
-    backgroundColor: '#7B3FF2',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    fontSize: 16,
-    color: '#FFFFFF',
-    fontWeight: '600',
-  },
   emptyState: {
     alignItems: 'center',
-    paddingVertical: 60,
-    paddingHorizontal: 24,
+    paddingVertical: 50,
+    paddingHorizontal: 20,
   },
-  emptyIcon: {
-    fontSize: 48,
-    marginBottom: 12,
+  emptyIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
   },
   emptyTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
     color: '#1E293B',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   emptySubtitle: {
-    fontSize: 15,
+    fontSize: 14,
     color: '#64748B',
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 20,
+    marginBottom: 20,
   },
+  emptyActionButton: {
+    backgroundColor: '#7C3AED',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  emptyActionText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  errorContainer: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  errorText: {
+    fontSize: 14,
+    color: '#EF4444',
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  retryButton: {
+    backgroundColor: '#7C3AED',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  retryButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
+    fontSize: 13,
+  },
+  mr4: { marginRight: 4 },
+  mr6: { marginRight: 6 },
+  mb8: { marginBottom: 8 },
 });

@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 import PrimaryButton from '../../components/button/PrimaryButton';
 
 interface RewardDetailsScreenProps {
@@ -41,13 +42,13 @@ export default function RewardDetailsScreen({
           style={styles.headerButton}
           activeOpacity={0.7}
         >
-          <Text style={styles.headerIcon}>←</Text>
+          <MaterialDesignIcons name="arrow-left" size={24} color="#1E293B" />
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>Reward Details</Text>
 
         <TouchableOpacity style={styles.headerButton} activeOpacity={0.7}>
-          <Text style={styles.headerIcon}>♡</Text>
+          <MaterialDesignIcons name="heart-outline" size={22} color="#EF4444" />
         </TouchableOpacity>
       </View>
 
@@ -57,11 +58,17 @@ export default function RewardDetailsScreen({
       >
         {/* Large Hero Image */}
         <View style={styles.imageCard}>
-          <Image
-            source={{ uri: imageUrl }}
-            style={styles.heroImage}
-            resizeMode="cover"
-          />
+          {imageUrl ? (
+            <Image
+              source={{ uri: imageUrl }}
+              style={styles.heroImage}
+              resizeMode="cover"
+            />
+          ) : (
+            <View style={styles.heroFallback}>
+              <MaterialDesignIcons name="gift" size={64} color="#7C3AED" />
+            </View>
+          )}
         </View>
 
         {/* Title & Cost Badge */}
@@ -71,6 +78,7 @@ export default function RewardDetailsScreen({
           </View>
 
           <View style={styles.costBadge}>
+            <MaterialDesignIcons name="star" size={14} color="#4F46E5" style={styles.starIconMargin} />
             <Text style={styles.costBadgeText}>{stampsCost} Stamps</Text>
           </View>
 
@@ -80,21 +88,21 @@ export default function RewardDetailsScreen({
           <View style={styles.termsSection}>
             <View style={styles.termItem}>
               <View style={styles.termIconCircle}>
-                <Text style={styles.termIcon}>✓</Text>
+                <MaterialDesignIcons name="check" size={13} color="#059669" />
               </View>
               <Text style={styles.termText}>Valid for {validityDays} days</Text>
             </View>
 
             <View style={styles.termItem}>
               <View style={styles.termIconCircle}>
-                <Text style={styles.termIcon}>✓</Text>
+                <MaterialDesignIcons name="check" size={13} color="#059669" />
               </View>
               <Text style={styles.termText}>One time use only</Text>
             </View>
 
             <View style={styles.termItem}>
               <View style={styles.termIconCircle}>
-                <Text style={styles.termIcon}>✓</Text>
+                <MaterialDesignIcons name="check" size={13} color="#059669" />
               </View>
               <Text style={styles.termText}>Not valid with other offers</Text>
             </View>
@@ -162,6 +170,13 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 220,
   },
+  heroFallback: {
+    width: '100%',
+    height: 220,
+    backgroundColor: '#F5F3FF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   detailsSection: {
     marginTop: 24,
   },
@@ -176,6 +191,8 @@ const styles = StyleSheet.create({
     color: '#1E293B',
   },
   costBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
     alignSelf: 'flex-start',
     backgroundColor: '#EEF2FF',
     borderColor: '#C7D2FE',
@@ -190,6 +207,9 @@ const styles = StyleSheet.create({
     color: '#4F46E5',
     fontSize: 14,
     fontWeight: '700',
+  },
+  starIconMargin: {
+    marginRight: 4,
   },
   descriptionText: {
     fontSize: 15,
@@ -213,7 +233,9 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: '#EDE9FE',
+    backgroundColor: '#ECFDF5',
+    borderWidth: 1,
+    borderColor: '#A7F3D0',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,

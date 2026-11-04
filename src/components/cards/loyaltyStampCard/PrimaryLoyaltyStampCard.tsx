@@ -107,7 +107,8 @@ const PrimaryLoyaltyStampCard = ({
         {/* Progress or Reward Ready Badge */}
         {isRewardAvailable ? (
           <View style={styles.rewardReadyBadge}>
-            <PrimaryText text="Reward Ready! 🎁" customStyle={styles.rewardReadyText} />
+            <MaterialDesignIcons name="gift" size={13} color="#059669" style={styles.rewardIconMargin} />
+            <PrimaryText text="Reward Ready!" customStyle={styles.rewardReadyText} />
           </View>
         ) : (
           <View
@@ -255,6 +256,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ECFDF5',
     borderColor: '#A7F3D0',
     borderWidth: 1,
+    flexDirection: 'row',
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 14,
@@ -266,6 +268,9 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
     color: '#059669',
+  },
+  rewardIconMargin: {
+    marginRight: 4,
   },
   stampContainer: {
     flexDirection: 'row',
