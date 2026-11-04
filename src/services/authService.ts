@@ -11,6 +11,9 @@ export interface UserProfile {
   name?: string;
   phone: string;
   role: 'customer' | 'business';
+  email?: string;
+  isVerified?: boolean;
+  profileImage?: string;
   [key: string]: any;
 }
 
@@ -46,6 +49,23 @@ export interface RegisterResponse {
   user?: UserProfile;
 }
 
+// Simple in-memory token storage (replace with AsyncStorage for persistence)
+let authToken: string | null = null;
+let currentUser: UserProfile | null = null;
+
+export const getAuthToken = (): string | null => authToken;
+export const getCurrentUser = (): UserProfile | null => currentUser;
+
+export const setAuthData = (token: string, user: UserProfile) => {
+  authToken = token;
+  currentUser = user;
+};
+
+export const clearAuthData = () => {
+  authToken = null;
+  currentUser = null;
+};
+
 /**
  * Sends phone and password to the backend login endpoint.
  */
@@ -59,6 +79,15 @@ export async function loginUser(credentials: LoginCredentials): Promise<LoginRes
   });
 
   const result = await response.json();
+
+  if (result.success && (result.token || result.data?.token)) {
+    const token = result.token || result.data?.token;
+    const user = result.user || result.data?.user;
+    if (token && user) {
+      setAuthData(token, user);
+    }
+  }
+
   return result;
 }
 
@@ -72,6 +101,36 @@ export async function registerUser(payload: RegisterPayload): Promise<RegisterRe
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(payload),
+  });
+
+  const result = await response.json();
+
+  if (result.success && (result.token || result.data?.token)) {
+    const token = result.token || result.data?.token;
+    const user = result.user || result.data?.user;
+    if (token && user) {
+      setAuthData(token, user);
+    }
+  }
+
+  return result;
+}
+
+/**
+ * Get user profile from backend
+ */
+export async function getProfile(): Promise<LoginResponse> {
+  const token = getAuthToken();
+  if (!token) {
+    return { success: false, message: 'Not authenticated' };
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/auth/profile`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
   });
 
   const result = await response.json();
