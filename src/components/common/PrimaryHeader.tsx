@@ -22,25 +22,11 @@ const PrimaryHeader = ({
     name = 'User',
     subtitle = 'Collect stamps. Earn rewards.',
     notificationCount = 0,
-    onMenuPress,
     onNotificationPress,
     style,
 }: PrimaryHeaderProps) => {
     return (
         <View style={[styles.container, style]}>
-            <Pressable
-                onPress={onMenuPress}
-                hitSlop={10}
-                style={({ pressed }) => [
-                    styles.iconButton,
-                    pressed && styles.buttonPressed,
-                ]}>
-                <MaterialDesignIcons
-                    name="menu"
-                    size={22}
-                    color="#475569"
-                />
-            </Pressable>
             <View style={styles.content}>
                 <PrimaryText text={`Good morning, ${name}! 👋`} customStyle={styles.greeting} />
                 <PrimaryText text={subtitle} customStyle={styles.subtitle} />
@@ -86,7 +72,7 @@ const styles = StyleSheet.create({
     },
     content: {
         flex: 1,
-        marginHorizontal: 12,
+        marginRight: 12,
     },
     greeting: {
         fontSize: 20,

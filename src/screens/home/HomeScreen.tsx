@@ -81,9 +81,6 @@ const HomeScreen = ({ onOpenScanner, onSeeAll }: HomeScreenProps) => {
         name={userName}
         subtitle="Collect stamps. Earn rewards."
         notificationCount={dashboard?.customerCards?.filter((c: any) => c.isRewardAvailable).length || 0}
-        onMenuPress={() => {
-          console.log('Menu pressed');
-        }}
         onNotificationPress={() => {
           console.log('Notification pressed');
         }}
