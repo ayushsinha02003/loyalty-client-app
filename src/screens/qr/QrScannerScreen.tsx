@@ -6,12 +6,24 @@ import {
   Text,
   TouchableOpacity,
   View,
+  TextInput,
+  Modal,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
 import Svg, { Rect } from 'react-native-svg';
+import { qrApi } from '../../services/api';
+
+interface ScanResultData {
+  businessName: string;
+  stampsEarned: number;
+  currentStamps: number;
+  totalStamps: number;
+}
 
 interface QrScannerScreenProps {
   onBack?: () => void;
-  onScanSuccess?: () => void;
+  onScanSuccess?: (data?: ScanResultData) => void;
   onEnterCode?: () => void;
   onGallerySelect?: () => void;
 }
@@ -19,10 +31,48 @@ interface QrScannerScreenProps {
 export default function QrScannerScreen({
   onBack,
   onScanSuccess,
-  onEnterCode,
-  onGallerySelect,
 }: QrScannerScreenProps) {
   const [torchOn, setTorchOn] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [manualCode, setManualCode] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleScanCode = async (codeToScan: string) => {
+    const trimmed = codeToScan.trim();
+    if (!trimmed) {
+      Alert.alert('Required', 'Please enter a valid QR code');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await qrApi.scan(trimmed);
+      if (response.success) {
+        const customerCard = response.data?.customerCard || response.customerCard;
+        const stampsEarned = response.data?.stampsEarned ?? response.stampsEarned ?? 1;
+        const businessName =
+          customerCard?.loyaltyCard?.business?.businessName ||
+          customerCard?.loyaltyCard?.title ||
+          'Store';
+        const currentStamps = customerCard?.currentStamps || 1;
+        const totalStamps = customerCard?.loyaltyCard?.totalStamps || 10;
+
+        setModalVisible(false);
+        onScanSuccess?.({
+          businessName,
+          stampsEarned,
+          currentStamps,
+          totalStamps,
+        });
+      } else {
+        Alert.alert('Scan Failed', response.message || 'Invalid or inactive QR code');
+      }
+    } catch (err: any) {
+      Alert.alert('Scan Failed', err.message || 'Invalid QR code');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -61,29 +111,25 @@ export default function QrScannerScreen({
               <View style={[styles.corner, styles.cornerBL]} />
               <View style={[styles.corner, styles.cornerBR]} />
 
-              {/* QR Code SVG Mock Graphic inside Viewfinder */}
+              {/* QR Graphic in Center */}
               <TouchableOpacity
-                onPress={onScanSuccess}
+                onPress={() => setModalVisible(true)}
                 activeOpacity={0.8}
                 style={styles.qrInner}
               >
                 <Svg width={140} height={140} viewBox="0 0 100 100">
-                  {/* Top-Left Corner Block */}
                   <Rect x="5" y="5" width="28" height="28" rx="6" fill="#FFFFFF" />
                   <Rect x="11" y="11" width="16" height="16" rx="3" fill="#1E1B4B" />
                   <Rect x="15" y="15" width="8" height="8" rx="2" fill="#FFFFFF" />
 
-                  {/* Top-Right Corner Block */}
                   <Rect x="67" y="5" width="28" height="28" rx="6" fill="#FFFFFF" />
                   <Rect x="73" y="11" width="16" height="16" rx="3" fill="#1E1B4B" />
                   <Rect x="77" y="15" width="8" height="8" rx="2" fill="#FFFFFF" />
 
-                  {/* Bottom-Left Corner Block */}
                   <Rect x="5" y="67" width="28" height="28" rx="6" fill="#FFFFFF" />
                   <Rect x="11" y="73" width="16" height="16" rx="3" fill="#1E1B4B" />
                   <Rect x="15" y="77" width="8" height="8" rx="2" fill="#FFFFFF" />
 
-                  {/* QR Data Pixels */}
                   <Rect x="42" y="10" width="8" height="8" rx="2" fill="#FFFFFF" />
                   <Rect x="50" y="22" width="6" height="6" rx="1.5" fill="#FFFFFF" />
                   <Rect x="42" y="42" width="16" height="16" rx="4" fill="#A855F7" />
@@ -97,39 +143,16 @@ export default function QrScannerScreen({
             </View>
 
             <Text style={styles.instructionText}>
-              Place the QR code within the frame to scan
+              Scan the merchant QR code to collect your loyalty stamp
             </Text>
           </View>
 
           {/* Bottom Action Controls */}
           <View style={styles.bottomBar}>
-            {/* Gallery Option */}
-            <TouchableOpacity
-              style={styles.actionItem}
-              onPress={onGallerySelect}
-              activeOpacity={0.75}
-            >
-              <View style={styles.actionCircle}>
-                <Text style={styles.actionEmoji}>🖼️</Text>
-              </View>
-              <Text style={styles.actionLabel}>Gallery</Text>
-            </TouchableOpacity>
-
-            {/* Main Scan Button */}
-            <TouchableOpacity
-              style={styles.mainScanButton}
-              onPress={onScanSuccess}
-              activeOpacity={0.85}
-            >
-              <View style={styles.mainScanInner}>
-                <Text style={styles.mainScanIcon}>⛶</Text>
-              </View>
-            </TouchableOpacity>
-
             {/* Enter Code Option */}
             <TouchableOpacity
               style={styles.actionItem}
-              onPress={onEnterCode}
+              onPress={() => setModalVisible(true)}
               activeOpacity={0.75}
             >
               <View style={styles.actionCircle}>
@@ -137,9 +160,69 @@ export default function QrScannerScreen({
               </View>
               <Text style={styles.actionLabel}>Enter Code</Text>
             </TouchableOpacity>
+
+            {/* Main Scan Action Button */}
+            <TouchableOpacity
+              style={styles.mainScanButton}
+              onPress={() => setModalVisible(true)}
+              activeOpacity={0.85}
+            >
+              <View style={styles.mainScanInner}>
+                <Text style={styles.mainScanIcon}>⛶</Text>
+              </View>
+            </TouchableOpacity>
           </View>
         </SafeAreaView>
       </View>
+
+      {/* Manual Code Input Modal */}
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Enter Merchant Code</Text>
+            <Text style={styles.modalSubtitle}>
+              Type the code shown below the business QR code to claim your stamp:
+            </Text>
+
+            <TextInput
+              style={styles.modalInput}
+              placeholder="e.g. 8f4a19c..."
+              placeholderTextColor="#94A3B8"
+              value={manualCode}
+              onChangeText={setManualCode}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+
+            <View style={styles.modalButtonRow}>
+              <TouchableOpacity
+                style={styles.modalCancelButton}
+                onPress={() => setModalVisible(false)}
+                disabled={loading}
+              >
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.modalSubmitButton}
+                onPress={() => handleScanCode(manualCode)}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#FFFFFF" size="small" />
+                ) : (
+                  <Text style={styles.modalSubmitText}>Claim Stamp</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -277,10 +360,10 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: '#6366F1',
+    backgroundColor: '#7B3FF2',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#6366F1',
+    shadowColor: '#7B3FF2',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.45,
     shadowRadius: 14,
@@ -299,5 +382,69 @@ const styles = StyleSheet.create({
     fontSize: 26,
     color: '#FFFFFF',
     fontWeight: '700',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  modalContent: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 24,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#1E293B',
+    marginBottom: 8,
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: '#64748B',
+    marginBottom: 18,
+    lineHeight: 20,
+  },
+  modalInput: {
+    height: 50,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    fontSize: 15,
+    color: '#0F172A',
+    marginBottom: 20,
+    backgroundColor: '#F8FAFC',
+  },
+  modalButtonRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  modalCancelButton: {
+    flex: 1,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalCancelText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#64748B',
+  },
+  modalSubmitButton: {
+    flex: 2,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: '#7B3FF2',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalSubmitText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
 });

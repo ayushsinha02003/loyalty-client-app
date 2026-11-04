@@ -14,11 +14,12 @@ import PrimaryAdminBottomNav from './src/components/admin/PrimaryAdminBottomNav'
 import HomeScreen from './src/screens/home/HomeScreen';
 import AdminHomeScreen from './src/screens/home/AdminHomeScreen';
 import MyCardsScreen from './src/screens/my-cards/MyCardsScreen';
+import SearchScreen from './src/screens/search/SearchScreen';
 import RewardsScreen from './src/screens/rewards/RewardsScreen';
 import ProfileScreen from './src/screens/profile/ProfileScreen';
 import OnboardingScreen from './src/screens/onboarding/OnboardingScreen';
-import SplashScreen from '#/screens/auth/splashScreen/SplashScreen';
-import LoginScreen from '#/screens/auth/loginSignUp/LoginScreen';
+import SplashScreen from './src/screens/auth/splashScreen/SplashScreen';
+import LoginScreen from './src/screens/auth/loginSignUp/LoginScreen';
 import SignUpScreen from './src/screens/auth/loginSignUp/SignUpScreen';
 import ScreenAccessScreen, {
   type ScreenId,
@@ -68,6 +69,11 @@ function App() {
     }
   };
 
+  const handleLogout = () => {
+    setInitialScreen(null);
+    setShowLogin(true);
+  };
+
   return (
     <SafeAreaProvider>
       <StatusBar
@@ -101,25 +107,39 @@ function App() {
           onSignup={handleAuthSuccess}
         />
       ) : (
-        <AppContent initialScreen={initialScreen || undefined} />
+        <AppContent
+          initialScreen={initialScreen || undefined}
+          onLogout={handleLogout}
+        />
       )}
     </SafeAreaProvider>
   );
 }
 
-function AppContent({ initialScreen }: { initialScreen?: ScreenId }) {
+function AppContent({
+  initialScreen,
+  onLogout,
+}: {
+  initialScreen?: ScreenId;
+  onLogout: () => void;
+}) {
   const [activeTab, setActiveTab] = useState<TabId>(
-    initialScreen === 'Home' ? 'Home' : 'All'
+    initialScreen === 'Home' ? 'Home' : 'Home'
   );
   const [selectedScreen, setSelectedScreen] = useState<ScreenId | null>(
-    initialScreen || null
+    initialScreen || 'Home'
   );
+  const [scanResult, setScanResult] = useState<any>(null);
 
   const insets = useSafeAreaInsets();
 
   const handleTabPress = (tab: TabId) => {
     setActiveTab(tab);
-    setSelectedScreen(tab);
+    if (tab === 'All') {
+      setSelectedScreen('All');
+    } else {
+      setSelectedScreen(tab);
+    }
   };
 
   const handleScreenSelect = (screen: ScreenId) => {
@@ -130,7 +150,6 @@ function AppContent({ initialScreen }: { initialScreen?: ScreenId }) {
     } else {
       setActiveTab('All');
     }
-
     setSelectedScreen(screen);
   };
 
@@ -205,14 +224,29 @@ function AppContent({ initialScreen }: { initialScreen?: ScreenId }) {
       case 'MyCards':
         return <MyCardsScreen />;
 
+      case 'Search':
+        return (
+          <SearchScreen
+            onJoinSuccess={() => {
+              setActiveTab('MyCards');
+              setSelectedScreen('MyCards');
+            }}
+          />
+        );
+
       case 'Rewards':
         return <RewardsScreen />;
 
       case 'Profile':
-        return <ProfileScreen />;
+        return (
+          <ProfileScreen
+            onLogout={onLogout}
+            onViewActivity={() => setSelectedScreen('Activity')}
+          />
+        );
 
       case 'Splash':
-        return <SplashScreen onFinish={() => setSelectedScreen('All')} />;
+        return <SplashScreen onFinish={() => setSelectedScreen('Home')} />;
 
       case 'Onboarding':
         return (
@@ -278,16 +312,29 @@ function AppContent({ initialScreen }: { initialScreen?: ScreenId }) {
         return (
           <QrScannerScreen
             onBack={() => setSelectedScreen('Home')}
-            onScanSuccess={() => setSelectedScreen('ScanSuccess')}
-            onEnterCode={() => setSelectedScreen('ScanSuccess')}
+            onScanSuccess={data => {
+              setScanResult(data);
+              setSelectedScreen('ScanSuccess');
+            }}
+            onEnterCode={() => {}}
           />
         );
 
       case 'ScanSuccess':
         return (
           <ScanSuccessScreen
-            onViewCard={() => setSelectedScreen('MyCards')}
-            onDone={() => setSelectedScreen('Home')}
+            businessName={scanResult?.businessName}
+            stampsEarned={scanResult?.stampsEarned}
+            currentStamps={scanResult?.currentStamps}
+            totalStamps={scanResult?.totalStamps}
+            onViewCard={() => {
+              setActiveTab('MyCards');
+              setSelectedScreen('MyCards');
+            }}
+            onDone={() => {
+              setActiveTab('Home');
+              setSelectedScreen('Home');
+            }}
           />
         );
 
@@ -351,7 +398,16 @@ function AppContent({ initialScreen }: { initialScreen?: ScreenId }) {
         );
 
       case 'AdminHome':
-        return <AdminHomeScreen />;
+        return (
+          <AdminHomeScreen
+            onActionPress={action => {
+              if (action === 'Add Customer') setSelectedScreen('AdminCustomers');
+              else if (action === 'Create Reward') setSelectedScreen('AdminAddReward');
+              else if (action === 'Scan QR Code') setSelectedScreen('AdminQrCode');
+              else if (action === 'View Reports') setSelectedScreen('AdminAnalytics');
+            }}
+          />
+        );
 
       case 'AdminCustomers':
         return <AdminCustomersScreen />;
@@ -407,9 +463,14 @@ function AppContent({ initialScreen }: { initialScreen?: ScreenId }) {
           <AdminMoreScreen
             onSelectOption={option => {
               if (option === 'profile') setSelectedScreen('AdminBusinessProfile');
-              else if (option === 'staff') setSelectedScreen('AdminCustomers');
+              else if (option === 'customers') setSelectedScreen('AdminCustomers');
+              else if (option === 'qr') setSelectedScreen('AdminQrCode');
+              else if (option === 'analytics') setSelectedScreen('AdminAnalytics');
+              else if (option === 'activity') setSelectedScreen('AdminActivity');
+              else if (option === 'stamps') setSelectedScreen('AdminStampCards');
+              else if (option === 'rewards') setSelectedScreen('AdminRewards');
             }}
-            onLogout={() => setSelectedScreen('All')}
+            onLogout={onLogout}
           />
         );
 

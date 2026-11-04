@@ -6,10 +6,18 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Image,
+  ActivityIndicator,
+  Platform,
 } from 'react-native';
-import Svg, { Rect } from 'react-native-svg';
+import { useBusinessQRCodes, useBusinessProfile } from '../../../hooks/useApi';
 
 export default function AdminQrCodeScreen() {
+  const { qrCodes, loading, error, refetch } = useBusinessQRCodes();
+  const { profile } = useBusinessProfile();
+
+  const activeQr = qrCodes && qrCodes.length > 0 ? qrCodes[0] : null;
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
@@ -20,59 +28,68 @@ export default function AdminQrCodeScreen() {
       </View>
 
       <View style={styles.content}>
-        {/* QR Code Container Card */}
-        <View style={styles.qrCard}>
-          <Svg width={200} height={200} viewBox="0 0 100 100">
-            {/* Top-Left Finder */}
-            <Rect x="5" y="5" width="28" height="28" rx="6" fill="#1E1B4B" />
-            <Rect x="11" y="11" width="16" height="16" rx="3" fill="#FFFFFF" />
-            <Rect x="15" y="15" width="8" height="8" rx="2" fill="#1E1B4B" />
+        {loading ? (
+          <View style={styles.loadingBox}>
+            <ActivityIndicator size="large" color="#7B3FF2" />
+            <Text style={styles.loadingText}>Generating your QR code...</Text>
+          </View>
+        ) : error ? (
+          <View style={styles.errorBox}>
+            <Text style={styles.errorText}>{error}</Text>
+            <TouchableOpacity style={styles.retryButton} onPress={refetch}>
+              <Text style={styles.retryText}>Retry</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <>
+            {/* Business Info Header */}
+            <View style={styles.businessHeader}>
+              <Text style={styles.businessName}>
+                {profile?.businessName || 'Your Business'}
+              </Text>
+              <Text style={styles.businessCategory}>
+                {profile?.category || 'Loyalty Program'}
+              </Text>
+            </View>
 
-            {/* Top-Right Finder */}
-            <Rect x="67" y="5" width="28" height="28" rx="6" fill="#1E1B4B" />
-            <Rect x="73" y="11" width="16" height="16" rx="3" fill="#FFFFFF" />
-            <Rect x="77" y="15" width="8" height="8" rx="2" fill="#1E1B4B" />
+            {/* QR Code Container Card */}
+            <View style={styles.qrCard}>
+              {activeQr?.qrImage ? (
+                <Image
+                  source={{ uri: activeQr.qrImage }}
+                  style={styles.qrImage}
+                  resizeMode="contain"
+                />
+              ) : (
+                <View style={styles.qrFallback}>
+                  <Text style={styles.qrFallbackEmoji}>📱</Text>
+                  <Text style={styles.qrFallbackCode}>
+                    {activeQr?.code || 'QR CODE'}
+                  </Text>
+                </View>
+              )}
+            </View>
 
-            {/* Bottom-Left Finder */}
-            <Rect x="5" y="67" width="28" height="28" rx="6" fill="#1E1B4B" />
-            <Rect x="11" y="73" width="16" height="16" rx="3" fill="#FFFFFF" />
-            <Rect x="15" y="77" width="8" height="8" rx="2" fill="#1E1B4B" />
+            {/* Code hex display */}
+            {activeQr?.code ? (
+              <View style={styles.codePill}>
+                <Text style={styles.codePillLabel}>CODE: </Text>
+                <Text style={styles.codePillText}>{activeQr.code}</Text>
+              </View>
+            ) : null}
 
-            {/* Data Modules */}
-            <Rect x="40" y="10" width="8" height="8" rx="2" fill="#1E1B4B" />
-            <Rect x="52" y="18" width="6" height="6" rx="1.5" fill="#1E1B4B" />
-            <Rect x="42" y="38" width="16" height="16" rx="4" fill="#6366F1" />
-            <Rect x="15" y="44" width="8" height="8" rx="2" fill="#1E1B4B" />
-            <Rect x="75" y="42" width="10" height="6" rx="1.5" fill="#1E1B4B" />
-            <Rect x="42" y="68" width="8" height="8" rx="2" fill="#1E1B4B" />
-            <Rect x="60" y="64" width="6" height="12" rx="1.5" fill="#1E1B4B" />
-            <Rect x="75" y="72" width="12" height="12" rx="2" fill="#1E1B4B" />
-          </Svg>
-        </View>
+            <Text style={styles.subtitle}>
+              Customers scan this QR code with the Loyalty app to instantly collect stamps!
+            </Text>
 
-        <Text style={styles.subtitle}>
-          Customers scan this QR{'\n'}to collect stamps
-        </Text>
-
-        {/* Buttons: Download & Share */}
-        <View style={styles.buttonRow}>
-          <TouchableOpacity style={styles.actionButton} activeOpacity={0.8}>
-            <Text style={styles.actionIcon}>⬇️</Text>
-            <Text style={styles.actionText}>Download</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.actionButton} activeOpacity={0.8}>
-            <Text style={styles.actionIcon}>🔗</Text>
-            <Text style={styles.actionText}>Share</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Help Banner at Bottom */}
-        <View style={styles.tipCard}>
-          <Text style={styles.tipText}>
-            💡 You can print this QR and display it at your counter.
-          </Text>
-        </View>
+            {/* Help / Instructions Banner at Bottom */}
+            <View style={styles.tipCard}>
+              <Text style={styles.tipText}>
+                💡 Print and display this QR code at your checkout counter for easy customer scanning.
+              </Text>
+            </View>
+          </>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -100,10 +117,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 28,
     paddingBottom: 70,
   },
+  businessHeader: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  businessName: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#1E293B',
+  },
+  businessCategory: {
+    fontSize: 14,
+    color: '#7B3FF2',
+    fontWeight: '600',
+    marginTop: 2,
+  },
   qrCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 24,
-    padding: 24,
+    padding: 20,
     borderWidth: 1.5,
     borderColor: '#E2E8F0',
     shadowColor: '#000',
@@ -111,40 +143,58 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 16,
     elevation: 4,
-    marginBottom: 20,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: '#64748B',
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 28,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    gap: 16,
-    width: '100%',
-    marginBottom: 36,
-  },
-  actionButton: {
-    flex: 1,
-    flexDirection: 'row',
+    marginBottom: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    height: 52,
-    borderRadius: 14,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+  },
+  qrImage: {
+    width: 220,
+    height: 220,
+  },
+  qrFallback: {
+    width: 220,
+    height: 220,
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: '#F8FAFC',
-    gap: 8,
+    borderRadius: 16,
   },
-  actionIcon: {
-    fontSize: 16,
+  qrFallbackEmoji: {
+    fontSize: 48,
+    marginBottom: 8,
   },
-  actionText: {
-    fontSize: 15,
+  qrFallbackCode: {
+    fontSize: 14,
     fontWeight: '700',
     color: '#334155',
+  },
+  codePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F1F5F9',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 12,
+    marginBottom: 14,
+  },
+  codePillLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#64748B',
+  },
+  codePillText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#1E293B',
+    fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
+  },
+  subtitle: {
+    fontSize: 14,
+    color: '#64748B',
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 20,
+    paddingHorizontal: 12,
   },
   tipCard: {
     backgroundColor: '#F8FAFC',
@@ -160,5 +210,33 @@ const styles = StyleSheet.create({
     color: '#64748B',
     textAlign: 'center',
     lineHeight: 18,
+  },
+  loadingBox: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 15,
+    color: '#64748B',
+  },
+  errorBox: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  errorText: {
+    fontSize: 15,
+    color: '#EF4444',
+    marginBottom: 12,
+  },
+  retryButton: {
+    backgroundColor: '#7B3FF2',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  retryText: {
+    color: '#FFFFFF',
+    fontWeight: '600',
   },
 });

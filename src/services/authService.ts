@@ -44,17 +44,25 @@ export interface RegisterPayload {
 export interface RegisterResponse {
   success: boolean;
   message: string;
-  data?: UserProfile;
+  data?: {
+    token?: string;
+    user?: UserProfile;
+    [key: string]: any;
+  };
   token?: string;
   user?: UserProfile;
 }
 
-// Simple in-memory token storage (replace with AsyncStorage for persistence)
+// Module-level token & user storage
 let authToken: string | null = null;
 let currentUser: UserProfile | null = null;
 
 export const getAuthToken = (): string | null => authToken;
 export const getCurrentUser = (): UserProfile | null => currentUser;
+
+export const setAuthToken = (token: string | null) => {
+  authToken = token;
+};
 
 export const setAuthData = (token: string, user: UserProfile) => {
   authToken = token;
@@ -80,9 +88,12 @@ export async function loginUser(credentials: LoginCredentials): Promise<LoginRes
 
   const result = await response.json();
 
-  if (result.success && (result.token || result.data?.token)) {
+  if (result.success) {
     const token = result.token || result.data?.token;
     const user = result.user || result.data?.user;
+    if (token) {
+      setAuthToken(token);
+    }
     if (token && user) {
       setAuthData(token, user);
     }
@@ -105,9 +116,12 @@ export async function registerUser(payload: RegisterPayload): Promise<RegisterRe
 
   const result = await response.json();
 
-  if (result.success && (result.token || result.data?.token)) {
+  if (result.success) {
     const token = result.token || result.data?.token;
     const user = result.user || result.data?.user;
+    if (token) {
+      setAuthToken(token);
+    }
     if (token && user) {
       setAuthData(token, user);
     }
@@ -129,11 +143,14 @@ export async function getProfile(): Promise<LoginResponse> {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
   });
 
   const result = await response.json();
+  if (result.success && (result.user || result.data?.user)) {
+    const user = result.user || result.data?.user;
+    currentUser = user;
+  }
   return result;
 }
-

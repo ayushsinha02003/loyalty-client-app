@@ -19,6 +19,7 @@ export type ScreenId =
   | 'Otp'
   | 'Home'
   | 'MyCards'
+  | 'Search'
   | 'QrScanner'
   | 'ScanSuccess'
   | 'Rewards'
@@ -48,31 +49,27 @@ export const SCREEN_OPTIONS: Array<{ id: ScreenId; label: string; section?: stri
   { id: 'Welcome', label: '5. Welcome Screen' },
   { id: 'Login', label: '6. Sign In Screen' },
   { id: 'Signup', label: '7. Sign Up Screen' },
-  { id: 'Otp', label: '8. OTP Verification' },
-  { id: 'Home', label: '9. Home Screen' },
-  { id: 'MyCards', label: '10. My Cards Screen' },
+  { id: 'Home', label: '8. Home Screen' },
+  { id: 'MyCards', label: '9. My Cards Screen' },
+  { id: 'Search', label: '10. Discover & Search Screen' },
   { id: 'QrScanner', label: '11. QR Scanner Screen' },
   { id: 'ScanSuccess', label: '12. Scan Success Screen' },
   { id: 'Rewards', label: '13. Rewards Screen' },
-  { id: 'RewardDetails', label: '14. Reward Details Screen' },
-  { id: 'Activity', label: '15. Activity Screen' },
-  { id: 'Profile', label: '16. Profile Screen' },
+  { id: 'Activity', label: '14. Activity History Screen' },
+  { id: 'Profile', label: '15. Profile Screen' },
 
   // Admin Screens
-  { id: 'BusinessSetup1', label: '1. Business Setup (Step 1)', section: 'ADMIN' },
-  { id: 'BusinessSetup2', label: '2. Business Setup (Step 2)' },
-  { id: 'BusinessSetup3', label: '3. Review & Confirm (Step 3)' },
-  { id: 'AdminHome', label: '4. Admin Dashboard' },
-  { id: 'AdminCustomers', label: '5. Customers Screen' },
-  { id: 'AdminStampCards', label: '6. Stamp Cards (Manage)' },
-  { id: 'AdminAddStampCard', label: '7. Add Stamp Card Screen' },
-  { id: 'AdminRewards', label: '8. Admin Rewards Screen' },
-  { id: 'AdminAddReward', label: '9. Add Reward Screen' },
-  { id: 'AdminQrCode', label: '10. Business QR Code Screen' },
-  { id: 'AdminAnalytics', label: '11. Analytics Screen' },
-  { id: 'AdminActivity', label: '12. Activity / Transactions' },
-  { id: 'AdminBusinessProfile', label: '13. Business Profile Screen' },
-  { id: 'AdminMore', label: '14. More / Settings Screen' },
+  { id: 'AdminHome', label: '1. Admin Dashboard', section: 'ADMIN' },
+  { id: 'AdminCustomers', label: '2. Customers Screen (Manage & Stamp)' },
+  { id: 'AdminStampCards', label: '3. Stamp Cards (Manage)' },
+  { id: 'AdminAddStampCard', label: '4. Add Stamp Card Screen' },
+  { id: 'AdminRewards', label: '5. Admin Rewards Screen' },
+  { id: 'AdminAddReward', label: '6. Add Reward Screen' },
+  { id: 'AdminQrCode', label: '7. Business QR Code Screen' },
+  { id: 'AdminAnalytics', label: '8. Analytics Screen' },
+  { id: 'AdminActivity', label: '9. Activity / Transactions' },
+  { id: 'AdminBusinessProfile', label: '10. Business Profile Screen' },
+  { id: 'AdminMore', label: '11. More / Settings Screen' },
 ];
 
 type ScreenAccessScreenProps = {
@@ -84,14 +81,14 @@ export default function ScreenAccessScreen({
 }: ScreenAccessScreenProps) {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Open a Screen</Text>
+      <Text style={styles.title}>Explore Screens</Text>
 
-      <ScrollView contentContainerStyle={styles.list}>
+      <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
         {SCREEN_OPTIONS.map(screen => (
           <React.Fragment key={screen.id}>
             {screen.section ? (
               <Text style={styles.sectionHeading}>
-                {screen.section === 'CUSTOMER' ? '👤 CUSTOMER SCREENS' : '💼 ADMIN / BUSINESS SCREENS'}
+                {screen.section === 'CUSTOMER' ? '👤 CUSTOMER EXPERIENCE' : '💼 BUSINESS OWNER EXPERIENCE'}
               </Text>
             ) : null}
             <TouchableOpacity
@@ -101,6 +98,7 @@ export default function ScreenAccessScreen({
                   styles.adminButton,
               ]}
               onPress={() => onSelectScreen(screen.id)}
+              activeOpacity={0.8}
             >
               <Text style={styles.buttonText}>{screen.label}</Text>
             </TouchableOpacity>

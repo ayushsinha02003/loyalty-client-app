@@ -10,7 +10,10 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Alert,
 } from 'react-native';
+import { loyaltyCardApi } from '../../../services/api';
+import PrimaryButton from '../../../components/button/PrimaryButton';
 
 interface AdminAddRewardScreenProps {
   onBack?: () => void;
@@ -22,9 +25,45 @@ export default function AdminAddRewardScreen({
   onSave,
 }: AdminAddRewardScreenProps) {
   const [rewardName, setRewardName] = useState('');
-  const [requiredStamps, setRequiredStamps] = useState('');
+  const [requiredStamps, setRequiredStamps] = useState('10');
   const [description, setDescription] = useState('');
-  const [validity, setValidity] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSave = async () => {
+    if (!rewardName.trim()) {
+      Alert.alert('Required', 'Please enter a reward name');
+      return;
+    }
+
+    const stamps = parseInt(requiredStamps, 10);
+    if (isNaN(stamps) || stamps <= 0) {
+      Alert.alert('Invalid', 'Please enter a valid number of stamps (e.g. 10)');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await loyaltyCardApi.create({
+        title: `${rewardName.trim()} Card`,
+        reward: rewardName.trim(),
+        totalStamps: stamps,
+        description: description.trim() || `Earn ${stamps} stamps to get ${rewardName.trim()}`,
+        backgroundColor: '#7B3FF2',
+        textColor: '#FFFFFF',
+      });
+
+      if (response.success) {
+        Alert.alert('Success', 'Reward created successfully!');
+        onSave?.();
+      } else {
+        Alert.alert('Error', response.message || 'Failed to create reward');
+      }
+    } catch (err: any) {
+      Alert.alert('Error', err.message || 'Failed to create reward');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -47,15 +86,15 @@ export default function AdminAddRewardScreen({
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Upload Area */}
-          <View style={styles.uploadSection}>
-            <Text style={styles.label}>Reward Image</Text>
-            <TouchableOpacity style={styles.uploadBox} activeOpacity={0.8}>
-              <View style={styles.uploadCircle}>
-                <Text style={styles.uploadEmoji}>☁️</Text>
-              </View>
-              <Text style={styles.uploadText}>Upload Image</Text>
-            </TouchableOpacity>
+          {/* Card Visual Banner */}
+          <View style={styles.rewardBanner}>
+            <Text style={styles.bannerEmoji}>🎁</Text>
+            <Text style={styles.bannerHeading}>
+              {rewardName.trim() || 'New Customer Reward'}
+            </Text>
+            <Text style={styles.bannerSubtext}>
+              {requiredStamps} Stamps Required
+            </Text>
           </View>
 
           {/* Form Fields */}
@@ -64,7 +103,7 @@ export default function AdminAddRewardScreen({
               <Text style={styles.label}>Reward Name</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Enter reward name"
+                placeholder="e.g. Free Coffee, 20% Off, Free Dessert"
                 placeholderTextColor="#94A3B8"
                 value={rewardName}
                 onChangeText={setRewardName}
@@ -72,10 +111,10 @@ export default function AdminAddRewardScreen({
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Required Stamps</Text>
+              <Text style={styles.label}>Required Stamps to Redeem</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Enter required stamps (e.g. 100)"
+                placeholder="e.g. 10"
                 placeholderTextColor="#94A3B8"
                 keyboardType="number-pad"
                 value={requiredStamps}
@@ -87,34 +126,21 @@ export default function AdminAddRewardScreen({
               <Text style={styles.label}>Description</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Enter description"
+                placeholder="Enter details or terms of the reward"
                 placeholderTextColor="#94A3B8"
                 value={description}
                 onChangeText={setDescription}
               />
             </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Validity (days)</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter validity (optional)"
-                placeholderTextColor="#94A3B8"
-                keyboardType="number-pad"
-                value={validity}
-                onChangeText={setValidity}
-              />
-            </View>
           </View>
 
           {/* Save Button */}
-          <TouchableOpacity
+          <PrimaryButton
+            title="Save Reward"
+            loading={loading}
+            onPress={handleSave}
             style={styles.saveButton}
-            onPress={onSave}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.saveButtonText}>Save Reward</Text>
-          </TouchableOpacity>
+          />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -161,47 +187,42 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 40,
   },
-  uploadSection: {
+  rewardBanner: {
+    height: 140,
+    borderRadius: 18,
+    backgroundColor: '#F5F3FF',
+    borderWidth: 1.5,
+    borderColor: '#DDD6FE',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginVertical: 14,
   },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#334155',
-    marginBottom: 8,
+  bannerEmoji: {
+    fontSize: 32,
+    marginBottom: 4,
   },
-  uploadBox: {
-    height: 130,
-    borderRadius: 18,
-    borderWidth: 1.5,
-    borderColor: '#C7D2FE',
-    borderStyle: 'dashed',
-    backgroundColor: '#F5F3FF',
-    alignItems: 'center',
-    justifyContent: 'center',
+  bannerHeading: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#7B3FF2',
+    marginBottom: 2,
   },
-  uploadCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#EDE9FE',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 6,
-  },
-  uploadEmoji: {
-    fontSize: 18,
-  },
-  uploadText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#4F46E5',
+  bannerSubtext: {
+    fontSize: 13,
+    color: '#64748B',
+    fontWeight: '500',
   },
   formContainer: {
     marginVertical: 10,
   },
   inputGroup: {
     marginBottom: 18,
+  },
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#334155',
+    marginBottom: 8,
   },
   input: {
     height: 54,
@@ -214,21 +235,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   saveButton: {
-    backgroundColor: '#4F46E5',
-    height: 56,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
     marginTop: 10,
-    shadowColor: '#4F46E5',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  saveButtonText: {
-    color: '#FFFFFF',
-    fontSize: 17,
-    fontWeight: '700',
   },
 });

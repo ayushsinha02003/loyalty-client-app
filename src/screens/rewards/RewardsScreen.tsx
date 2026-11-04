@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -7,6 +7,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  RefreshControl,
 } from 'react-native';
 import PrimaryText from '../../components/text/PrimaryText';
 import { useAvailableRewards, useRewardHistory } from '../../hooks/useApi';
@@ -21,16 +22,36 @@ const tabs: { key: TabKey; label: string }[] = [
 
 const RewardsScreen = () => {
   const [activeTab, setActiveTab] = useState<TabKey>('available');
-  const { rewards, loading: rewardsLoading, error: rewardsError, refetch: refetchRewards } = useAvailableRewards();
-  const { history: claimedRewards, loading: historyLoading, error: historyError, refetch: refetchHistory } = useRewardHistory();
+  const {
+    rewards,
+    loading: rewardsLoading,
+    error: rewardsError,
+    refetch: refetchRewards,
+  } = useAvailableRewards();
+
+  const {
+    history: claimedRewards,
+    loading: historyLoading,
+    error: historyError,
+    refetch: refetchHistory,
+  } = useRewardHistory();
+
   const [redeemingId, setRedeemingId] = useState<string | null>(null);
+
+  // Hook must be called unconditionally at the top level
+  const filteredRewards = useMemo(() => {
+    if (activeTab === 'available') {
+      return rewards || [];
+    }
+    return claimedRewards || [];
+  }, [activeTab, rewards, claimedRewards]);
 
   const handleRedeem = async (customerCardId: string) => {
     setRedeemingId(customerCardId);
     try {
       const response = await rewardApi.redeem(customerCardId);
       if (response.success) {
-        Alert.alert('Success', 'Reward redeemed successfully!');
+        Alert.alert('Success 🎉', 'Reward redeemed successfully! Enjoy your gift.');
         refetchRewards();
         refetchHistory();
       } else {
@@ -54,13 +75,6 @@ const RewardsScreen = () => {
       </View>
     );
   }
-
-  const filteredRewards = useMemo(() => {
-    if (activeTab === 'available') {
-      return rewards || [];
-    }
-    return claimedRewards || [];
-  }, [activeTab, rewards, claimedRewards]);
 
   return (
     <View style={styles.container}>
@@ -115,11 +129,14 @@ const RewardsScreen = () => {
         {filteredRewards.length > 0 ? (
           filteredRewards.map((item: any) => {
             const isAvailable = activeTab === 'available';
-            const businessName = item.loyaltyCard?.business?.businessName || 'Unknown Business';
-            const rewardText = item.loyaltyCard?.reward || 'Reward';
-            const totalStamps = item.loyaltyCard?.totalStamps || 0;
-            const currentStamps = item.currentStamps || 0;
-            const progress = totalStamps > 0 ? Math.min((currentStamps / totalStamps) * 100, 100) : 0;
+            const businessName =
+              item.loyaltyCard?.business?.businessName ||
+              item.business?.businessName ||
+              'Participating Business';
+            const rewardText = item.loyaltyCard?.reward || item.reward || 'Special Reward';
+            const totalStamps = item.loyaltyCard?.totalStamps || 10;
+            const currentStamps = item.currentStamps || totalStamps;
+            const progress = totalStamps > 0 ? Math.min((currentStamps / totalStamps) * 100, 100) : 100;
 
             return (
               <View key={item._id} style={styles.card}>
@@ -138,12 +155,12 @@ const RewardsScreen = () => {
                           <View
                             style={[
                               styles.progressFill,
-                              { width: `${progress}%` }
+                              { width: `${progress}%` },
                             ]}
                           />
                         </View>
                         <Text style={styles.progressText}>
-                          {currentStamps}/{totalStamps} stamps
+                          {currentStamps}/{totalStamps} stamps completed
                         </Text>
                       </View>
                     )}
@@ -153,7 +170,7 @@ const RewardsScreen = () => {
                     <TouchableOpacity
                       style={[
                         styles.button,
-                        redeemingId === item._id && styles.buttonLoading
+                        redeemingId === item._id && styles.buttonLoading,
                       ]}
                       onPress={() => handleRedeem(item._id)}
                       disabled={redeemingId !== null}
@@ -166,7 +183,7 @@ const RewardsScreen = () => {
 
                   {!isAvailable && (
                     <View style={styles.claimedBadge}>
-                      <Text style={styles.claimedBadgeText}>Claimed</Text>
+                      <Text style={styles.claimedBadgeText}>Claimed ✓</Text>
                     </View>
                   )}
                 </View>
@@ -187,8 +204,8 @@ const RewardsScreen = () => {
             </Text>
             <Text style={styles.emptySubtitle}>
               {activeTab === 'available'
-                ? 'Complete stamp cards to unlock rewards!'
-                : 'Your redeemed rewards will appear here.'}
+                ? 'Complete your stamp cards to unlock and redeem free rewards!'
+                : 'Your redeemed rewards history will appear here.'}
             </Text>
           </View>
         )}
@@ -270,6 +287,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   cardContent: {
     flexDirection: 'row',
@@ -373,6 +392,3 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
 });
-
-// Add RefreshControl import
-import { RefreshControl } from 'react-native';

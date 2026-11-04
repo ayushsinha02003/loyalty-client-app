@@ -1,57 +1,67 @@
-import { API_BASE_URL } from './authService';
+import {
+  API_BASE_URL,
+  getAuthToken,
+  setAuthToken,
+  clearAuthData,
+  loginUser,
+  registerUser,
+} from './authService';
+
+export { setAuthToken };
+export const clearAuthToken = clearAuthData;
 
 // Types
 export interface Business {
   _id: string;
-  owner: string;
+  owner?: string;
   businessName: string;
   category: string;
-  description: string;
+  description?: string;
   phone: string;
-  email: string;
+  email?: string;
   address: string;
   city: string;
-  state: string;
-  country: string;
-  postalCode: string;
-  logo: string;
-  website: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  state?: string;
+  country?: string;
+  postalCode?: string;
+  logo?: string;
+  website?: string;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface LoyaltyCard {
   _id: string;
   business: string | Business;
   title: string;
-  description: string;
+  description?: string;
   totalStamps: number;
   reward: string;
-  icon: string;
-  backgroundColor: string;
-  textColor: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  icon?: string;
+  backgroundColor?: string;
+  textColor?: string;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CustomerCard {
   _id: string;
-  customer: string;
+  customer: any;
   loyaltyCard: LoyaltyCard;
   currentStamps: number;
   isRewardAvailable: boolean;
-  joinedAt: string;
-  createdAt: string;
-  updatedAt: string;
+  joinedAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface StampTransaction {
   _id: string;
   customerCard: string | CustomerCard;
   business: string | Business;
-  addedBy: string;
+  addedBy: any;
   stampsAdded: number;
   createdAt: string;
 }
@@ -60,10 +70,10 @@ export interface RewardTransaction {
   _id: string;
   customerCard: string | CustomerCard;
   business: string | Business;
-  customer: string;
+  customer: any;
   loyaltyCard: string | LoyaltyCard;
   reward: string;
-  redeemedBy: string;
+  redeemedBy: any;
   createdAt: string;
 }
 
@@ -72,9 +82,10 @@ export interface QRCode {
   business: string | Business;
   loyaltyCard: string | LoyaltyCard;
   code: string;
+  qrImage?: string;
   isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface BusinessDashboard {
@@ -89,10 +100,10 @@ export interface BusinessDashboard {
 export interface BusinessCustomer {
   _id: string;
   customer: { _id: string; name: string; phone: string; email: string };
-  loyaltyCard: { _id: string; title: string; totalStamps: number; reward: string };
+  loyaltyCard: { _id: string; title: string; totalStamps: number; reward: string; isActive?: boolean };
   currentStamps: number;
   isRewardAvailable: boolean;
-  createdAt: string;
+  createdAt?: string;
 }
 
 export interface CustomerDashboard {
@@ -107,57 +118,34 @@ export interface ApiResponse<T> {
   [key: string]: any;
 }
 
-// Get auth token from storage
-const getAuthToken = async (): Promise<string | null> => {
-  try {
-    // Using AsyncStorage or similar
-    // For now, we'll use a global variable or context
-    // This should be replaced with actual storage implementation
-    if (typeof window !== 'undefined') {
-      return (window as any).__authToken__ || null;
-    }
-    return null;
-  } catch {
-    return null;
-  }
-};
-
-// Set auth token
-export const setAuthToken = (token: string) => {
-  if (typeof window !== 'undefined') {
-    (window as any).__authToken__ = token;
-  }
-};
-
-// Clear auth token
-export const clearAuthToken = () => {
-  if (typeof window !== 'undefined') {
-    (window as any).__authToken__ = null;
-  }
-};
-
 // Base fetch with auth
 async function fetchWithAuth<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
-  const token = await getAuthToken();
+  const token = getAuthToken();
 
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...(options.headers || {}),
+    ...((options.headers as Record<string, string>) || {}),
   };
 
   if (token) {
-    (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+    headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const response = await fetch(`${API_BASE_URL}${normalizedEndpoint}`, {
     ...options,
     headers,
   });
 
-  const data = await response.json();
+  let data: any;
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error('Server returned an invalid response');
+  }
 
   if (!response.ok) {
     throw new Error(data.message || 'Request failed');
@@ -169,12 +157,7 @@ async function fetchWithAuth<T>(
 // ============ AUTH API ============
 export const authApi = {
   login: async (phone: string, password: string) => {
-    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ phone, password }),
-    });
-    return response.json();
+    return loginUser({ phone, password });
   },
 
   register: async (data: {
@@ -188,12 +171,7 @@ export const authApi = {
     address?: string;
     city?: string;
   }) => {
-    const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    return response.json();
+    return registerUser(data);
   },
 
   getProfile: async () => {
@@ -239,7 +217,7 @@ export const businessApi = {
     return fetchWithAuth<{
       customerCard: CustomerCard;
       stampHistory: StampTransaction[];
-      rewardHistory: RewardTransaction[]
+      rewardHistory: RewardTransaction[];
     }>(`/api/business/customers/${customerCardId}`);
   },
 };
@@ -292,14 +270,14 @@ export const customerCardApi = {
 // ============ STAMP API ============
 export const stampApi = {
   addStamp: async (customerCardId: string) => {
-    return fetchWithAuth<{ customerCard: CustomerCard }>('/api/stamps', {
+    return fetchWithAuth<{ customerCard: CustomerCard }>('/api/stamps/add', {
       method: 'POST',
       body: JSON.stringify({ customerCardId }),
     });
   },
 
   addStampByCard: async (customerCardId: string) => {
-    return fetchWithAuth<{ customerCard: CustomerCard; transaction: StampTransaction }>('/api/stamps/customer-card', {
+    return fetchWithAuth<{ customerCard: CustomerCard; transaction: StampTransaction }>('/api/stamps/customer', {
       method: 'POST',
       body: JSON.stringify({ customerCardId }),
     });
@@ -334,7 +312,7 @@ export const qrApi = {
   },
 
   scan: async (code: string) => {
-    return fetchWithAuth<{ customerCard: CustomerCard }>('/api/qr/scan', {
+    return fetchWithAuth<{ customerCard: CustomerCard; stampsEarned?: number }>('/api/qr/scan', {
       method: 'POST',
       body: JSON.stringify({ code }),
     });

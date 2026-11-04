@@ -7,7 +7,30 @@ import {
   Text,
   TouchableOpacity,
   View,
+  RefreshControl,
+  ActivityIndicator,
 } from 'react-native';
+import { useStampHistory, useRewardHistory } from '../../hooks/useApi';
+
+interface StampActivity {
+  _id: string;
+  customerCard: any;
+  business: any;
+  addedBy: any;
+  stampsAdded: number;
+  createdAt: string;
+}
+
+interface RewardActivity {
+  _id: string;
+  customerCard: any;
+  business: any;
+  customer: any;
+  loyaltyCard: any;
+  reward: string;
+  redeemedBy: any;
+  createdAt: string;
+}
 
 interface ActivityItem {
   id: string;
@@ -19,6 +42,7 @@ interface ActivityItem {
   time: string;
   icon: string;
   iconBg: string;
+  date: string;
 }
 
 interface ActivityGroup {
@@ -31,81 +55,117 @@ interface ActivityScreenProps {
 }
 
 export default function ActivityScreen({ onBack }: ActivityScreenProps) {
-  const [activeFilter, setActiveFilter] = useState<'All' | 'Stamps' | 'Rewards' | 'Offers'>('All');
+  const [activeFilter, setActiveFilter] = useState<'All' | 'Stamps' | 'Rewards'>('All');
+  const {
+    history: stampHistory,
+    loading: stampLoading,
+    error: stampError,
+    refetch: refetchStamps,
+  } = useStampHistory();
 
-  const filterOptions: Array<'All' | 'Stamps' | 'Rewards' | 'Offers'> = [
+  const {
+    history: rewardHistory,
+    loading: rewardLoading,
+    error: rewardError,
+    refetch: refetchRewards,
+  } = useRewardHistory();
+
+  const filterOptions: Array<'All' | 'Stamps' | 'Rewards'> = [
     'All',
     'Stamps',
     'Rewards',
-    'Offers',
   ];
 
-  const activities: ActivityGroup[] = [
-    {
-      date: 'Today',
-      items: [
-        {
-          id: '1',
+  const loading = stampLoading || rewardLoading;
+  const error = stampError || rewardError;
+
+  // Transform API data to ActivityGroup format
+  const transformActivities = (): ActivityGroup[] => {
+    const allActivities: ActivityItem[] = [];
+
+    // Process stamp history
+    if (stampHistory) {
+      stampHistory.forEach((stamp: StampActivity) => {
+        const date = new Date(stamp.createdAt);
+        const businessName = stamp.business?.businessName || 'Store';
+        const icon = '☕';
+        const iconBg = '#FEF3C7';
+
+        allActivities.push({
+          id: stamp._id,
           type: 'stamp',
           title: 'Stamp Collected',
-          store: 'Brew & Beans',
-          amount: '+1',
+          store: businessName,
+          amount: `+${stamp.stampsAdded || 1}`,
           isPositive: true,
-          time: '10:30 AM',
-          icon: '☕',
-          iconBg: '#FEF3C7',
-        },
-      ],
-    },
-    {
-      date: 'Yesterday',
-      items: [
-        {
-          id: '2',
-          type: 'stamp',
-          title: 'Stamp Collected',
-          store: 'Pizza Point',
-          amount: '+1',
-          isPositive: true,
-          time: '04:20 PM',
-          icon: '🍕',
-          iconBg: '#FFEDD5',
-        },
-      ],
-    },
-    {
-      date: '2 May 2025',
-      items: [
-        {
-          id: '3',
+          time: date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          icon,
+          iconBg,
+          date: date.toISOString().split('T')[0],
+        });
+      });
+    }
+
+    // Process reward history
+    if (rewardHistory) {
+      rewardHistory.forEach((reward: RewardActivity) => {
+        const date = new Date(reward.createdAt);
+        const businessName = reward.business?.businessName || 'Store';
+        const rewardName = reward.reward || 'Reward';
+        const icon = '🎁';
+        const iconBg = '#FCE7F3';
+
+        allActivities.push({
+          id: reward._id,
           type: 'reward',
           title: 'Reward Redeemed',
-          store: 'Free Coffee',
-          amount: '-100',
+          store: `${rewardName} at ${businessName}`,
+          amount: `-${reward.loyaltyCard?.totalStamps || 10}`,
           isPositive: false,
-          time: '04:15 PM',
-          icon: '🎁',
-          iconBg: '#FCE7F3',
-        },
-      ],
-    },
-    {
-      date: '1 May 2025',
-      items: [
-        {
-          id: '4',
-          type: 'stamp',
-          title: 'Stamp Collected',
-          store: 'Sweet Treats',
-          amount: '+1',
-          isPositive: true,
-          time: '11:45 AM',
-          icon: '🧁',
-          iconBg: '#EDE9FE',
-        },
-      ],
-    },
-  ];
+          time: date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          icon,
+          iconBg,
+          date: date.toISOString().split('T')[0],
+        });
+      });
+    }
+
+    // Sort by date descending
+    allActivities.sort((a, b) => (a.id > b.id ? -1 : 1));
+
+    // Group by date
+    const groups: { [key: string]: ActivityItem[] } = {};
+    allActivities.forEach(item => {
+      const dateKey = item.date;
+      if (!groups[dateKey]) {
+        groups[dateKey] = [];
+      }
+      groups[dateKey].push(item);
+    });
+
+    // Convert to ActivityGroup array with friendly date labels
+    return Object.entries(groups).map(([date, items]) => {
+      const dateObj = new Date(date);
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+
+      let dateLabel = dateObj.toLocaleDateString('en-US', {
+        weekday: 'long',
+        month: 'short',
+        day: 'numeric',
+      });
+      if (dateObj.toDateString() === today.toDateString()) {
+        dateLabel = 'Today';
+      } else if (dateObj.toDateString() === yesterday.toDateString()) {
+        dateLabel = 'Yesterday';
+      }
+
+      return { date: dateLabel, items };
+    });
+  };
+
+  const activities = transformActivities();
 
   // Filter activities
   const filteredGroups = activities
@@ -127,25 +187,31 @@ export default function ActivityScreen({ onBack }: ActivityScreenProps) {
     })
     .filter(group => group.items.length > 0);
 
+  const handleRefresh = () => {
+    refetchStamps();
+    refetchRewards();
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={onBack}
-          style={styles.headerButton}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.headerIcon}>←</Text>
-        </TouchableOpacity>
+        {onBack ? (
+          <TouchableOpacity
+            onPress={onBack}
+            style={styles.headerButton}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.headerIcon}>←</Text>
+          </TouchableOpacity>
+        ) : (
+          <View style={styles.placeholder} />
+        )}
 
-        <Text style={styles.headerTitle}>Activity</Text>
-
-        <TouchableOpacity style={styles.headerButton} activeOpacity={0.7}>
-          <Text style={styles.headerIcon}>⚡</Text>
-        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Activity History</Text>
+        <View style={styles.placeholder} />
       </View>
 
       {/* Filter Pills */}
@@ -182,44 +248,69 @@ export default function ActivityScreen({ onBack }: ActivityScreenProps) {
       <ScrollView
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={loading} onRefresh={handleRefresh} />
+        }
       >
-        {filteredGroups.map(group => (
-          <View key={group.date} style={styles.dateGroup}>
-            <Text style={styles.dateHeader}>{group.date}</Text>
-
-            {group.items.map(item => (
-              <View key={item.id} style={styles.activityCard}>
-                <View style={styles.leftRow}>
-                  <View
-                    style={[
-                      styles.iconCircle,
-                      { backgroundColor: item.iconBg },
-                    ]}
-                  >
-                    <Text style={styles.itemEmoji}>{item.icon}</Text>
-                  </View>
-
-                  <View style={styles.infoCol}>
-                    <Text style={styles.itemTitle}>{item.title}</Text>
-                    <Text style={styles.itemStore}>{item.store}</Text>
-                  </View>
-                </View>
-
-                <View style={styles.rightCol}>
-                  <Text
-                    style={[
-                      styles.amountText,
-                      item.isPositive ? styles.amountPositive : styles.amountNegative,
-                    ]}
-                  >
-                    {item.amount}
-                  </Text>
-                  <Text style={styles.timeText}>{item.time}</Text>
-                </View>
-              </View>
-            ))}
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#7B3FF2" />
+            <Text style={styles.loadingText}>Loading activity...</Text>
           </View>
-        ))}
+        ) : error ? (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>{error}</Text>
+            <TouchableOpacity style={styles.retryButton} onPress={handleRefresh}>
+              <Text style={styles.retryButtonText}>Retry</Text>
+            </TouchableOpacity>
+          </View>
+        ) : filteredGroups.length > 0 ? (
+          filteredGroups.map(group => (
+            <View key={group.date} style={styles.dateGroup}>
+              <Text style={styles.dateHeader}>{group.date}</Text>
+
+              {group.items.map(item => (
+                <View key={item.id} style={styles.activityCard}>
+                  <View style={styles.leftRow}>
+                    <View
+                      style={[
+                        styles.iconCircle,
+                        { backgroundColor: item.iconBg },
+                      ]}
+                    >
+                      <Text style={styles.itemEmoji}>{item.icon}</Text>
+                    </View>
+
+                    <View style={styles.infoCol}>
+                      <Text style={styles.itemTitle}>{item.title}</Text>
+                      <Text style={styles.itemStore}>{item.store}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.rightCol}>
+                    <Text
+                      style={[
+                        styles.amountText,
+                        item.isPositive ? styles.amountPositive : styles.amountNegative,
+                      ]}
+                    >
+                      {item.amount}
+                    </Text>
+                    <Text style={styles.timeText}>{item.time}</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          ))
+        ) : (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyIcon}>📋</Text>
+            <Text style={styles.emptyTitle}>No Activity Yet</Text>
+            <Text style={styles.emptySubtitle}>
+              Your stamp collection and reward redemptions will appear here.
+            </Text>
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -249,6 +340,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#F8FAFC',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  placeholder: {
+    width: 44,
   },
   headerIcon: {
     fontSize: 20,
@@ -311,6 +405,7 @@ const styles = StyleSheet.create({
   leftRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
   },
   iconCircle: {
     width: 46,
@@ -324,6 +419,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   infoCol: {
+    flex: 1,
     justifyContent: 'center',
   },
   itemTitle: {
@@ -338,6 +434,7 @@ const styles = StyleSheet.create({
   },
   rightCol: {
     alignItems: 'flex-end',
+    marginLeft: 8,
   },
   amountText: {
     fontSize: 16,
@@ -353,5 +450,60 @@ const styles = StyleSheet.create({
   timeText: {
     fontSize: 12,
     color: '#94A3B8',
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 60,
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#64748B',
+  },
+  errorContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#EF4444',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  retryButton: {
+    backgroundColor: '#7B3FF2',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    fontSize: 16,
+    color: '#FFFFFF',
+    fontWeight: '600',
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: 60,
+    paddingHorizontal: 24,
+  },
+  emptyIcon: {
+    fontSize: 48,
+    marginBottom: 12,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1E293B',
+    marginBottom: 8,
+  },
+  emptySubtitle: {
+    fontSize: 15,
+    color: '#64748B',
+    textAlign: 'center',
+    lineHeight: 22,
   },
 });

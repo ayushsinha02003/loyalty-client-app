@@ -8,15 +8,23 @@ import {
   Text,
   TouchableOpacity,
   View,
+  RefreshControl,
+  Alert,
+  ActivityIndicator,
 } from 'react-native';
+import { useBusinessLoyaltyCards } from '../../../hooks/useApi';
+import PrimaryText from '../../../components/text/PrimaryText';
+import { loyaltyCardApi } from '../../../services/api';
 
 interface RewardItem {
-  id: string;
-  name: string;
-  stamps: number;
-  emoji: string;
-  emojiBg: string;
-  active: boolean;
+  _id: string;
+  title: string;
+  totalStamps: number;
+  reward: string;
+  isActive?: boolean;
+  backgroundColor?: string;
+  textColor?: string;
+  icon?: string;
 }
 
 interface AdminRewardsScreenProps {
@@ -26,45 +34,30 @@ interface AdminRewardsScreenProps {
 export default function AdminRewardsScreen({
   onAddReward,
 }: AdminRewardsScreenProps) {
-  const [rewards, setRewards] = useState<RewardItem[]>([
-    {
-      id: '1',
-      name: 'Free Coffee',
-      stamps: 100,
-      emoji: '☕',
-      emojiBg: '#FEF3C7',
-      active: true,
-    },
-    {
-      id: '2',
-      name: '20% Off',
-      stamps: 200,
-      emoji: '🏷️',
-      emojiBg: '#FFEDD5',
-      active: true,
-    },
-    {
-      id: '3',
-      name: 'Free Pastry',
-      stamps: 150,
-      emoji: '🥐',
-      emojiBg: '#EDE9FE',
-      active: true,
-    },
-    {
-      id: '4',
-      name: 'Buy 1 Get 1 Free',
-      stamps: 250,
-      emoji: '🍹',
-      emojiBg: '#FCE7F3',
-      active: true,
-    },
-  ]);
+  const { cards, loading, error, refetch } = useBusinessLoyaltyCards();
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
-  const toggleReward = (id: string) => {
-    setRewards(prev =>
-      prev.map(r => (r.id === id ? { ...r, active: !r.active } : r))
-    );
+  // Filter cards that have rewards
+  const rewards = cards?.filter((card: any) => card.reward) || [];
+
+  const toggleReward = async (id: string, currentStatus: boolean) => {
+    setTogglingId(id);
+    try {
+      const response = await loyaltyCardApi.update(id, { isActive: !currentStatus });
+      if (response.success) {
+        refetch();
+      } else {
+        Alert.alert('Error', response.message || 'Failed to update reward');
+      }
+    } catch (err: any) {
+      Alert.alert('Error', err.message || 'Failed to update reward');
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
+  const handleRefresh = () => {
+    refetch();
   };
 
   return (
@@ -73,7 +66,7 @@ export default function AdminRewardsScreen({
 
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Rewards</Text>
+        <PrimaryText text="Rewards" customStyle={styles.title} />
         <TouchableOpacity
           onPress={onAddReward}
           style={styles.addButton}
@@ -86,26 +79,60 @@ export default function AdminRewardsScreen({
       <ScrollView
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={loading} onRefresh={handleRefresh} />
+        }
       >
-        {rewards.map(reward => (
-          <View key={reward.id} style={styles.rewardCard}>
-            <View style={[styles.iconCircle, { backgroundColor: reward.emojiBg }]}>
-              <Text style={styles.rewardEmoji}>{reward.emoji}</Text>
-            </View>
-
-            <View style={styles.rewardInfo}>
-              <Text style={styles.rewardName}>{reward.name}</Text>
-              <Text style={styles.rewardStamps}>{reward.stamps} Stamps</Text>
-            </View>
-
-            <Switch
-              trackColor={{ false: '#CBD5E1', true: '#86EFAC' }}
-              thumbColor={reward.active ? '#16A34A' : '#F1F5F9'}
-              value={reward.active}
-              onValueChange={() => toggleReward(reward.id)}
-            />
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#7B3FF2" />
+            <Text style={styles.loadingText}>Loading rewards...</Text>
           </View>
-        ))}
+        ) : error ? (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>{error}</Text>
+            <TouchableOpacity style={styles.retryButton} onPress={handleRefresh}>
+              <Text style={styles.retryButtonText}>Retry</Text>
+            </TouchableOpacity>
+          </View>
+        ) : rewards.length > 0 ? (
+          rewards.map((reward: RewardItem) => (
+            <View key={reward._id} style={styles.rewardCard}>
+              <View
+                style={[
+                  styles.iconCircle,
+                  { backgroundColor: reward.backgroundColor || '#EDE9FE' },
+                ]}
+              >
+                <Text style={styles.rewardEmoji}>{reward.icon || '🎁'}</Text>
+              </View>
+
+              <View style={styles.rewardInfo}>
+                <PrimaryText text={reward.reward || 'Reward'} customStyle={styles.rewardName} />
+                <PrimaryText
+                  text={`${reward.totalStamps || 10} Stamps Required • ${reward.title}`}
+                  customStyle={styles.rewardStamps}
+                />
+              </View>
+
+              <Switch
+                trackColor={{ false: '#CBD5E1', true: '#C4B5FD' }}
+                thumbColor={reward.isActive ? '#7B3FF2' : '#F1F5F9'}
+                value={reward.isActive !== false}
+                onValueChange={() => toggleReward(reward._id, reward.isActive !== false)}
+                disabled={togglingId === reward._id}
+              />
+            </View>
+          ))
+        ) : (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyIcon}>🎁</Text>
+            <Text style={styles.emptyTitle}>No Rewards Yet</Text>
+            <Text style={styles.emptySubtitle}>
+              Create loyalty cards with rewards to start rewarding your customers!
+            </Text>
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -178,5 +205,60 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#64748B',
     fontWeight: '500',
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 60,
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#64748B',
+  },
+  errorContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#EF4444',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  retryButton: {
+    backgroundColor: '#7B3FF2',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    fontSize: 16,
+    color: '#FFFFFF',
+    fontWeight: '600',
+  },
+  emptyState: {
+    alignItems: 'center',
+    paddingVertical: 60,
+    paddingHorizontal: 24,
+  },
+  emptyIcon: {
+    fontSize: 48,
+    marginBottom: 12,
+  },
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1E293B',
+    marginBottom: 8,
+  },
+  emptySubtitle: {
+    fontSize: 15,
+    color: '#64748B',
+    textAlign: 'center',
+    lineHeight: 22,
   },
 });

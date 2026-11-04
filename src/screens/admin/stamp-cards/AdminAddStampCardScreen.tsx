@@ -10,7 +10,10 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Alert,
 } from 'react-native';
+import { loyaltyCardApi } from '../../../services/api';
+import PrimaryButton from '../../../components/button/PrimaryButton';
 
 interface AdminAddStampCardScreenProps {
   onBack?: () => void;
@@ -23,9 +26,50 @@ export default function AdminAddStampCardScreen({
 }: AdminAddStampCardScreenProps) {
   const [cardName, setCardName] = useState('');
   const [description, setDescription] = useState('');
-  const [totalStamps, setTotalStamps] = useState('');
+  const [totalStamps, setTotalStamps] = useState('10');
   const [reward, setReward] = useState('');
-  const [validity, setValidity] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSave = async () => {
+    if (!cardName.trim()) {
+      Alert.alert('Required', 'Please enter a stamp card name');
+      return;
+    }
+
+    if (!reward.trim()) {
+      Alert.alert('Required', 'Please enter a reward');
+      return;
+    }
+
+    const stamps = parseInt(totalStamps, 10);
+    if (isNaN(stamps) || stamps <= 0) {
+      Alert.alert('Invalid', 'Please enter a valid number of stamps (e.g. 10)');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await loyaltyCardApi.create({
+        title: cardName.trim(),
+        description: description.trim(),
+        totalStamps: stamps,
+        reward: reward.trim(),
+        backgroundColor: '#7B3FF2',
+        textColor: '#FFFFFF',
+      });
+
+      if (response.success) {
+        Alert.alert('Success', 'Stamp card created successfully!');
+        onSave?.();
+      } else {
+        Alert.alert('Error', response.message || 'Failed to create stamp card');
+      }
+    } catch (err: any) {
+      Alert.alert('Error', err.message || 'Failed to create stamp card');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -48,14 +92,16 @@ export default function AdminAddStampCardScreen({
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Card Image Upload Banner */}
-          <TouchableOpacity style={styles.uploadBox} activeOpacity={0.8}>
-            <View style={styles.uploadCircle}>
-              <Text style={styles.uploadEmoji}>☁️</Text>
-            </View>
-            <Text style={styles.uploadHeading}>Upload Card Image</Text>
-            <Text style={styles.uploadSubtext}>Recommended size: 800x400</Text>
-          </TouchableOpacity>
+          {/* Card Visual Banner */}
+          <View style={styles.cardBanner}>
+            <Text style={styles.bannerEmoji}>🎫</Text>
+            <Text style={styles.bannerHeading}>
+              {cardName.trim() || 'New Stamp Card'}
+            </Text>
+            <Text style={styles.bannerSubtext}>
+              {totalStamps} Stamps • {reward.trim() ? `Reward: ${reward.trim()}` : 'Custom Reward'}
+            </Text>
+          </View>
 
           {/* Form Fields */}
           <View style={styles.formContainer}>
@@ -63,7 +109,7 @@ export default function AdminAddStampCardScreen({
               <Text style={styles.label}>Card Name</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Enter card name"
+                placeholder="e.g. VIP Coffee Club, Lunch Card"
                 placeholderTextColor="#94A3B8"
                 value={cardName}
                 onChangeText={setCardName}
@@ -71,21 +117,10 @@ export default function AdminAddStampCardScreen({
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Description</Text>
+              <Text style={styles.label}>Total Stamps to Complete</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Enter description"
-                placeholderTextColor="#94A3B8"
-                value={description}
-                onChangeText={setDescription}
-              />
-            </View>
-
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>Total Stamps</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter total stamps (e.g. 10)"
+                placeholder="e.g. 10 (or 5, 8, 12)"
                 placeholderTextColor="#94A3B8"
                 keyboardType="number-pad"
                 value={totalStamps}
@@ -94,10 +129,10 @@ export default function AdminAddStampCardScreen({
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Reward (e.g. Free Coffee)</Text>
+              <Text style={styles.label}>Reward Description</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Enter reward"
+                placeholder="e.g. Free Coffee, Free Pastry, 50% Off"
                 placeholderTextColor="#94A3B8"
                 value={reward}
                 onChangeText={setReward}
@@ -105,26 +140,24 @@ export default function AdminAddStampCardScreen({
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Validity (days)</Text>
+              <Text style={styles.label}>Description (Optional)</Text>
               <TextInput
                 style={styles.input}
-                placeholder="Enter validity (optional)"
+                placeholder="Instructions or details for customers"
                 placeholderTextColor="#94A3B8"
-                keyboardType="number-pad"
-                value={validity}
-                onChangeText={setValidity}
+                value={description}
+                onChangeText={setDescription}
               />
             </View>
           </View>
 
           {/* Save Button */}
-          <TouchableOpacity
+          <PrimaryButton
+            title="Save Stamp Card"
+            loading={loading}
+            onPress={handleSave}
             style={styles.saveButton}
-            onPress={onSave}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.saveButtonText}>Save Card</Text>
-          </TouchableOpacity>
+          />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -171,38 +204,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 40,
   },
-  uploadBox: {
+  cardBanner: {
     height: 140,
     borderRadius: 18,
-    borderWidth: 1.5,
-    borderColor: '#C7D2FE',
-    borderStyle: 'dashed',
     backgroundColor: '#F5F3FF',
+    borderWidth: 1.5,
+    borderColor: '#DDD6FE',
     alignItems: 'center',
     justifyContent: 'center',
     marginVertical: 14,
   },
-  uploadCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#EDE9FE',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 6,
+  bannerEmoji: {
+    fontSize: 32,
+    marginBottom: 4,
   },
-  uploadEmoji: {
-    fontSize: 18,
-  },
-  uploadHeading: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#4F46E5',
+  bannerHeading: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#7B3FF2',
     marginBottom: 2,
   },
-  uploadSubtext: {
-    fontSize: 12,
-    color: '#94A3B8',
+  bannerSubtext: {
+    fontSize: 13,
+    color: '#64748B',
+    fontWeight: '500',
   },
   formContainer: {
     marginVertical: 10,
@@ -227,21 +252,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   saveButton: {
-    backgroundColor: '#4F46E5',
-    height: 56,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
     marginTop: 10,
-    shadowColor: '#4F46E5',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  saveButtonText: {
-    color: '#FFFFFF',
-    fontSize: 17,
-    fontWeight: '700',
   },
 });

@@ -7,7 +7,9 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from 'react-native';
+import { useBusinessProfile } from '../../../hooks/useApi';
 
 interface AdminBusinessProfileScreenProps {
   onEdit?: () => void;
@@ -16,13 +18,16 @@ interface AdminBusinessProfileScreenProps {
 export default function AdminBusinessProfileScreen({
   onEdit,
 }: AdminBusinessProfileScreenProps) {
+  const { profile, loading, error } = useBusinessProfile();
+
   const profileFields = [
-    { label: 'Business Name', value: 'Brew & Beans' },
-    { label: 'Category', value: 'Coffee Shop' },
-    { label: 'Address', value: '123, MG Road, Indore, MP' },
-    { label: 'Contact Number', value: '+91  98765 43210' },
-    { label: 'Email', value: 'business@email.com' },
-    { label: 'Working Hours', value: '9:00 AM - 10:00 PM' },
+    { label: 'Business Name', value: profile?.businessName || 'Your Business' },
+    { label: 'Category', value: profile?.category || 'Retail' },
+    { label: 'Address', value: profile?.address ? `${profile.address}, ${profile.city || ''}` : 'Not provided' },
+    { label: 'Contact Number', value: profile?.phone || 'Not provided' },
+    { label: 'Email', value: profile?.email || 'Not provided' },
+    { label: 'Country', value: profile?.country || 'India' },
+    { label: 'Status', value: profile?.isActive !== false ? 'Active' : 'Inactive' },
   ];
 
   return (
@@ -32,40 +37,58 @@ export default function AdminBusinessProfileScreen({
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>Business Profile</Text>
-        <TouchableOpacity
-          onPress={onEdit}
-          style={styles.editButton}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.editIcon}>✏️</Text>
-        </TouchableOpacity>
+        {onEdit ? (
+          <TouchableOpacity
+            onPress={onEdit}
+            style={styles.editButton}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.editIcon}>✏️</Text>
+          </TouchableOpacity>
+        ) : null}
       </View>
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Business Avatar & Branding */}
-        <View style={styles.brandingCard}>
-          <View style={styles.logoCircle}>
-            <Text style={styles.logoEmoji}>☕</Text>
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#7B3FF2" />
+            <Text style={styles.loadingText}>Loading profile...</Text>
           </View>
-          <Text style={styles.businessName}>Brew & Beans</Text>
-          <Text style={styles.businessCategory}>Coffee Shop</Text>
-        </View>
-
-        {/* Profile Field Details */}
-        <View style={styles.fieldsContainer}>
-          {profileFields.map((field, idx) => (
-            <View key={idx} style={styles.fieldItem}>
-              <View style={styles.fieldInfo}>
-                <Text style={styles.fieldLabel}>{field.label}</Text>
-                <Text style={styles.fieldValue}>{field.value}</Text>
+        ) : error ? (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+        ) : (
+          <>
+            {/* Business Avatar & Branding */}
+            <View style={styles.brandingCard}>
+              <View style={styles.logoCircle}>
+                <Text style={styles.logoEmoji}>🏢</Text>
               </View>
-              <Text style={styles.arrowIcon}>›</Text>
+              <Text style={styles.businessName}>
+                {profile?.businessName || 'Your Business'}
+              </Text>
+              <Text style={styles.businessCategory}>
+                {profile?.category || 'Retail Store'}
+              </Text>
             </View>
-          ))}
-        </View>
+
+            {/* Profile Field Details */}
+            <View style={styles.fieldsContainer}>
+              {profileFields.map((field, idx) => (
+                <View key={idx} style={styles.fieldItem}>
+                  <View style={styles.fieldInfo}>
+                    <Text style={styles.fieldLabel}>{field.label}</Text>
+                    <Text style={styles.fieldValue}>{field.value}</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -115,7 +138,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#065F46',
+    backgroundColor: '#EDE9FE',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
@@ -136,8 +159,8 @@ const styles = StyleSheet.create({
   },
   businessCategory: {
     fontSize: 14,
-    color: '#64748B',
-    fontWeight: '500',
+    color: '#7B3FF2',
+    fontWeight: '600',
   },
   fieldsContainer: {
     marginTop: 8,
@@ -163,9 +186,24 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#1E293B',
   },
-  arrowIcon: {
-    fontSize: 20,
-    color: '#CBD5E1',
-    fontWeight: '300',
+  loadingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 60,
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#64748B',
+  },
+  errorContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    paddingTop: 40,
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#EF4444',
   },
 });

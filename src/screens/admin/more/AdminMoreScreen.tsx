@@ -7,7 +7,9 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Alert,
 } from 'react-native';
+import { clearAuthData } from '../../../services/authService';
 
 interface AdminMoreScreenProps {
   onSelectOption?: (option: string) => void;
@@ -20,13 +22,27 @@ export default function AdminMoreScreen({
 }: AdminMoreScreenProps) {
   const menuItems = [
     { id: 'profile', label: 'Business Profile', emoji: '🏢' },
-    { id: 'staff', label: 'Staff Members', emoji: '👥' },
-    { id: 'notifications', label: 'Notification Settings', emoji: '🔔' },
-    { id: 'password', label: 'Change Password', emoji: '🔒' },
-    { id: 'support', label: 'Help & Support', emoji: '💬' },
-    { id: 'terms', label: 'Terms & Conditions', emoji: '📄' },
-    { id: 'about', label: 'About Us', emoji: 'ℹ️' },
+    { id: 'customers', label: 'Customer Management', emoji: '👥' },
+    { id: 'qr', label: 'Business QR Code', emoji: '📱' },
+    { id: 'analytics', label: 'Analytics & Insights', emoji: '📊' },
+    { id: 'activity', label: 'All Transactions & Activity', emoji: '📋' },
+    { id: 'stamps', label: 'Manage Stamp Cards', emoji: '🎫' },
+    { id: 'rewards', label: 'Manage Rewards', emoji: '🎁' },
   ];
+
+  const handleLogout = () => {
+    Alert.alert('Logout', 'Are you sure you want to log out of your business account?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Logout',
+        style: 'destructive',
+        onPress: () => {
+          clearAuthData();
+          onLogout?.();
+        },
+      },
+    ]);
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -62,7 +78,7 @@ export default function AdminMoreScreen({
         {/* Logout Row */}
         <TouchableOpacity
           style={[styles.menuRow, styles.logoutRow]}
-          onPress={onLogout}
+          onPress={handleLogout}
           activeOpacity={0.7}
         >
           <View style={styles.leftRow}>

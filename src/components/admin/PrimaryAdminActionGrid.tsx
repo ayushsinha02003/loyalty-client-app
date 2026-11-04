@@ -8,18 +8,23 @@ type Action = {
   icon: React.ComponentProps<typeof MaterialDesignIcons>['name'];
 };
 
+interface PrimaryAdminActionGridProps {
+  actions: Action[];
+  onPressAction?: (index: number) => void;
+}
+
 export default function PrimaryAdminActionGrid({
   actions,
-}: {
-  actions: Action[];
-}) {
+  onPressAction,
+}: PrimaryAdminActionGridProps) {
   return (
     <View style={styles.grid}>
-      {actions.map(action => (
+      {actions.map((action, index) => (
         <TouchableOpacity
           key={action.label}
           style={styles.action}
           activeOpacity={0.8}
+          onPress={() => onPressAction?.(index)}
         >
           <View style={styles.icon}>
             <MaterialDesignIcons name={action.icon} size={26} color="#7B3FF2" />
