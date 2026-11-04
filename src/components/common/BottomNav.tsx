@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
 
-type TabId = 'All' | 'Home' | 'MyCards' | 'Rewards' | 'Profile';
+type TabId = 'Home' | 'MyCards' | 'Scan' | 'Rewards' | 'Profile' | 'All';
 interface BottomNavProps {
     activeTab: TabId;
     onTabPress: (tab: TabId) => void;
@@ -19,42 +19,44 @@ const tabs: Array<{
     label: string;
     icon: string;
     activeIcon: string;
+    isPrimary?: boolean;
 }> = [
-        {
-            id: 'Home',
-            label: 'Home',
-            icon: 'home-outline',
-            activeIcon: 'home',
-        },
-        {
-            id: 'MyCards',
-            label: 'My Cards',
-            icon: 'credit-card-outline',
-            activeIcon: 'credit-card',
-        },
-        {
-            id: 'All',
-            label: 'All',
-            icon: 'all',
-            activeIcon: 'credit-card',
-        },
-        {
-            id: 'Rewards',
-            label: 'Rewards',
-            icon: 'gift-outline',
-            activeIcon: 'gift',
-        },
-        {
-            id: 'Profile',
-            label: 'Profile',
-            icon: 'account-outline',
-            activeIcon: 'account',
-        },
-    ];
+    {
+        id: 'Home',
+        label: 'Home',
+        icon: 'home-outline',
+        activeIcon: 'home',
+    },
+    {
+        id: 'MyCards',
+        label: 'My Cards',
+        icon: 'credit-card-outline',
+        activeIcon: 'credit-card',
+    },
+    {
+        id: 'Scan',
+        label: 'Scan QR',
+        icon: 'qrcode-scan',
+        activeIcon: 'qrcode-scan',
+        isPrimary: true,
+    },
+    {
+        id: 'Rewards',
+        label: 'Rewards',
+        icon: 'gift-outline',
+        activeIcon: 'gift',
+    },
+    {
+        id: 'Profile',
+        label: 'Profile',
+        icon: 'account-outline',
+        activeIcon: 'account',
+    },
+];
 
 export type { TabId };
 export function isTabId(value: string): value is TabId {
-    return tabs.some(tab => tab.id === value);
+    return tabs.some(tab => tab.id === value) || value === 'All';
 }
 
 export default function BottomNav({
@@ -73,6 +75,7 @@ export default function BottomNav({
             <View style={styles.navbar}>
                 {tabs.map(tab => {
                     const selected = activeTab === tab.id;
+                    const isPrimary = tab.isPrimary;
                     return (
                         <Pressable
                             key={tab.id}
@@ -88,16 +91,21 @@ export default function BottomNav({
                             <View
                                 style={[
                                     styles.iconContainer,
-                                    selected && styles.iconContainerActive,
+                                    isPrimary && styles.primaryIconContainer,
+                                    !isPrimary && selected && styles.iconContainerActive,
                                 ]}>
                                 <MaterialDesignIcons
                                     name={(selected ? tab.activeIcon : tab.icon) as any}
-                                    size={24}
-                                    color={selected ? '#FFFFFF' : '#9CA3AF'}
+                                    size={isPrimary ? 24 : 24}
+                                    color={isPrimary ? '#FFFFFF' : selected ? '#FFFFFF' : '#9CA3AF'}
                                 />
                             </View>
-                            {selected && (
-                                <Text style={styles.activeLabel}>
+                            {(selected || isPrimary) && (
+                                <Text
+                                    style={[
+                                        styles.activeLabel,
+                                        isPrimary && styles.primaryLabel,
+                                    ]}>
                                     {tab.label}
                                 </Text>
                             )}
@@ -147,9 +155,29 @@ const styles = StyleSheet.create({
         backgroundColor: '#7C3AED',
         borderRadius: 14,
     },
+    primaryIconContainer: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        backgroundColor: '#7C3AED',
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#7C3AED',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.35,
+        shadowRadius: 8,
+        elevation: 6,
+        marginTop: -6,
+    },
     activeLabel: {
         marginTop: 4,
         fontSize: 11,
+        fontWeight: '700',
+        color: '#7C3AED',
+    },
+    primaryLabel: {
+        marginTop: 2,
+        fontSize: 10,
         fontWeight: '700',
         color: '#7C3AED',
     },

@@ -137,14 +137,18 @@ function AppContent({
     setActiveTab(tab);
     if (tab === 'All') {
       setSelectedScreen('All');
+    } else if (tab === 'Scan') {
+      setSelectedScreen('QrScanner');
     } else {
-      setSelectedScreen(tab);
+      setSelectedScreen(tab as ScreenId);
     }
   };
 
   const handleScreenSelect = (screen: ScreenId) => {
     if (screen === 'All') {
       setActiveTab('All');
+    } else if (screen === 'QrScanner') {
+      setActiveTab('Scan');
     } else if (isTabId(screen)) {
       setActiveTab(screen);
     } else {
@@ -219,7 +223,18 @@ function AppContent({
     switch (selectedScreen) {
       // Customer Screens
       case 'Home':
-        return <HomeScreen />;
+        return (
+          <HomeScreen
+            onOpenScanner={() => {
+              setActiveTab('Scan');
+              setSelectedScreen('QrScanner');
+            }}
+            onSeeAll={() => {
+              setActiveTab('MyCards');
+              setSelectedScreen('MyCards');
+            }}
+          />
+        );
 
       case 'MyCards':
         return <MyCardsScreen />;
@@ -410,7 +425,11 @@ function AppContent({
         );
 
       case 'AdminCustomers':
-        return <AdminCustomersScreen />;
+        return (
+          <AdminCustomersScreen
+            onOpenScanner={() => setSelectedScreen('QrScanner')}
+          />
+        );
 
       case 'AdminStampCards':
         return (

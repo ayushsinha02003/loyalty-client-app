@@ -16,7 +16,12 @@ import PrimaryLoyaltyStampCard from '../../components/cards/loyaltyStampCard/Pri
 import LoyaltySteps from '../../components/loyalty/PrimaryLoyaltyStampCard';
 import { useCustomerDashboard } from '../../hooks/useApi';
 
-const HomeScreen = () => {
+interface HomeScreenProps {
+  onOpenScanner?: () => void;
+  onSeeAll?: () => void;
+}
+
+const HomeScreen = ({ onOpenScanner, onSeeAll }: HomeScreenProps) => {
   const { dashboard, loading, error, refetch } = useCustomerDashboard();
   const [userName, setUserName] = useState('User');
 
@@ -102,12 +107,21 @@ const HomeScreen = () => {
             <Text style={styles.emptySubtitle}>
               Scan a QR code at a participating business to join their loyalty program!
             </Text>
+            {onOpenScanner && (
+              <TouchableOpacity
+                style={styles.scanButton}
+                onPress={onOpenScanner}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.scanButtonText}>📷 Open QR Scanner</Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
 
         <View style={styles.titleContainer}>
           <PrimaryText text="My Stamp Cards" customStyle={styles.title} />
-          <TouchableOpacity>
+          <TouchableOpacity onPress={onSeeAll}>
             <PrimaryText text="See all" customStyle={styles.seeAll} />
           </TouchableOpacity>
         </View>
@@ -131,6 +145,15 @@ const HomeScreen = () => {
             <Text style={styles.emptySubtitle}>
               Scan a QR code at a participating business to join their loyalty program!
             </Text>
+            {onOpenScanner && (
+              <TouchableOpacity
+                style={styles.scanButton}
+                onPress={onOpenScanner}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.scanButtonText}>📷 Open QR Scanner</Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
 
@@ -208,19 +231,41 @@ const styles = StyleSheet.create({
   },
   emptyState: {
     alignItems: 'center',
-    paddingVertical: 40,
+    paddingVertical: 32,
     paddingHorizontal: 24,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   emptyTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
     color: '#1E293B',
     marginBottom: 8,
   },
   emptySubtitle: {
-    fontSize: 15,
+    fontSize: 14,
     color: '#64748B',
     textAlign: 'center',
-    lineHeight: 22,
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  scanButton: {
+    backgroundColor: '#7B3FF2',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 12,
+    shadowColor: '#7B3FF2',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  scanButtonText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
   },
 });

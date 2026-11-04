@@ -16,7 +16,11 @@ import { useBusinessCustomers } from '../../../hooks/useApi';
 import PrimaryText from '../../../components/text/PrimaryText';
 import { stampApi, rewardApi } from '../../../services/api';
 
-export default function AdminCustomersScreen() {
+interface AdminCustomersScreenProps {
+  onOpenScanner?: () => void;
+}
+
+export default function AdminCustomersScreen({ onOpenScanner }: AdminCustomersScreenProps = {}) {
   const [search, setSearch] = useState('');
   const { customers, loading, error, refetch } = useBusinessCustomers();
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
@@ -73,6 +77,15 @@ export default function AdminCustomersScreen() {
       {/* Header */}
       <View style={styles.header}>
         <PrimaryText text="Customers" customStyle={styles.title} />
+        {onOpenScanner && (
+          <TouchableOpacity
+            style={styles.scanHeaderButton}
+            onPress={onOpenScanner}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.scanHeaderButtonText}>📷 Scan QR</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* Search Bar Row */}
@@ -191,6 +204,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 16,
     paddingBottom: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  scanHeaderButton: {
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 12,
+  },
+  scanHeaderButtonText: {
+    color: '#7B3FF2',
+    fontWeight: '700',
+    fontSize: 13,
   },
   title: {
     fontSize: 24,
