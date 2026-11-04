@@ -7,11 +7,11 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getCurrentUser, clearAuthData } from '../../services/authService';
 import { customerApi } from '../../services/api';
+import { ProfileScreenSkeleton } from '../../components/skeleton';
 
 interface ProfileScreenProps {
   onLogout?: () => void;
@@ -87,14 +87,7 @@ const ProfileScreen = ({ onLogout, onViewActivity }: ProfileScreenProps) => {
   };
 
   if (loading) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#7B3FF2" />
-          <Text style={styles.loadingText}>Loading profile...</Text>
-        </View>
-      </SafeAreaView>
-    );
+    return <ProfileScreenSkeleton />;
   }
 
   return (

@@ -5,13 +5,13 @@ import {
   View,
   TouchableOpacity,
   ScrollView,
-  ActivityIndicator,
   Alert,
   RefreshControl,
 } from 'react-native';
 import PrimaryText from '../../components/text/PrimaryText';
 import { useAvailableRewards, useRewardHistory } from '../../hooks/useApi';
 import { rewardApi } from '../../services/api';
+import { RewardsScreenSkeleton } from '../../components/skeleton';
 
 type TabKey = 'available' | 'claimed';
 
@@ -65,15 +65,7 @@ const RewardsScreen = () => {
   };
 
   if (rewardsLoading && historyLoading) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Rewards</Text>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#7B3FF2" />
-          <Text style={styles.loadingText}>Loading rewards...</Text>
-        </View>
-      </View>
-    );
+    return <RewardsScreenSkeleton />;
   }
 
   return (

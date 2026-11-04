@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import PrimaryText from '../../components/text/PrimaryText';
 import { useExploreCards } from '../../hooks/useApi';
+import { SearchScreenSkeleton } from '../../components/skeleton';
 import { customerCardApi } from '../../services/api';
 
 interface SearchScreenProps {
@@ -27,6 +28,10 @@ export default function SearchScreen({ onJoinSuccess }: SearchScreenProps) {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const { cards, loading, error, refetch } = useExploreCards();
   const [joiningId, setJoiningId] = useState<string | null>(null);
+
+  if (loading && (!cards || cards.length === 0)) {
+    return <SearchScreenSkeleton />;
+  }
 
   const filteredCards = (cards || []).filter((card: any) => {
     const businessName =

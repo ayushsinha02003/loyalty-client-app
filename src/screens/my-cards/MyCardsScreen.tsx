@@ -5,6 +5,7 @@ import PrimaryText from '../../components/text/PrimaryText';
 import PrimarySearchBar from '../../components/searchBar/PrimarySearchBar';
 import PrimaryLoyaltyStampCard from '../../components/cards/loyaltyStampCard/PrimaryLoyaltyStampCard';
 import { useCustomerCards } from '../../hooks/useApi';
+import { MyCardsScreenSkeleton } from '../../components/skeleton';
 
 const MyCardsScreen = () => {
   const { cards, loading, error, refetch } = useCustomerCards();
@@ -20,16 +21,7 @@ const MyCardsScreen = () => {
   };
 
   if (loading) {
-    return (
-      <SafeAreaView style={styles.container} edges={['top']}>
-        <View style={styles.header}>
-          <PrimaryText text="My Cards" customStyle={styles.title} />
-        </View>
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading your cards...</Text>
-        </View>
-      </SafeAreaView>
-    );
+    return <MyCardsScreenSkeleton />;
   }
 
   if (error) {

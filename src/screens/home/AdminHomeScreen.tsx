@@ -14,6 +14,7 @@ import PrimaryAdminActivity from '../../components/admin/PrimaryAdminActivity';
 import PrimaryAdminMetric from '../../components/admin/PrimaryAdminMetric';
 import PrimaryAdminStatCard from '../../components/admin/PrimaryAdminStatCard';
 import { useBusinessDashboard, useBusinessStampHistory } from '../../hooks/useApi';
+import { AdminHomeScreenSkeleton } from '../../components/skeleton';
 
 interface AdminHomeScreenProps {
   onActionPress?: (action: string) => void;
@@ -51,20 +52,7 @@ export default function AdminHomeScreen({ onActionPress }: AdminHomeScreenProps)
     })) || [];
 
   if (loading) {
-    return (
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <MaterialDesignIcons name="store" size={30} color="#7B3FF2" />
-          <View style={styles.headerCopy}>
-            <PrimaryText text={`Hello, ${businessName}!`} customStyle={styles.title} />
-            <PrimaryText text="Manage your business & rewards" customStyle={styles.subtitle} />
-          </View>
-        </View>
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading dashboard...</Text>
-        </View>
-      </View>
-    );
+    return <AdminHomeScreenSkeleton />;
   }
 
   if (error) {

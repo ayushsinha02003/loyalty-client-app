@@ -10,9 +10,14 @@ import {
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useBusinessDashboard } from '../../../hooks/useApi';
+import { AdminAnalyticsScreenSkeleton } from '../../../components/skeleton';
 
 export default function AdminAnalyticsScreen() {
   const { dashboard, loading } = useBusinessDashboard();
+
+  if (loading && !dashboard) {
+    return <AdminAnalyticsScreenSkeleton />;
+  }
 
   const metrics = [
     {

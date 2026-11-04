@@ -15,6 +15,7 @@ import {
 import { useBusinessLoyaltyCards } from '../../../hooks/useApi';
 import PrimaryText from '../../../components/text/PrimaryText';
 import { loyaltyCardApi } from '../../../services/api';
+import { AdminRewardsScreenSkeleton } from '../../../components/skeleton';
 
 interface RewardItem {
   _id: string;
@@ -36,6 +37,10 @@ export default function AdminRewardsScreen({
 }: AdminRewardsScreenProps) {
   const { cards, loading, error, refetch } = useBusinessLoyaltyCards();
   const [togglingId, setTogglingId] = useState<string | null>(null);
+
+  if (loading && (!cards || cards.length === 0)) {
+    return <AdminRewardsScreenSkeleton />;
+  }
 
   // Filter cards that have rewards
   const rewards = cards?.filter((card: any) => card.reward) || [];

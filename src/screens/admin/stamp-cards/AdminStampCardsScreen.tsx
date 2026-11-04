@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { useBusinessLoyaltyCards } from '../../../hooks/useApi';
 import PrimaryText from '../../../components/text/PrimaryText';
+import { AdminStampCardsScreenSkeleton } from '../../../components/skeleton';
 
 interface AdminStampCardsScreenProps {
   onAddCard?: () => void;
@@ -23,6 +24,10 @@ export default function AdminStampCardsScreen({
 }: AdminStampCardsScreenProps) {
   const { cards, loading, error, refetch, deleteCard } = useBusinessLoyaltyCards();
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  if (loading && (!cards || cards.length === 0)) {
+    return <AdminStampCardsScreenSkeleton />;
+  }
 
   const handleDelete = async (id: string) => {
     Alert.alert(

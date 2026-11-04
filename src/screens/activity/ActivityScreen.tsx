@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useStampHistory, useRewardHistory } from '../../hooks/useApi';
+import { ActivityScreenSkeleton } from '../../components/skeleton';
 
 interface StampActivity {
   _id: string;
@@ -77,6 +78,10 @@ export default function ActivityScreen({ onBack }: ActivityScreenProps) {
   ];
 
   const loading = stampLoading || rewardLoading;
+
+  if (loading && (!stampHistory || stampHistory.length === 0) && (!rewardHistory || rewardHistory.length === 0)) {
+    return <ActivityScreenSkeleton />;
+  }
   const error = stampError || rewardError;
 
   // Transform API data to ActivityGroup format

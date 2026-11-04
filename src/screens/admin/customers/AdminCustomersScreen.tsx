@@ -15,6 +15,7 @@ import {
 import { useBusinessCustomers } from '../../../hooks/useApi';
 import PrimaryText from '../../../components/text/PrimaryText';
 import { stampApi, rewardApi } from '../../../services/api';
+import { AdminCustomersScreenSkeleton } from '../../../components/skeleton';
 
 interface AdminCustomersScreenProps {
   onOpenScanner?: () => void;
@@ -24,6 +25,10 @@ export default function AdminCustomersScreen({ onOpenScanner }: AdminCustomersSc
   const [search, setSearch] = useState('');
   const { customers, loading, error, refetch } = useBusinessCustomers();
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+
+  if (loading && (!customers || customers.length === 0)) {
+    return <AdminCustomersScreenSkeleton />;
+  }
 
   const filtered = customers?.filter(
     (c: any) =>

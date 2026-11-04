@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useBusinessProfile } from '../../../hooks/useApi';
+import { AdminBusinessProfileScreenSkeleton } from '../../../components/skeleton';
 
 interface AdminBusinessProfileScreenProps {
   onEdit?: () => void;
@@ -19,6 +20,10 @@ export default function AdminBusinessProfileScreen({
   onEdit,
 }: AdminBusinessProfileScreenProps) {
   const { profile, loading, error } = useBusinessProfile();
+
+  if (loading && !profile) {
+    return <AdminBusinessProfileScreenSkeleton />;
+  }
 
   const profileFields = [
     { label: 'Business Name', value: profile?.businessName || 'Your Business' },

@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useBusinessStampHistory, useBusinessRewardHistory } from '../../../hooks/useApi';
+import { AdminActivityScreenSkeleton } from '../../../components/skeleton';
 
 export default function AdminActivityScreen() {
   const [filter, setFilter] = useState<'All' | 'Stamps' | 'Rewards'>('All');
@@ -19,6 +20,10 @@ export default function AdminActivityScreen() {
 
   const loading = stampLoading || rewardLoading;
   const error = stampError || rewardError;
+
+  if (loading && (!stampHistory || stampHistory.length === 0) && (!rewardHistory || rewardHistory.length === 0)) {
+    return <AdminActivityScreenSkeleton />;
+  }
 
   const handleRefresh = () => {
     refetchStamps();

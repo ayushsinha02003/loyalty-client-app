@@ -15,6 +15,7 @@ import PrimaryText from '../../components/text/PrimaryText';
 import PrimaryLoyaltyStampCard from '../../components/cards/loyaltyStampCard/PrimaryLoyaltyStampCard';
 import LoyaltySteps from '../../components/loyalty/PrimaryLoyaltyStampCard';
 import { useCustomerDashboard } from '../../hooks/useApi';
+import { HomeScreenSkeleton } from '../../components/skeleton';
 
 interface HomeScreenProps {
   onOpenScanner?: () => void;
@@ -43,18 +44,7 @@ const HomeScreen = ({ onOpenScanner, onSeeAll }: HomeScreenProps) => {
   const displayCard = activeCard || completedCard || dashboard?.customerCards?.[0];
 
   if (loading) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <PrimaryHeader
-          name={userName}
-          subtitle="Collect stamps. Earn rewards."
-          notificationCount={0}
-        />
-        <View style={styles.loadingContainer}>
-          <Text style={styles.loadingText}>Loading your dashboard...</Text>
-        </View>
-      </SafeAreaView>
-    );
+    return <HomeScreenSkeleton />;
   }
 
   if (error) {

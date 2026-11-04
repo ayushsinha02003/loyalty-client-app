@@ -11,12 +11,17 @@ import {
   Platform,
 } from 'react-native';
 import { useBusinessQRCodes, useBusinessProfile } from '../../../hooks/useApi';
+import { AdminQrCodeScreenSkeleton } from '../../../components/skeleton';
 
 export default function AdminQrCodeScreen() {
   const { qrCodes, loading, error, refetch } = useBusinessQRCodes();
   const { profile } = useBusinessProfile();
 
   const activeQr = qrCodes && qrCodes.length > 0 ? qrCodes[0] : null;
+
+  if (loading && !activeQr) {
+    return <AdminQrCodeScreenSkeleton />;
+  }
 
   return (
     <SafeAreaView style={styles.container}>
