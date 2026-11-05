@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
 import {
   SafeAreaProvider,
@@ -10,6 +10,12 @@ import PrimaryBottomNav, {
   isTabId,
 } from './src/components/common/BottomNav';
 import PrimaryAdminBottomNav from './src/components/admin/PrimaryAdminBottomNav';
+import {
+  initializeAuthSession,
+  getHasCompletedOnboarding,
+  setHasCompletedOnboarding,
+  clearAuthData,
+} from './src/services/authService';
 
 import HomeScreen from './src/screens/home/HomeScreen';
 import AdminHomeScreen from './src/screens/home/AdminHomeScreen';
@@ -49,10 +55,57 @@ import AdminMoreScreen from './src/screens/admin/more/AdminMoreScreen';
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
   const [showSplash, setShowSplash] = useState(true);
-  const [showOnboarding, setShowOnboarding] = useState(true);
+  const [isSessionRestored, setIsSessionRestored] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
   const [initialScreen, setInitialScreen] = useState<ScreenId | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function restoreSession() {
+      try {
+        const [authSession, hasCompletedOnboarding] = await Promise.all([
+          initializeAuthSession(),
+          getHasCompletedOnboarding(),
+        ]);
+
+        if (!isMounted) return;
+
+        if (authSession.isAuthenticated && authSession.user) {
+          const role = (authSession.user.role as string) || '';
+          setShowOnboarding(false);
+          setShowLogin(false);
+          setShowSignup(false);
+          setInitialScreen(
+            role === 'business' || role === 'admin' ? 'AdminHome' : 'Home'
+          );
+        } else if (!hasCompletedOnboarding) {
+          setShowOnboarding(true);
+          setShowLogin(false);
+        } else {
+          setShowOnboarding(false);
+          setShowLogin(true);
+        }
+      } catch (err) {
+        console.warn('Session restoration error:', err);
+        if (isMounted) {
+          setShowLogin(true);
+        }
+      } finally {
+        if (isMounted) {
+          setIsSessionRestored(true);
+        }
+      }
+    }
+
+    restoreSession();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleAuthSuccess = (data?: any) => {
     const role =
@@ -62,6 +115,7 @@ function App() {
       data?.role;
     setShowLogin(false);
     setShowSignup(false);
+    setShowOnboarding(false);
     if (role === 'business' || role === 'admin') {
       setInitialScreen('AdminHome');
     } else {
@@ -69,8 +123,11 @@ function App() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await clearAuthData();
     setInitialScreen(null);
+    setShowSignup(false);
+    setShowOnboarding(false);
     setShowLogin(true);
   };
 
@@ -81,11 +138,12 @@ function App() {
         backgroundColor={isDarkMode ? '#111' : '#fff'}
       />
 
-      {showSplash ? (
+      {showSplash || !isSessionRestored ? (
         <SplashScreen onFinish={() => setShowSplash(false)} />
       ) : showOnboarding ? (
         <OnboardingScreen
-          onGetStarted={() => {
+          onGetStarted={async () => {
+            await setHasCompletedOnboarding(true);
             setShowOnboarding(false);
             setShowLogin(true);
           }}
@@ -124,12 +182,21 @@ function AppContent({
   onLogout: () => void;
 }) {
   const [activeTab, setActiveTab] = useState<TabId>(
-    initialScreen === 'Home' ? 'Home' : 'Home'
+    initialScreen && isTabId(initialScreen) ? initialScreen : 'Home'
   );
   const [selectedScreen, setSelectedScreen] = useState<ScreenId | null>(
     initialScreen || 'Home'
   );
   const [scanResult, setScanResult] = useState<any>(null);
+
+  useEffect(() => {
+    if (initialScreen) {
+      setSelectedScreen(initialScreen);
+      if (isTabId(initialScreen)) {
+        setActiveTab(initialScreen);
+      }
+    }
+  }, [initialScreen]);
 
   const insets = useSafeAreaInsets();
 
