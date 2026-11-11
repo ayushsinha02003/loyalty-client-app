@@ -7,7 +7,8 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
+import { AlertCircle } from 'lucide-react-native';
+import { PALETTE, RADII } from '../../constants/theme';
 
 export interface PrimaryErrorBannerProps {
   message?: string | null;
@@ -29,12 +30,9 @@ export default function PrimaryErrorBanner({
       {icon ? (
         <Text style={styles.legacyIcon}>{icon}</Text>
       ) : (
-        <MaterialDesignIcons
-          name="alert-circle-outline"
-          size={18}
-          color="#DC2626"
-          style={styles.iconMargin}
-        />
+        <View style={styles.iconMargin}>
+          <AlertCircle size={18} color={PALETTE.primary} strokeWidth={2} />
+        </View>
       )}
       <Text style={[styles.text, textStyle]}>{message}</Text>
     </View>
@@ -45,13 +43,13 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FEF2F2',
+    backgroundColor: PALETTE.illusCoralBg,
     borderWidth: 1,
-    borderColor: '#FECACA',
-    borderRadius: 12,
+    borderColor: 'rgba(255, 106, 85, 0.3)',
+    borderRadius: RADII.lg,
     paddingVertical: 12,
-    paddingHorizontal: 14,
-    marginBottom: 20,
+    paddingHorizontal: 16,
+    marginBottom: 18,
   },
   iconMargin: {
     marginRight: 10,
@@ -62,8 +60,8 @@ const styles = StyleSheet.create({
   },
   text: {
     flex: 1,
-    color: '#DC2626',
-    fontSize: 14,
+    color: PALETTE.onSurface,
+    fontSize: 13,
     fontWeight: '600',
   },
 });

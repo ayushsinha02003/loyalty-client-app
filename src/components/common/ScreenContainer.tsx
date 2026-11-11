@@ -1,5 +1,6 @@
 import React, { ReactNode } from 'react';
 import { SafeAreaView, StyleSheet, ViewStyle } from 'react-native';
+import { PALETTE } from '../../constants/theme';
 
 interface Props {
     children: ReactNode;
@@ -19,6 +20,6 @@ export default ScreenContainer;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f8fafc',
+        backgroundColor: PALETTE.surfaceAlt,
     },
 });

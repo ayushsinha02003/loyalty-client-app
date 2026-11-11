@@ -1,16 +1,10 @@
 import React from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  View,
-  ActivityIndicator,
-} from 'react-native';
+import { ScrollView, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import { useBusinessDashboard } from '../../../hooks/useApi';
 import { AdminAnalyticsScreenSkeleton } from '../../../components/skeleton';
+import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../../constants/theme';
 
 export default function AdminAnalyticsScreen() {
   const { dashboard, loading } = useBusinessDashboard();
@@ -24,46 +18,46 @@ export default function AdminAnalyticsScreen() {
       id: '1',
       title: 'Total Active Customers',
       value: (dashboard?.totalCustomers || 0).toString(),
-      change: 'Active',
+      change: 'Enrolled',
       period: 'all time',
-      color: '#4F46E5',
+      strokeColor: PALETTE.primary,
       graphPath: 'M0 25 Q20 30 40 18 T80 8 T120 12 T160 2',
     },
     {
       id: '2',
       title: 'Stamps Issued',
       value: (dashboard?.totalStamps || 0).toString(),
-      change: 'Earned',
+      change: 'Collected',
       period: 'total recorded',
-      color: '#7B3FF2',
+      strokeColor: PALETTE.surfaceContrast,
       graphPath: 'M0 28 Q30 24 60 14 T110 18 T160 4',
     },
     {
       id: '3',
       title: 'Rewards Redeemed',
       value: (dashboard?.totalRewardsRedeemed || 0).toString(),
-      change: 'Redeemed',
+      change: 'Claimed',
       period: 'completed gifts',
-      color: '#10B981',
+      strokeColor: PALETTE.warning,
       graphPath: 'M0 26 Q25 28 50 16 T100 20 T160 3',
     },
     {
       id: '4',
-      title: 'Pending Rewards to Claim',
+      title: 'Pending Rewards',
       value: (dashboard?.rewardsAvailable || 0).toString(),
       change: 'Ready',
-      period: 'unclaimed rewards',
-      color: '#F59E0B',
+      period: 'unclaimed gifts',
+      strokeColor: PALETTE.illusCoolBlue,
       graphPath: 'M0 22 Q30 18 60 24 T110 14 T160 6',
     },
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <StatusBar barStyle="dark-content" backgroundColor={PALETTE.surfaceAlt} />
 
-      {/* Header */}
       <View style={styles.header}>
+        <Text style={styles.eyebrow}>Performance</Text>
         <Text style={styles.title}>Analytics</Text>
       </View>
 
@@ -71,43 +65,33 @@ export default function AdminAnalyticsScreen() {
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
       >
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#7B3FF2" />
-            <Text style={styles.loadingText}>Loading analytics...</Text>
-          </View>
-        ) : (
-          metrics.map(metric => (
-            <View key={metric.id} style={styles.metricCard}>
-              <View style={styles.cardHeader}>
-                <Text style={styles.metricTitle}>{metric.title}</Text>
-                <View style={[styles.badge, { backgroundColor: `${metric.color}15` }]}>
-                  <Text style={[styles.badgeText, { color: metric.color }]}>
-                    {metric.change}
-                  </Text>
-                </View>
-              </View>
-
-              <View style={styles.numberRow}>
-                <Text style={styles.metricValue}>{metric.value}</Text>
-                <Text style={styles.periodText}>{metric.period}</Text>
-              </View>
-
-              {/* Sparkline Graph */}
-              <View style={styles.graphContainer}>
-                <Svg width="100%" height={40} viewBox="0 0 160 35">
-                  <Path
-                    d={metric.graphPath}
-                    fill="none"
-                    stroke={metric.color}
-                    strokeWidth="3"
-                    strokeLinecap="round"
-                  />
-                </Svg>
+        {metrics.map(metric => (
+          <View key={metric.id} style={styles.metricCard}>
+            <View style={styles.cardHeader}>
+              <Text style={styles.metricTitle}>{metric.title}</Text>
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>{metric.change}</Text>
               </View>
             </View>
-          ))
-        )}
+
+            <View style={styles.numberRow}>
+              <Text style={styles.metricValue}>{metric.value}</Text>
+              <Text style={styles.periodText}>{metric.period}</Text>
+            </View>
+
+            <View style={styles.graphContainer}>
+              <Svg width="100%" height={40} viewBox="0 0 160 35">
+                <Path
+                  d={metric.graphPath}
+                  fill="none"
+                  stroke={metric.strokeColor}
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                />
+              </Svg>
+            </View>
+          </View>
+        ))}
       </ScrollView>
     </SafeAreaView>
   );
@@ -116,87 +100,74 @@ export default function AdminAnalyticsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: PALETTE.surfaceAlt,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     paddingTop: 16,
-    paddingBottom: 16,
+    paddingBottom: 14,
+  },
+  eyebrow: {
+    ...TYPOGRAPHY.labelUppercase,
+    color: PALETTE.onSurfaceVariant,
+    marginBottom: 4,
   },
   title: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#1E293B',
+    ...TYPOGRAPHY.displayMd,
+    color: PALETTE.onSurface,
   },
   listContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 100,
+    paddingHorizontal: 24,
+    paddingBottom: 120,
     gap: 16,
   },
   metricCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
     padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 10,
-    elevation: 2,
+    ...SHADOWS.softCard,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 10,
   },
   metricTitle: {
-    fontSize: 14,
-    color: '#64748B',
-    fontWeight: '600',
+    ...TYPOGRAPHY.headlineSm,
+    color: PALETTE.onSurface,
+    flex: 1,
+    marginRight: 8,
   },
   badge: {
+    backgroundColor: PALETTE.surfaceContrast,
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 8,
+    borderRadius: RADII.full,
   },
   badgeText: {
-    fontSize: 12,
-    fontWeight: '700',
+    ...TYPOGRAPHY.labelSm,
+    fontSize: 11,
+    color: PALETTE.surface,
   },
   numberRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
     gap: 8,
-    marginBottom: 16,
+    marginBottom: 14,
   },
   metricValue: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: '#1E293B',
+    ...TYPOGRAPHY.displayMd,
+    color: PALETTE.onSurface,
   },
   periodText: {
-    fontSize: 13,
-    color: '#94A3B8',
+    ...TYPOGRAPHY.caption,
+    color: PALETTE.onSurfaceMuted,
   },
   graphContainer: {
-    marginTop: 6,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderColor: '#F8FAFC',
-  },
-  loadingContainer: {
-    alignItems: 'center',
+    height: 44,
     justifyContent: 'center',
-    paddingTop: 60,
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#64748B',
   },
 });

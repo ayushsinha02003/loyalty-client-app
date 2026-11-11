@@ -6,6 +6,7 @@ import {
     StyleProp,
     TextProps,
 } from 'react-native';
+import { PALETTE } from '../../constants/theme';
 
 interface PrimaryTextProps extends TextProps {
     text: ReactNode;
@@ -31,7 +32,7 @@ export default PrimaryText;
 const styles = StyleSheet.create({
     text: {
         fontSize: 14,
-        fontWeight: '600',
-        color: '#0F172A',
+        fontWeight: '500',
+        color: PALETTE.onSurface,
     },
 });

@@ -1,70 +1,69 @@
 import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
-import PrimaryText from '../text/PrimaryText';
+import {
+  Bookmark,
+  Gift,
+  Home,
+  MoreHorizontal,
+  Users,
+} from 'lucide-react-native';
+import { PALETTE, RADII, SHADOWS } from '../../constants/theme';
 
 type Props = {
   onPress?: (item: string) => void;
   bottomInset?: number;
   activeItem?: string;
 };
-const items = [
-  { label: 'Home', icon: 'home-outline' as const, active: 'home' as const },
-  {
-    label: 'Customers',
-    icon: 'account-group-outline' as const,
-    active: 'account-group' as const,
-  },
-  {
-    label: 'Stamps',
-    icon: 'bookmark-outline' as const,
-    active: 'bookmark' as const,
-  },
-  { label: 'Rewards', icon: 'gift-outline' as const, active: 'gift' as const },
-  {
-    label: 'More',
-    icon: 'dots-horizontal' as const,
-    active: 'dots-horizontal' as const,
-  },
-];
 
+const NAV_ITEMS = [
+  { key: 'Home', label: 'Home', Icon: Home },
+  { key: 'Customers', label: 'Customers', Icon: Users },
+  { key: 'Stamps', label: 'Stamps', Icon: Bookmark },
+  { key: 'Rewards', label: 'Rewards', Icon: Gift },
+  { key: 'More', label: 'More', Icon: MoreHorizontal },
+] as const;
+
+/**
+ * Floating dark slate-indigo pill navigation bar for merchant/admin screens.
+ */
 export default function PrimaryAdminBottomNav({
   onPress,
   bottomInset = 0,
   activeItem = 'Home',
 }: Props) {
+  const bottomPadding = Math.max(bottomInset, 20);
+
   return (
     <View
-      style={[styles.wrapper, { paddingBottom: Math.max(bottomInset, 10) }]}
+      pointerEvents="box-none"
+      style={[styles.outerContainer, { paddingBottom: bottomPadding }]}
     >
-      <View style={styles.navbar}>
-        {items.map(item => {
-          const selected = activeItem === item.label;
+      <View style={styles.pillBar}>
+        {NAV_ITEMS.map(({ key, label, Icon }) => {
+          const isActive = activeItem === key;
+
           return (
             <Pressable
-              key={item.label}
-              onPress={() => onPress?.(item.label)}
-              style={({ pressed }) => [styles.item, pressed && styles.pressed]}
-              android_ripple={{ color: '#EDE9FE', borderless: true }}
+              key={key}
+              accessibilityRole="button"
+              accessibilityLabel={label}
+              accessibilityState={{ selected: isActive }}
+              style={styles.tabButton}
+              onPress={() => onPress?.(key)}
             >
-              <View
-                style={[
-                  styles.iconContainer,
-                  selected && styles.iconContainerActive,
-                ]}
-              >
-                <MaterialDesignIcons
-                  name={selected ? item.active : item.icon}
+              <View style={styles.iconSlot}>
+                <Icon
                   size={24}
-                  color={selected ? '#FFFFFF' : '#9CA3AF'}
+                  strokeWidth={2}
+                  color={isActive ? PALETTE.surface : PALETTE.onSurfaceMuted}
+                />
+                <View
+                  style={[
+                    styles.activeDot,
+                    !isActive && styles.activeDotHidden,
+                  ]}
                 />
               </View>
-              {selected && (
-                <PrimaryText
-                  text={item.label}
-                  customStyle={styles.activeLabel}
-                />
-              )}
             </Pressable>
           );
         })}
@@ -74,38 +73,44 @@ export default function PrimaryAdminBottomNav({
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    backgroundColor: '#F8FAFC',
-    paddingHorizontal: 16,
+  outerContainer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
+    paddingHorizontal: 24,
   },
-  navbar: {
-    minHeight: 68,
+  pillBar: {
+    width: '100%',
+    maxWidth: 355,
+    height: 68,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.surfaceContrast,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 24,
-    paddingVertical: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 7,
+    paddingHorizontal: 14,
+    ...SHADOWS.floatingNav,
   },
-  item: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  iconContainer: {
-    width: 42,
-    height: 42,
+  tabButton: {
+    flex: 1,
+    height: '100%',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 14,
   },
-  iconContainerActive: { backgroundColor: '#7C3AED', borderRadius: 14 },
-  activeLabel: {
-    marginTop: 4,
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#7C3AED',
+  iconSlot: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  pressed: { opacity: 0.7 },
+  activeDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: PALETTE.primary,
+    marginTop: 5,
+  },
+  activeDotHidden: {
+    opacity: 0,
+  },
 });

@@ -1,28 +1,69 @@
 import React, { useState } from 'react';
 import {
-  SafeAreaView,
+  Alert,
+  RefreshControl,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  RefreshControl,
-  Alert,
 } from 'react-native';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  AlertCircle,
+  Cake,
+  Coffee,
+  CreditCard,
+  Dumbbell,
+  Gift,
+  Hash,
+  Pizza,
+  Plus,
+  Scissors,
+  Star,
+  Trash2,
+  Utensils,
+} from 'lucide-react-native';
 import { useBusinessLoyaltyCards } from '../../../hooks/useApi';
 import PrimaryText from '../../../components/text/PrimaryText';
 import { AdminStampCardsScreenSkeleton } from '../../../components/skeleton';
+import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../../constants/theme';
 
 interface AdminStampCardsScreenProps {
   onAddCard?: () => void;
 }
 
+const TILE_BACKGROUNDS = [
+  PALETTE.illusCoralBg,
+  PALETTE.illusWarmYellow,
+  PALETTE.illusWarmOrange,
+  PALETTE.illusNeutralCream,
+  PALETTE.illusCoolBlue,
+] as const;
+
+const getIconForCard = (title: string) => {
+  const lower = title.toLowerCase();
+  if (lower.includes('coffee') || lower.includes('tea')) return Coffee;
+  if (lower.includes('pizza')) return Pizza;
+  if (lower.includes('sandwich') || lower.includes('burger') || lower.includes('food')) {
+    return Utensils;
+  }
+  if (lower.includes('ice cream') || lower.includes('dessert') || lower.includes('cake')) {
+    return Cake;
+  }
+  if (lower.includes('hair') || lower.includes('salon') || lower.includes('spa')) {
+    return Scissors;
+  }
+  if (lower.includes('gym') || lower.includes('fitness')) return Dumbbell;
+  return Star;
+};
+
 export default function AdminStampCardsScreen({
   onAddCard,
 }: AdminStampCardsScreenProps) {
-  const { cards, loading, error, refetch, deleteCard } = useBusinessLoyaltyCards();
+  const { cards, loading, error, refetch, deleteCard } =
+    useBusinessLoyaltyCards();
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   if (loading && (!cards || cards.length === 0)) {
@@ -32,7 +73,7 @@ export default function AdminStampCardsScreen({
   const handleDelete = async (id: string) => {
     Alert.alert(
       'Delete Stamp Card',
-      'Are you sure you want to delete this stamp card? This action cannot be undone.',
+      'Are you sure you want to delete this stamp card? This cannot be undone.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -59,47 +100,26 @@ export default function AdminStampCardsScreen({
     );
   };
 
-  const handleRefresh = () => {
-    refetch();
-  };
-
-  const getIconForCard = (
-    title: string
-  ): React.ComponentProps<typeof MaterialDesignIcons>['name'] => {
-    const lower = title.toLowerCase();
-    if (lower.includes('coffee') || lower.includes('tea')) return 'coffee';
-    if (lower.includes('pizza') || lower.includes('food')) return 'pizza';
-    if (lower.includes('sandwich') || lower.includes('burger')) return 'hamburger';
-    if (lower.includes('ice cream') || lower.includes('dessert')) return 'ice-cream';
-    if (lower.includes('hair') || lower.includes('salon') || lower.includes('spa')) return 'content-cut';
-    if (lower.includes('gym') || lower.includes('fitness')) return 'dumbbell';
-    return 'star-circle-outline';
-  };
-
-  const getColorForCard = (index: number) => {
-    const colors = ['#7C3AED', '#4F46E5', '#0D9488', '#EA580C', '#DB2777', '#2563EB'];
-    return colors[index % colors.length];
-  };
-
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <StatusBar barStyle="dark-content" backgroundColor={PALETTE.surfaceAlt} />
 
-      {/* Header */}
       <View style={styles.header}>
         <View>
+          <PrimaryText text="Programs" customStyle={styles.eyebrow} />
           <PrimaryText text="Stamp Cards" customStyle={styles.title} />
           <Text style={styles.subtitle}>
-            {cards?.length || 0} active loyalty {cards?.length === 1 ? 'card' : 'cards'}
+            {cards?.length || 0} active loyalty{' '}
+            {cards?.length === 1 ? 'card' : 'cards'}
           </Text>
         </View>
 
         <TouchableOpacity
           onPress={onAddCard}
           style={styles.addButton}
-          activeOpacity={0.8}
+          activeOpacity={0.85}
         >
-          <MaterialDesignIcons name="plus" size={18} color="#FFFFFF" style={styles.mr4} />
+          <Plus size={16} strokeWidth={2.5} color={PALETTE.onPrimary} />
           <Text style={styles.addButtonText}>New Card</Text>
         </TouchableOpacity>
       </View>
@@ -108,56 +128,70 @@ export default function AdminStampCardsScreen({
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={handleRefresh} />
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={refetch}
+            tintColor={PALETTE.primary}
+          />
         }
       >
         {error ? (
-          <View style={styles.errorContainer}>
-            <MaterialDesignIcons name="alert-circle-outline" size={40} color="#EF4444" style={styles.mb8} />
+          <View style={styles.errorCard}>
+            <AlertCircle size={36} strokeWidth={2} color={PALETTE.primary} />
             <Text style={styles.errorText}>{error}</Text>
-            <TouchableOpacity style={styles.retryButton} onPress={handleRefresh}>
+            <TouchableOpacity style={styles.retryButton} onPress={refetch}>
               <Text style={styles.retryButtonText}>Retry</Text>
             </TouchableOpacity>
           </View>
         ) : cards.length > 0 ? (
           cards.map((card: any, index: number) => {
-            const iconName = getIconForCard(card.title);
-            const color = card.backgroundColor || getColorForCard(index);
+            const IconComp = getIconForCard(card.title || '');
+            const wellBg = TILE_BACKGROUNDS[index % TILE_BACKGROUNDS.length];
+            const iconTint =
+              wellBg === PALETTE.illusCoolBlue || wellBg === PALETTE.illusWarmOrange
+                ? PALETTE.surface
+                : wellBg === PALETTE.illusCoralBg
+                  ? PALETTE.primary
+                  : PALETTE.surfaceContrast;
             const totalStamps = card.totalStamps || 10;
 
             return (
-              <View
-                key={card._id}
-                style={[styles.cardWrapper, { borderLeftColor: color }]}
-              >
+              <View key={card._id} style={styles.cardWrapper}>
                 <View style={styles.cardHeader}>
-                  <View style={styles.cardIconBox}>
-                    <MaterialDesignIcons name={iconName} size={22} color={color} />
+                  <View style={[styles.cardIconBox, { backgroundColor: wellBg }]}>
+                    <IconComp size={22} strokeWidth={2} color={iconTint} />
                   </View>
 
                   <View style={styles.cardHeaderInfo}>
-                    <PrimaryText text={card.title} customStyle={styles.cardTitle} />
+                    <PrimaryText
+                      text={card.title}
+                      customStyle={styles.cardTitle}
+                    />
                     <PrimaryText
                       text={card.description || `Reward: ${card.reward}`}
                       customStyle={styles.cardSubtitle}
+                      numberOfLines={1}
                     />
                   </View>
 
                   <TouchableOpacity
                     onPress={() => handleDelete(card._id)}
                     style={styles.deleteButton}
-                    activeOpacity={0.7}
+                    activeOpacity={0.75}
                     disabled={deletingId === card._id}
                   >
-                    <MaterialDesignIcons
-                      name="trash-can-outline"
-                      size={20}
-                      color={deletingId === card._id ? '#94A3B8' : '#EF4444'}
+                    <Trash2
+                      size={18}
+                      strokeWidth={2}
+                      color={
+                        deletingId === card._id
+                          ? PALETTE.onSurfaceMuted
+                          : PALETTE.primary
+                      }
                     />
                   </TouchableOpacity>
                 </View>
 
-                {/* Stamp Dots Visual Preview */}
                 <View style={styles.stampDotsRow}>
                   {Array.from({ length: totalStamps }).map((_, i) => {
                     const isLast = i === totalStamps - 1;
@@ -169,11 +203,19 @@ export default function AdminStampCardsScreen({
                           isLast && styles.stampCircleLast,
                         ]}
                       >
-                        <MaterialDesignIcons
-                          name={isLast ? 'gift' : 'star'}
-                          size={15}
-                          color={isLast ? '#7C3AED' : '#94A3B8'}
-                        />
+                        {isLast ? (
+                          <Gift
+                            size={14}
+                            strokeWidth={2}
+                            color={PALETTE.primary}
+                          />
+                        ) : (
+                          <Star
+                            size={13}
+                            strokeWidth={2}
+                            color={PALETTE.onSurfaceMuted}
+                          />
+                        )}
                       </View>
                     );
                   })}
@@ -181,14 +223,18 @@ export default function AdminStampCardsScreen({
 
                 <View style={styles.cardFooter}>
                   <View style={styles.metaRow}>
-                    <MaterialDesignIcons name="counter" size={14} color="#64748B" style={styles.mr4} />
+                    <Hash
+                      size={13}
+                      strokeWidth={2}
+                      color={PALETTE.onSurfaceVariant}
+                    />
                     <Text style={styles.progressText}>
-                      {totalStamps} Stamps Required
+                      {totalStamps} Stamps
                     </Text>
                   </View>
 
                   <View style={styles.rewardPill}>
-                    <MaterialDesignIcons name="gift-outline" size={13} color="#7C3AED" style={styles.mr4} />
+                    <Gift size={12} strokeWidth={2} color={PALETTE.primary} />
                     <Text style={styles.rewardText} numberOfLines={1}>
                       {card.reward}
                     </Text>
@@ -200,18 +246,18 @@ export default function AdminStampCardsScreen({
         ) : (
           <View style={styles.emptyState}>
             <View style={styles.emptyIconCircle}>
-              <MaterialDesignIcons name="credit-card-plus-outline" size={48} color="#94A3B8" />
+              <CreditCard size={28} strokeWidth={2} color={PALETTE.primary} />
             </View>
             <Text style={styles.emptyTitle}>No Stamp Cards Yet</Text>
             <Text style={styles.emptySubtitle}>
-              Create your first loyalty stamp card to start rewarding repeat customers!
+              Create your first loyalty stamp card to reward repeat customers.
             </Text>
             <TouchableOpacity
               style={styles.emptyActionButton}
               onPress={onAddCard}
-              activeOpacity={0.8}
+              activeOpacity={0.85}
             >
-              <MaterialDesignIcons name="plus" size={18} color="#FFFFFF" style={styles.mr6} />
+              <Plus size={18} strokeWidth={2.5} color={PALETTE.onPrimary} />
               <Text style={styles.emptyActionText}>Create Loyalty Card</Text>
             </TouchableOpacity>
           </View>
@@ -224,100 +270,87 @@ export default function AdminStampCardsScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: PALETTE.surfaceAlt,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     paddingTop: 16,
-    paddingBottom: 12,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+    paddingBottom: 14,
+  },
+  eyebrow: {
+    ...TYPOGRAPHY.labelUppercase,
+    color: PALETTE.onSurfaceVariant,
+    marginBottom: 4,
   },
   title: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#0F172A',
+    ...TYPOGRAPHY.displayMd,
+    color: PALETTE.onSurface,
   },
   subtitle: {
-    fontSize: 12,
-    color: '#64748B',
+    ...TYPOGRAPHY.caption,
+    color: PALETTE.onSurfaceVariant,
     marginTop: 2,
   },
   addButton: {
-    backgroundColor: '#7C3AED',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 14,
+    backgroundColor: PALETTE.primary,
+    paddingHorizontal: 16,
+    height: 42,
+    borderRadius: RADII.full,
     flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#7C3AED',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    elevation: 3,
+    gap: 6,
+    ...SHADOWS.btn,
   },
   addButtonText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-    fontSize: 13,
+    ...TYPOGRAPHY.labelSm,
+    color: PALETTE.onPrimary,
   },
   listContent: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 90,
+    paddingHorizontal: 24,
+    paddingBottom: 120,
     gap: 16,
   },
   cardWrapper: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    borderWidth: 1.5,
-    borderLeftWidth: 4,
-    borderColor: '#E2E8F0',
-    padding: 18,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    padding: 20,
+    ...SHADOWS.softCard,
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 14,
   },
   cardIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: '#F8FAFC',
+    width: 48,
+    height: 48,
+    borderRadius: RADII.lg,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
-    borderWidth: 1,
-    borderColor: '#F1F5F9',
   },
   cardHeaderInfo: {
     flex: 1,
+    marginRight: 8,
   },
   cardTitle: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: '#0F172A',
+    ...TYPOGRAPHY.headlineSm,
+    color: PALETTE.onSurface,
   },
   cardSubtitle: {
-    fontSize: 13,
-    color: '#64748B',
+    ...TYPOGRAPHY.caption,
+    color: PALETTE.onSurfaceVariant,
     marginTop: 2,
   },
   deleteButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: '#FEE2E2',
+    width: 38,
+    height: 38,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.illusCoralBg,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -325,116 +358,127 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
-    marginVertical: 12,
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: PALETTE.border,
   },
   stampCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    width: 30,
+    height: 30,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.surfaceAlt,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
   stampCircleLast: {
-    borderColor: '#C4B5FD',
-    backgroundColor: '#FAF5FF',
+    backgroundColor: PALETTE.illusCoralBg,
+    borderColor: PALETTE.primary,
   },
   cardFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
-    paddingTop: 12,
-    marginTop: 4,
+    marginTop: 16,
+    gap: 10,
   },
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 4,
   },
   progressText: {
-    fontSize: 12,
+    ...TYPOGRAPHY.caption,
+    color: PALETTE.onSurfaceVariant,
     fontWeight: '600',
-    color: '#64748B',
   },
   rewardPill: {
-    backgroundColor: '#F3E8FF',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    maxWidth: '55%',
+    gap: 5,
+    backgroundColor: PALETTE.surfaceContrast,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: RADII.full,
+    maxWidth: '60%',
   },
   rewardText: {
-    fontSize: 12,
-    color: '#6D28D9',
-    fontWeight: '700',
+    ...TYPOGRAPHY.labelSm,
+    fontSize: 11,
+    color: PALETTE.surface,
+  },
+  errorCard: {
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    padding: 28,
+    alignItems: 'center',
+    gap: 12,
+    ...SHADOWS.softCard,
+  },
+  errorText: {
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurface,
+    textAlign: 'center',
+  },
+  retryButton: {
+    backgroundColor: PALETTE.primary,
+    paddingHorizontal: 28,
+    height: 48,
+    borderRadius: RADII.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...SHADOWS.btn,
+  },
+  retryButtonText: {
+    ...TYPOGRAPHY.labelMd,
+    color: PALETTE.onPrimary,
   },
   emptyState: {
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    paddingVertical: 40,
+    paddingHorizontal: 24,
     alignItems: 'center',
-    paddingVertical: 50,
-    paddingHorizontal: 20,
+    ...SHADOWS.softCard,
   },
   emptyIconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#F1F5F9',
+    width: 64,
+    height: 64,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.illusCoralBg,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
   },
   emptyTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1E293B',
+    ...TYPOGRAPHY.headlineMd,
+    color: PALETTE.onSurface,
     marginBottom: 6,
   },
   emptySubtitle: {
-    fontSize: 14,
-    color: '#64748B',
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurfaceVariant,
     textAlign: 'center',
-    lineHeight: 20,
     marginBottom: 20,
   },
   emptyActionButton: {
-    backgroundColor: '#7C3AED',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 14,
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
+    backgroundColor: PALETTE.primary,
+    paddingHorizontal: 24,
+    height: 50,
+    borderRadius: RADII.full,
+    ...SHADOWS.btn,
   },
   emptyActionText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-    fontSize: 14,
+    ...TYPOGRAPHY.labelMd,
+    color: PALETTE.onPrimary,
   },
-  errorContainer: {
-    alignItems: 'center',
-    paddingVertical: 40,
-  },
-  errorText: {
-    fontSize: 14,
-    color: '#EF4444',
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-  retryButton: {
-    backgroundColor: '#7C3AED',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 10,
-  },
-  retryButtonText: {
-    color: '#FFFFFF',
-    fontWeight: '600',
-    fontSize: 13,
-  },
-  mr4: { marginRight: 4 },
-  mr6: { marginRight: 6 },
-  mb8: { marginBottom: 8 },
 });

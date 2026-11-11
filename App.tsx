@@ -5,6 +5,9 @@ import {
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
 
+import {
+  PALETTE,
+} from './src/constants/theme';
 import PrimaryBottomNav, {
   type TabId,
   isTabId,
@@ -135,7 +138,7 @@ function App() {
     <SafeAreaProvider>
       <StatusBar
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={isDarkMode ? '#111' : '#fff'}
+        backgroundColor={isDarkMode ? PALETTE.surfaceContrast : PALETTE.surfaceAlt}
       />
 
       {showSplash || !isSessionRestored ? (
@@ -591,11 +594,11 @@ export default App;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: PALETTE.surfaceAlt,
   },
 
   content: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: PALETTE.surfaceAlt,
   },
 });

@@ -1,14 +1,15 @@
 import React from 'react';
 import {
-  SafeAreaView,
   StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import PrimaryButton from '../../components/button/PrimaryButton';
+import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../constants/theme';
 
 interface WelcomeScreenProps {
   onCreateAccount?: () => void;
@@ -20,15 +21,14 @@ export default function WelcomeScreen({
   onSignIn,
 }: WelcomeScreenProps) {
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <StatusBar barStyle="dark-content" backgroundColor={PALETTE.surfaceAlt} />
 
       <View style={styles.content}>
-        {/* 3D Gift Box Illustration */}
-        <View style={styles.illustrationContainer}>
-          <Svg width={220} height={220} viewBox="0 0 200 200">
-            {/* Soft Shadow */}
-            <Circle cx="100" cy="180" r="50" fill="#E9D5FF" opacity="0.6" />
+        {/* Gift Box Illustration */}
+        <View style={styles.illustrationCard}>
+          <Svg width={210} height={210} viewBox="0 0 200 200">
+            <Circle cx="100" cy="180" r="46" fill={PALETTE.illusCoralBg} />
 
             {/* Gift Box Base */}
             <Rect
@@ -37,20 +37,19 @@ export default function WelcomeScreen({
               width="110"
               height="90"
               rx="18"
-              fill="#8B5CF6"
+              fill={PALETTE.primaryPressed}
             />
-            {/* Box Front Highlight */}
             <Rect
               x="50"
               y="90"
               width="100"
               height="80"
               rx="14"
-              fill="#7C3AED"
+              fill={PALETTE.primary}
             />
 
             {/* Vertical Ribbon */}
-            <Rect x="90" y="85" width="20" height="90" fill="#DDD6FE" />
+            <Rect x="90" y="85" width="20" height="90" fill={PALETTE.illusWarmYellow} />
 
             {/* Gift Box Lid */}
             <Rect
@@ -59,63 +58,59 @@ export default function WelcomeScreen({
               width="120"
               height="24"
               rx="8"
-              fill="#A78BFA"
+              fill={PALETTE.surfaceContrast}
             />
-            {/* Lid Ribbon */}
-            <Rect x="90" y="68" width="20" height="24" fill="#EDE9FE" />
+            <Rect x="90" y="68" width="20" height="24" fill={PALETTE.illusWarmYellow} />
 
-            {/* Ribbon Bow Left */}
+            {/* Ribbon Bow */}
             <Path
               d="M100 68 C80 40 55 45 65 62 C72 74 95 68 100 68 Z"
-              fill="#C4B5FD"
+              fill={PALETTE.illusWarmYellow}
             />
-            {/* Ribbon Bow Right */}
             <Path
               d="M100 68 C120 40 145 45 135 62 C128 74 105 68 100 68 Z"
-              fill="#C4B5FD"
+              fill={PALETTE.illusWarmYellow}
             />
-            {/* Bow Center Knot */}
-            <Circle cx="100" cy="68" r="8" fill="#DDD6FE" />
+            <Circle cx="100" cy="68" r="8" fill={PALETTE.illusWarmOrange} />
 
             {/* Friendly Mascot Eyes */}
-            <Circle cx="80" cy="125" r="4.5" fill="#FFFFFF" />
-            <Circle cx="120" cy="125" r="4.5" fill="#FFFFFF" />
-            <Circle cx="81.5" cy="124" r="2" fill="#1E1B4B" />
-            <Circle cx="121.5" cy="124" r="2" fill="#1E1B4B" />
+            <Circle cx="80" cy="125" r="4.5" fill={PALETTE.surface} />
+            <Circle cx="120" cy="125" r="4.5" fill={PALETTE.surface} />
+            <Circle cx="81.5" cy="124" r="2" fill={PALETTE.surfaceContrast} />
+            <Circle cx="121.5" cy="124" r="2" fill={PALETTE.surfaceContrast} />
 
             {/* Rosy Cheeks */}
-            <Circle cx="73" cy="133" r="5" fill="#F472B6" opacity="0.7" />
-            <Circle cx="127" cy="133" r="5" fill="#F472B6" opacity="0.7" />
+            <Circle cx="73" cy="133" r="4.5" fill={PALETTE.illusCoralBg} opacity="0.85" />
+            <Circle cx="127" cy="133" r="4.5" fill={PALETTE.illusCoralBg} opacity="0.85" />
 
-            {/* Cute Smile */}
+            {/* Smile */}
             <Path
               d="M93 133 Q100 141 107 133"
-              stroke="#FFFFFF"
+              stroke={PALETTE.surface}
               strokeWidth="2.5"
               strokeLinecap="round"
               fill="none"
             />
 
             {/* Floating Sparkles */}
-            <Circle cx="35" cy="65" r="3" fill="#A78BFA" opacity="0.8" />
-            <Circle cx="165" cy="75" r="4" fill="#C4B5FD" opacity="0.8" />
-            <Circle cx="155" cy="140" r="2.5" fill="#DDD6FE" />
+            <Circle cx="35" cy="65" r="3" fill={PALETTE.primary} opacity="0.7" />
+            <Circle cx="165" cy="75" r="4" fill={PALETTE.warning} opacity="0.85" />
+            <Circle cx="155" cy="140" r="2.5" fill={PALETTE.surfaceContrast} />
           </Svg>
         </View>
 
-        {/* Text Section */}
         <View style={styles.textContainer}>
+          <Text style={styles.eyebrow}>Digital Loyalty Wallet</Text>
           <Text style={styles.title}>Welcome to LoyaltyApp</Text>
           <Text style={styles.subtitle}>
-            Collect stamps from your favorite stores and earn exciting rewards.
+            Collect stamps from your favorite local stores and earn exciting rewards.
           </Text>
         </View>
 
-        {/* Button Section */}
         <View style={styles.actionContainer}>
           <PrimaryButton
             title="Create Account"
-            onPress={onCreateAccount}
+            onPress={onCreateAccount || (() => {})}
           />
 
           <View style={styles.footerRow}>
@@ -133,72 +128,63 @@ export default function WelcomeScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: PALETTE.surfaceAlt,
   },
   content: {
     flex: 1,
-    paddingHorizontal: 28,
+    paddingHorizontal: 24,
     justifyContent: 'space-between',
-    paddingVertical: 36,
+    paddingVertical: 28,
   },
-  illustrationContainer: {
+  illustrationCard: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 40,
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    paddingVertical: 28,
+    marginTop: 12,
+    ...SHADOWS.softCard,
   },
   textContainer: {
     alignItems: 'center',
-    paddingHorizontal: 12,
+    paddingHorizontal: 8,
+  },
+  eyebrow: {
+    ...TYPOGRAPHY.labelUppercase,
+    color: PALETTE.primary,
+    marginBottom: 8,
   },
   title: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: '#1E293B',
+    ...TYPOGRAPHY.displayMd,
+    color: PALETTE.onSurface,
     textAlign: 'center',
-    marginBottom: 12,
-    letterSpacing: -0.3,
+    marginBottom: 10,
   },
   subtitle: {
-    fontSize: 15,
-    color: '#64748B',
+    ...TYPOGRAPHY.bodyMd,
+    color: PALETTE.onSurfaceVariant,
     textAlign: 'center',
-    lineHeight: 22,
     paddingHorizontal: 8,
   },
   actionContainer: {
     width: '100%',
-    paddingBottom: 16,
-  },
-  primaryButton: {
-    backgroundColor: '#6366F1',
-    height: 56,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#6366F1',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.28,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  primaryButtonText: {
-    color: '#FFFFFF',
-    fontSize: 17,
-    fontWeight: '700',
+    paddingBottom: 8,
   },
   footerRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 18,
   },
   footerText: {
-    color: '#64748B',
-    fontSize: 14,
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurfaceVariant,
   },
   signInLink: {
-    color: '#7B3FF2',
+    ...TYPOGRAPHY.labelSm,
     fontSize: 14,
-    fontWeight: '700',
+    color: PALETTE.primary,
   },
 });

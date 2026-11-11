@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import {
-  View,
-  StyleSheet,
   Image,
-  Dimensions,
-  Pressable,
   ImageSourcePropType,
+  Pressable,
+  StatusBar,
+  StyleSheet,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import PrimaryText from '../../components/text/PrimaryText';
+import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../constants/theme';
 
-const { width } = Dimensions.get('window');
 interface OnboardingItem {
   id: number;
   title: string;
@@ -18,17 +18,18 @@ interface OnboardingItem {
   description: string;
   image: ImageSourcePropType;
 }
+
 interface OnboardingScreenProps {
   onGetStarted: () => void;
 }
 
-const onboardingData: OnboardingItem[] = [
+const ONBOARDING_DATA: OnboardingItem[] = [
   {
     id: 1,
     title: 'Collect Stamps.',
     highlight: 'Earn Rewards.',
     description:
-      'Visit your favorite places, collect stamps and enjoy exclusive rewards.',
+      'Visit your favorite places, collect stamps and enjoy exclusive perks.',
     image: require('../../assets/images/onboarding/onboarding-1.png'),
   },
   {
@@ -36,24 +37,25 @@ const onboardingData: OnboardingItem[] = [
     title: 'Collect Stamps',
     highlight: 'Every Visit.',
     description:
-      'Scan QR at the store or check-in to collect stamps on your digital loyalty cards.',
+      'Scan QR at the counter to collect stamps seamlessly on your digital cards.',
     image: require('../../assets/images/onboarding/onboarding-2.png'),
   },
   {
     id: 3,
-    title: 'Earn Rewards',
+    title: 'Unlock Rewards',
     highlight: "You'll Love.",
     description:
-      'Redeem exciting rewards and enjoy special offers from your favorite places.',
+      'Redeem exciting gifts and special offers across local partner stores.',
     image: require('../../assets/images/onboarding/onboarding-3.png'),
   },
 ];
 
 const OnboardingScreen = ({ onGetStarted }: OnboardingScreenProps) => {
   const [currentPage, setCurrentPage] = useState(0);
-  const currentItem = onboardingData[currentPage];
+  const currentItem = ONBOARDING_DATA[currentPage];
+
   const handleNext = () => {
-    if (currentPage < onboardingData.length - 1) {
+    if (currentPage < ONBOARDING_DATA.length - 1) {
       setCurrentPage(currentPage + 1);
     } else {
       onGetStarted();
@@ -61,7 +63,9 @@ const OnboardingScreen = ({ onGetStarted }: OnboardingScreenProps) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <StatusBar barStyle="dark-content" backgroundColor={PALETTE.surfaceAlt} />
+
       <View style={styles.textSection}>
         <PrimaryText text={currentItem.title} customStyle={styles.title} />
         <PrimaryText
@@ -73,16 +77,20 @@ const OnboardingScreen = ({ onGetStarted }: OnboardingScreenProps) => {
           customStyle={styles.description}
         />
       </View>
-      <View style={styles.imageContainer}>
-        <Image
-          key={currentPage}
-          source={currentItem.image}
-          resizeMode="contain"
-          style={styles.image}
-        />
+
+      <View style={styles.stageContainer}>
+        <View style={styles.imageStageCard}>
+          <Image
+            key={currentPage}
+            source={currentItem.image}
+            resizeMode="contain"
+            style={styles.image}
+          />
+        </View>
       </View>
+
       <View style={styles.indicatorContainer}>
-        {onboardingData.map((_, index) => (
+        {ONBOARDING_DATA.map((_, index) => (
           <View
             key={index}
             style={[
@@ -94,10 +102,18 @@ const OnboardingScreen = ({ onGetStarted }: OnboardingScreenProps) => {
       </View>
 
       <View style={styles.bottomSection}>
-        <Pressable style={styles.button} onPress={handleNext}>
+        <Pressable
+          style={({ pressed }) => [
+            styles.button,
+            pressed && styles.buttonPressed,
+          ]}
+          onPress={handleNext}
+        >
           <PrimaryText
             text={
-              currentPage === onboardingData.length - 1 ? 'Get Started' : 'Next'
+              currentPage === ONBOARDING_DATA.length - 1
+                ? 'Get Started'
+                : 'Next'
             }
             customStyle={styles.buttonText}
           />
@@ -112,94 +128,88 @@ export default OnboardingScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FCFBFF',
-  },
-  slide: {
-    width,
-    flex: 1,
-    alignItems: 'center',
-    paddingHorizontal: 24,
+    backgroundColor: PALETTE.surfaceAlt,
   },
   textSection: {
     width: '100%',
     alignItems: 'center',
-    paddingTop: 30,
+    paddingHorizontal: 24,
+    paddingTop: 28,
   },
   title: {
-    fontSize: 34,
-    lineHeight: 42,
-    fontWeight: '800',
-    color: '#07123B',
+    ...TYPOGRAPHY.displayMd,
+    color: PALETTE.onSurface,
     textAlign: 'center',
   },
   highlight: {
-    fontSize: 34,
-    lineHeight: 42,
-    fontWeight: '800',
-    color: '#7B3FF2',
+    ...TYPOGRAPHY.displayMd,
+    color: PALETTE.primary,
     textAlign: 'center',
   },
   description: {
-    marginTop: 20,
+    marginTop: 14,
     maxWidth: 310,
-    fontSize: 16,
-    lineHeight: 22,
-    fontWeight: '400',
-    color: '#667085',
+    ...TYPOGRAPHY.bodyMd,
+    color: PALETTE.onSurfaceVariant,
     textAlign: 'center',
   },
-  imageContainer: {
+  stageContainer: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingVertical: 20,
+    justifyContent: 'center',
+  },
+  imageStageCard: {
     flex: 1,
     width: '100%',
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    padding: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 10,
+    ...SHADOWS.softCard,
   },
   image: {
-    width: '95%',
-    height: '95%',
+    width: '92%',
+    height: '92%',
   },
   indicatorContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 9,
-    marginBottom: 25,
+    gap: 8,
+    marginBottom: 22,
   },
   indicator: {
-    width: 9,
-    height: 9,
-    borderRadius: 5,
-    backgroundColor: '#DDD6FE',
+    width: 8,
+    height: 8,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.illusNeutralCream,
   },
   activeIndicator: {
-    backgroundColor: '#6938EF',
+    width: 24,
+    backgroundColor: PALETTE.primary,
   },
   bottomSection: {
-    paddingHorizontal: 28,
-    paddingBottom: 28,
+    paddingHorizontal: 24,
+    paddingBottom: 24,
   },
   button: {
-    height: 58,
-    borderRadius: 16,
+    height: 56,
+    borderRadius: RADII.full,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#6435E9',
-    shadowColor: '#6435E9',
-    shadowOffset: {
-      width: 0,
-      height: 5,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
+    backgroundColor: PALETTE.primary,
+    ...SHADOWS.btn,
   },
   buttonPressed: {
-    opacity: 0.85,
+    backgroundColor: PALETTE.primaryPressed,
+    transform: [{ scale: 0.97 }],
   },
   buttonText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#FFFFFF',
+    ...TYPOGRAPHY.labelMd,
+    color: PALETTE.onPrimary,
   },
 });

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
-  SafeAreaView,
+  Alert,
+  RefreshControl,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -8,20 +9,34 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  RefreshControl,
-  Alert,
 } from 'react-native';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  AlertCircle,
+  CreditCard,
+  Gift,
+  Phone,
+  PlusCircle,
+  QrCode,
+  Search,
+  Star,
+  User,
+  Users,
+  X,
+} from 'lucide-react-native';
 import { useBusinessCustomers } from '../../../hooks/useApi';
 import PrimaryText from '../../../components/text/PrimaryText';
 import { stampApi, rewardApi } from '../../../services/api';
 import { AdminCustomersScreenSkeleton } from '../../../components/skeleton';
+import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../../constants/theme';
 
 interface AdminCustomersScreenProps {
   onOpenScanner?: () => void;
 }
 
-export default function AdminCustomersScreen({ onOpenScanner }: AdminCustomersScreenProps = {}) {
+export default function AdminCustomersScreen({
+  onOpenScanner,
+}: AdminCustomersScreenProps = {}) {
   const [search, setSearch] = useState('');
   const { customers, loading, error, refetch } = useBusinessCustomers();
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
@@ -30,19 +45,23 @@ export default function AdminCustomersScreen({ onOpenScanner }: AdminCustomersSc
     return <AdminCustomersScreenSkeleton />;
   }
 
-  const filtered = customers?.filter(
-    (c: any) =>
-      c.customer?.name?.toLowerCase().includes(search.toLowerCase()) ||
-      c.customer?.phone?.includes(search) ||
-      c.loyaltyCard?.title?.toLowerCase().includes(search.toLowerCase())
-  ) || [];
+  const filtered =
+    customers?.filter(
+      (c: any) =>
+        c.customer?.name?.toLowerCase().includes(search.toLowerCase()) ||
+        c.customer?.phone?.includes(search) ||
+        c.loyaltyCard?.title?.toLowerCase().includes(search.toLowerCase())
+    ) || [];
 
-  const handleAddStamp = async (customerCardId: string, customerName: string) => {
+  const handleAddStamp = async (
+    customerCardId: string,
+    customerName: string
+  ) => {
     setActionLoadingId(customerCardId);
     try {
       const response = await stampApi.addStampByCard(customerCardId);
       if (response.success) {
-        Alert.alert('Stamp Added', `Successfully awarded 1 stamp to ${customerName}.`);
+        Alert.alert('Stamp Added', `Awarded 1 stamp to ${customerName}.`);
         refetch();
       } else {
         Alert.alert('Error', response.message || 'Failed to add stamp');
@@ -54,12 +73,18 @@ export default function AdminCustomersScreen({ onOpenScanner }: AdminCustomersSc
     }
   };
 
-  const handleRedeemReward = async (customerCardId: string, customerName: string) => {
+  const handleRedeemReward = async (
+    customerCardId: string,
+    customerName: string
+  ) => {
     setActionLoadingId(customerCardId);
     try {
       const response = await rewardApi.redeem(customerCardId);
       if (response.success) {
-        Alert.alert('Reward Redeemed', `Reward successfully claimed for ${customerName}!`);
+        Alert.alert(
+          'Reward Redeemed',
+          `Reward claimed for ${customerName}!`
+        );
         refetch();
       } else {
         Alert.alert('Error', response.message || 'Failed to redeem reward');
@@ -76,15 +101,16 @@ export default function AdminCustomersScreen({ onOpenScanner }: AdminCustomersSc
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <StatusBar barStyle="dark-content" backgroundColor={PALETTE.surfaceAlt} />
 
-      {/* Header */}
       <View style={styles.header}>
         <View>
+          <PrimaryText text="Membership" customStyle={styles.eyebrow} />
           <PrimaryText text="Customers" customStyle={styles.title} />
           <Text style={styles.subtitle}>
-            {customers?.length || 0} active {customers?.length === 1 ? 'member' : 'members'} enrolled
+            {customers?.length || 0} active{' '}
+            {customers?.length === 1 ? 'member' : 'members'} enrolled
           </Text>
         </View>
 
@@ -92,44 +118,53 @@ export default function AdminCustomersScreen({ onOpenScanner }: AdminCustomersSc
           <TouchableOpacity
             style={styles.scanHeaderButton}
             onPress={onOpenScanner}
-            activeOpacity={0.8}
+            activeOpacity={0.85}
           >
-            <MaterialDesignIcons name="qrcode-scan" size={16} color="#7C3AED" style={styles.mr6} />
+            <QrCode size={16} strokeWidth={2} color={PALETTE.primary} />
             <Text style={styles.scanHeaderButtonText}>Scan QR</Text>
           </TouchableOpacity>
         )}
       </View>
 
-      {/* Search Bar Row */}
-      <View style={styles.searchRow}>
+      {/* Search Pill */}
+      <View style={styles.searchWrapper}>
         <View style={styles.searchBox}>
-          <MaterialDesignIcons name="magnify" size={20} color="#94A3B8" style={styles.mr8} />
           <TextInput
             style={styles.searchInput}
             placeholder="Search by name, phone, or card..."
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor={PALETTE.onSurfaceMuted}
             value={search}
             onChangeText={setSearch}
           />
-          {search.length > 0 ? (
-            <TouchableOpacity onPress={() => setSearch('')} hitSlop={10}>
-              <MaterialDesignIcons name="close-circle" size={18} color="#94A3B8" />
+          {search.length > 0 && (
+            <TouchableOpacity
+              onPress={() => setSearch('')}
+              hitSlop={10}
+              style={styles.clearBtn}
+            >
+              <X size={16} strokeWidth={2} color={PALETTE.onSurfaceMuted} />
             </TouchableOpacity>
-          ) : null}
+          )}
+          <View style={styles.searchSubmitCircle}>
+            <Search size={18} strokeWidth={2} color={PALETTE.onPrimary} />
+          </View>
         </View>
       </View>
 
-      {/* Customers List */}
       <ScrollView
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={handleRefresh} />
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={handleRefresh}
+            tintColor={PALETTE.primary}
+          />
         }
       >
         {error ? (
-          <View style={styles.errorContainer}>
-            <MaterialDesignIcons name="alert-circle-outline" size={40} color="#EF4444" style={styles.mb8} />
+          <View style={styles.errorCard}>
+            <AlertCircle size={36} strokeWidth={2} color={PALETTE.primary} />
             <Text style={styles.errorText}>{error}</Text>
             <TouchableOpacity style={styles.retryButton} onPress={handleRefresh}>
               <Text style={styles.retryButtonText}>Retry</Text>
@@ -141,7 +176,9 @@ export default function AdminCustomersScreen({ onOpenScanner }: AdminCustomersSc
             const card = customerCard.loyaltyCard || {};
             const isRewardReady = customerCard.isRewardAvailable;
             const isProcessing = actionLoadingId === customerCard._id;
-            const initial = customer.name ? customer.name.charAt(0).toUpperCase() : null;
+            const initial = customer.name
+              ? customer.name.charAt(0).toUpperCase()
+              : null;
 
             return (
               <View key={customerCard._id} style={styles.customerCard}>
@@ -150,47 +187,81 @@ export default function AdminCustomersScreen({ onOpenScanner }: AdminCustomersSc
                     {initial ? (
                       <Text style={styles.avatarInitial}>{initial}</Text>
                     ) : (
-                      <MaterialDesignIcons name="account" size={22} color="#7C3AED" />
+                      <User size={20} strokeWidth={2} color={PALETTE.primary} />
                     )}
                   </View>
 
                   <View style={styles.customerInfo}>
-                    <Text style={styles.customerName}>{customer.name || 'Customer'}</Text>
-                    <View style={styles.detailRow}>
-                      <MaterialDesignIcons name="phone-outline" size={12} color="#64748B" style={styles.mr4} />
-                      <Text style={styles.customerPhone}>{customer.phone || 'No phone'}</Text>
-                    </View>
-                    <View style={styles.detailRow}>
-                      <MaterialDesignIcons name="credit-card-outline" size={12} color="#7C3AED" style={styles.mr4} />
-                      <Text style={styles.cardTitle}>{card.title || 'Loyalty Program'}</Text>
-                    </View>
-                  </View>
-
-                  <View style={[styles.stampBadge, isRewardReady && styles.stampBadgeReady]}>
-                    <Text style={[styles.stampValue, isRewardReady && styles.stampValueReady]}>
-                      {customerCard.currentStamps || 0}/{card.totalStamps || 10}
+                    <Text style={styles.customerName} numberOfLines={1}>
+                      {customer.name || 'Customer'}
                     </Text>
-                    <View style={styles.stampLabelRow}>
-                      {isRewardReady && (
-                        <MaterialDesignIcons name="gift" size={11} color="#B45309" style={styles.mr2} />
-                      )}
-                      <Text style={[styles.stampLabel, isRewardReady && styles.stampLabelReady]}>
-                        {isRewardReady ? 'Ready' : 'Stamps'}
+                    <View style={styles.detailRow}>
+                      <Phone
+                        size={12}
+                        strokeWidth={2}
+                        color={PALETTE.onSurfaceVariant}
+                      />
+                      <Text style={styles.customerPhone}>
+                        {customer.phone || 'No phone'}
+                      </Text>
+                    </View>
+                    <View style={styles.detailRow}>
+                      <CreditCard
+                        size={12}
+                        strokeWidth={2}
+                        color={PALETTE.primary}
+                      />
+                      <Text style={styles.cardTitle} numberOfLines={1}>
+                        {card.title || 'Loyalty Program'}
                       </Text>
                     </View>
                   </View>
+
+                  <View
+                    style={[
+                      styles.stampBadge,
+                      isRewardReady && styles.stampBadgeReady,
+                    ]}
+                  >
+                    {isRewardReady ? (
+                      <Gift size={12} strokeWidth={2} color={PALETTE.primary} />
+                    ) : (
+                      <Star
+                        size={12}
+                        strokeWidth={2}
+                        color={PALETTE.warning}
+                        fill={PALETTE.warning}
+                      />
+                    )}
+                    <Text
+                      style={[
+                        styles.stampValue,
+                        isRewardReady && styles.stampValueReady,
+                      ]}
+                    >
+                      {customerCard.currentStamps || 0}/{card.totalStamps || 10}
+                    </Text>
+                  </View>
                 </View>
 
-                {/* Actions row: Add Stamp & Redeem Reward */}
                 <View style={styles.actionRow}>
                   {isRewardReady ? (
                     <TouchableOpacity
                       style={styles.redeemButton}
-                      onPress={() => handleRedeemReward(customerCard._id, customer.name || 'Customer')}
+                      onPress={() =>
+                        handleRedeemReward(
+                          customerCard._id,
+                          customer.name || 'Customer'
+                        )
+                      }
                       disabled={isProcessing}
-                      activeOpacity={0.8}
+                      activeOpacity={0.85}
                     >
-                      <MaterialDesignIcons name="gift" size={16} color="#FFFFFF" style={styles.mr6} />
+                      <Gift
+                        size={16}
+                        strokeWidth={2}
+                        color={PALETTE.primary}
+                      />
                       <Text style={styles.redeemButtonText}>
                         {isProcessing ? 'Redeeming...' : 'Redeem Reward'}
                       </Text>
@@ -198,11 +269,20 @@ export default function AdminCustomersScreen({ onOpenScanner }: AdminCustomersSc
                   ) : (
                     <TouchableOpacity
                       style={styles.addStampButton}
-                      onPress={() => handleAddStamp(customerCard._id, customer.name || 'Customer')}
+                      onPress={() =>
+                        handleAddStamp(
+                          customerCard._id,
+                          customer.name || 'Customer'
+                        )
+                      }
                       disabled={isProcessing}
-                      activeOpacity={0.8}
+                      activeOpacity={0.85}
                     >
-                      <MaterialDesignIcons name="plus-circle" size={16} color="#FFFFFF" style={styles.mr6} />
+                      <PlusCircle
+                        size={16}
+                        strokeWidth={2}
+                        color={PALETTE.onPrimary}
+                      />
                       <Text style={styles.addStampButtonText}>
                         {isProcessing ? 'Adding Stamp...' : 'Add 1 Stamp'}
                       </Text>
@@ -215,7 +295,7 @@ export default function AdminCustomersScreen({ onOpenScanner }: AdminCustomersSc
         ) : (
           <View style={styles.emptyState}>
             <View style={styles.emptyIconCircle}>
-              <MaterialDesignIcons name="account-group-outline" size={48} color="#94A3B8" />
+              <Users size={28} strokeWidth={2} color={PALETTE.primary} />
             </View>
             <Text style={styles.emptyTitle}>No Customers Found</Text>
             <Text style={styles.emptySubtitle}>
@@ -233,245 +313,240 @@ export default function AdminCustomersScreen({ onOpenScanner }: AdminCustomersSc
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: PALETTE.surfaceAlt,
   },
   header: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     paddingTop: 16,
-    paddingBottom: 10,
+    paddingBottom: 12,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+  },
+  eyebrow: {
+    ...TYPOGRAPHY.labelUppercase,
+    color: PALETTE.onSurfaceVariant,
+    marginBottom: 4,
   },
   title: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#0F172A',
+    ...TYPOGRAPHY.displayMd,
+    color: PALETTE.onSurface,
   },
   subtitle: {
-    fontSize: 12,
-    color: '#64748B',
+    ...TYPOGRAPHY.caption,
+    color: PALETTE.onSurfaceVariant,
     marginTop: 2,
   },
   scanHeaderButton: {
-    backgroundColor: '#EDE9FE',
+    backgroundColor: PALETTE.surfaceContrast,
     paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 14,
+    height: 40,
+    borderRadius: RADII.full,
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#DDD6FE',
+    gap: 6,
   },
   scanHeaderButtonText: {
-    color: '#7C3AED',
-    fontWeight: '700',
-    fontSize: 13,
+    ...TYPOGRAPHY.labelSm,
+    color: PALETTE.surface,
   },
-  searchRow: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+  searchWrapper: {
+    paddingHorizontal: 24,
+    marginBottom: 14,
   },
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    height: 44,
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.full,
+    paddingLeft: 20,
+    paddingRight: 7,
+    height: 54,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: PALETTE.border,
+    ...SHADOWS.softCard,
   },
   searchInput: {
     flex: 1,
-    fontSize: 14,
-    color: '#0F172A',
-    fontWeight: '500',
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurface,
+    paddingRight: 8,
+  },
+  clearBtn: {
+    padding: 6,
+    marginRight: 4,
+  },
+  searchSubmitCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   listContent: {
-    paddingHorizontal: 20,
-    paddingTop: 14,
-    paddingBottom: 90,
+    paddingHorizontal: 24,
+    paddingBottom: 120,
     gap: 14,
   },
   customerCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    padding: 16,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 2,
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    padding: 18,
+    ...SHADOWS.softCard,
   },
   customerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
   },
   avatarCircle: {
-    width: 46,
-    height: 46,
-    borderRadius: 14,
-    backgroundColor: '#EDE9FE',
+    width: 48,
+    height: 48,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.illusCoralBg,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
   },
   avatarInitial: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#7C3AED',
+    ...TYPOGRAPHY.headlineSm,
+    color: PALETTE.primary,
   },
   customerInfo: {
     flex: 1,
+    marginRight: 8,
   },
   customerName: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#0F172A',
-    marginBottom: 2,
+    ...TYPOGRAPHY.headlineSm,
+    color: PALETTE.onSurface,
   },
   detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 2,
+    gap: 5,
+    marginTop: 3,
   },
   customerPhone: {
-    fontSize: 12,
-    color: '#64748B',
+    ...TYPOGRAPHY.caption,
+    color: PALETTE.onSurfaceVariant,
   },
   cardTitle: {
-    fontSize: 12,
-    color: '#7C3AED',
+    ...TYPOGRAPHY.caption,
+    color: PALETTE.primary,
     fontWeight: '600',
+    flex: 1,
   },
   stampBadge: {
-    backgroundColor: '#F1F5F9',
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    gap: 5,
+    backgroundColor: PALETTE.border,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: RADII.sm,
   },
   stampBadgeReady: {
-    backgroundColor: '#D1FAE5',
-    borderColor: '#A7F3D0',
+    backgroundColor: PALETTE.surfaceContrast,
   },
   stampValue: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: '#1E293B',
+    ...TYPOGRAPHY.labelSm,
+    color: PALETTE.onSurface,
   },
   stampValueReady: {
-    color: '#059669',
-  },
-  stampLabelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stampLabel: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#64748B',
-    textTransform: 'uppercase',
-  },
-  stampLabelReady: {
-    color: '#059669',
-  },
-  mr2: {
-    marginRight: 2,
+    color: PALETTE.surface,
   },
   actionRow: {
+    marginTop: 14,
+    paddingTop: 14,
     borderTopWidth: 1,
-    borderTopColor: '#F1F5F9',
-    paddingTop: 10,
+    borderTopColor: PALETTE.border,
   },
   addStampButton: {
-    backgroundColor: '#7C3AED',
-    borderRadius: 12,
-    paddingVertical: 10,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    flexDirection: 'row',
+    gap: 8,
+    backgroundColor: PALETTE.primary,
+    height: 46,
+    borderRadius: RADII.full,
+    ...SHADOWS.btn,
   },
   addStampButtonText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
+    ...TYPOGRAPHY.labelSm,
     fontSize: 14,
+    color: PALETTE.onPrimary,
   },
   redeemButton: {
-    backgroundColor: '#10B981',
-    borderRadius: 12,
-    paddingVertical: 10,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    flexDirection: 'row',
+    gap: 8,
+    backgroundColor: PALETTE.surfaceContrast,
+    height: 46,
+    borderRadius: RADII.full,
   },
   redeemButtonText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
+    ...TYPOGRAPHY.labelSm,
     fontSize: 14,
+    color: PALETTE.surface,
+  },
+  errorCard: {
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    padding: 28,
+    alignItems: 'center',
+    gap: 12,
+    ...SHADOWS.softCard,
+  },
+  errorText: {
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurface,
+    textAlign: 'center',
+  },
+  retryButton: {
+    backgroundColor: PALETTE.primary,
+    paddingHorizontal: 28,
+    height: 48,
+    borderRadius: RADII.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...SHADOWS.btn,
+  },
+  retryButtonText: {
+    ...TYPOGRAPHY.labelMd,
+    color: PALETTE.onPrimary,
   },
   emptyState: {
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    paddingVertical: 40,
+    paddingHorizontal: 24,
     alignItems: 'center',
-    paddingVertical: 50,
+    ...SHADOWS.softCard,
   },
   emptyIconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#F1F5F9',
+    width: 64,
+    height: 64,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.illusCoralBg,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
   },
   emptyTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1E293B',
+    ...TYPOGRAPHY.headlineMd,
+    color: PALETTE.onSurface,
     marginBottom: 6,
   },
   emptySubtitle: {
-    fontSize: 14,
-    color: '#64748B',
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurfaceVariant,
     textAlign: 'center',
-    lineHeight: 20,
-    paddingHorizontal: 20,
   },
-  errorContainer: {
-    alignItems: 'center',
-    paddingVertical: 40,
-  },
-  errorText: {
-    fontSize: 14,
-    color: '#EF4444',
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-  retryButton: {
-    backgroundColor: '#7C3AED',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 10,
-  },
-  retryButtonText: {
-    color: '#FFFFFF',
-    fontWeight: '600',
-    fontSize: 13,
-  },
-  mr4: { marginRight: 4 },
-  mr6: { marginRight: 6 },
-  mr8: { marginRight: 8 },
-  mb8: { marginBottom: 8 },
 });

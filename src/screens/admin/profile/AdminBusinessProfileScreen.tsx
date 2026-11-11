@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -8,9 +7,20 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  AlertCircle,
+  Mail,
+  MapPin,
+  Pencil,
+  Phone,
+  ShieldCheck,
+  Store,
+  Tag,
+} from 'lucide-react-native';
 import { useBusinessProfile } from '../../../hooks/useApi';
 import { AdminBusinessProfileScreenSkeleton } from '../../../components/skeleton';
+import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../../constants/theme';
 
 interface AdminBusinessProfileScreenProps {
   onEdit?: () => void;
@@ -25,75 +35,62 @@ export default function AdminBusinessProfileScreen({
     return <AdminBusinessProfileScreenSkeleton />;
   }
 
-  const profileFields: Array<{
-    label: string;
-    value: string;
-    icon: React.ComponentProps<typeof MaterialDesignIcons>['name'];
-    color: string;
-    bgColor: string;
-  }> = [
+  const profileFields = [
     {
       label: 'Business Name',
       value: profile?.businessName || 'Your Business',
-      icon: 'storefront-outline',
-      color: '#7C3AED',
-      bgColor: '#EDE9FE',
+      Icon: Store,
     },
     {
       label: 'Category',
       value: profile?.category || 'Retail',
-      icon: 'shape-outline',
-      color: '#0284C7',
-      bgColor: '#E0F2FE',
+      Icon: Tag,
     },
     {
       label: 'Location Address',
-      value: profile?.address ? `${profile.address}, ${profile.city || ''}` : 'Not provided',
-      icon: 'map-marker-outline',
-      color: '#EA580C',
-      bgColor: '#FFEDD5',
+      value: profile?.address
+        ? `${profile.address}${profile.city ? `, ${profile.city}` : ''}`
+        : 'Not provided',
+      Icon: MapPin,
     },
     {
       label: 'Contact Number',
       value: profile?.phone || 'Not provided',
-      icon: 'phone-outline',
-      color: '#10B981',
-      bgColor: '#D1FAE5',
+      Icon: Phone,
     },
     {
       label: 'Email Address',
       value: profile?.email || 'Not provided',
-      icon: 'email-outline',
-      color: '#6366F1',
-      bgColor: '#EEF2FF',
+      Icon: Mail,
     },
     {
       label: 'Account Status',
       value: profile?.isActive !== false ? 'Active' : 'Inactive',
-      icon: 'shield-check-outline',
-      color: '#059669',
-      bgColor: '#ECFDF5',
+      Icon: ShieldCheck,
     },
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <StatusBar barStyle="dark-content" backgroundColor={PALETTE.surfaceAlt} />
 
-      {/* Header */}
       <View style={styles.header}>
         <View>
+          <Text style={styles.eyebrow}>Merchant Identity</Text>
           <Text style={styles.title}>Business Profile</Text>
-          <Text style={styles.subtitle}>Store details and customer-facing info</Text>
+          <Text style={styles.subtitle}>
+            Store details and customer-facing info
+          </Text>
         </View>
 
         {onEdit ? (
           <TouchableOpacity
             style={styles.editButton}
             onPress={onEdit}
-            activeOpacity={0.7}
+            activeOpacity={0.75}
+            accessibilityLabel="Edit Business Profile"
           >
-            <MaterialDesignIcons name="pencil-outline" size={18} color="#7C3AED" />
+            <Pencil size={18} strokeWidth={2} color={PALETTE.primary} />
           </TouchableOpacity>
         ) : null}
       </View>
@@ -103,38 +100,36 @@ export default function AdminBusinessProfileScreen({
         showsVerticalScrollIndicator={false}
       >
         {error ? (
-          <View style={styles.errorContainer}>
-            <MaterialDesignIcons name="alert-circle-outline" size={40} color="#EF4444" style={styles.mb8} />
+          <View style={styles.errorCard}>
+            <AlertCircle size={36} strokeWidth={2} color={PALETTE.primary} />
             <Text style={styles.errorText}>{error}</Text>
           </View>
         ) : (
           <>
-            {/* Business Avatar & Branding Card */}
             <View style={styles.brandingCard}>
               <View style={styles.logoCircle}>
-                <MaterialDesignIcons name="storefront" size={38} color="#7C3AED" />
+                <Store size={32} strokeWidth={2} color={PALETTE.primary} />
               </View>
               <Text style={styles.businessName}>
                 {profile?.businessName || 'Your Business'}
               </Text>
               <View style={styles.categoryBadge}>
-                <MaterialDesignIcons name="tag-outline" size={12} color="#7C3AED" style={styles.mr4} />
+                <Tag size={12} strokeWidth={2} color={PALETTE.primary} />
                 <Text style={styles.businessCategory}>
                   {profile?.category || 'Retail Store'}
                 </Text>
               </View>
             </View>
 
-            {/* Profile Field Details */}
             <View style={styles.fieldsContainer}>
-              {profileFields.map((field, idx) => (
+              {profileFields.map(({ label, value, Icon }, idx) => (
                 <View key={idx} style={styles.fieldItem}>
-                  <View style={[styles.fieldIconBox, { backgroundColor: field.bgColor }]}>
-                    <MaterialDesignIcons name={field.icon} size={20} color={field.color} />
+                  <View style={styles.fieldIconBox}>
+                    <Icon size={18} strokeWidth={2} color={PALETTE.primary} />
                   </View>
                   <View style={styles.fieldInfo}>
-                    <Text style={styles.fieldLabel}>{field.label}</Text>
-                    <Text style={styles.fieldValue}>{field.value}</Text>
+                    <Text style={styles.fieldLabel}>{label}</Text>
+                    <Text style={styles.fieldValue}>{value}</Text>
                   </View>
                 </View>
               ))}
@@ -149,112 +144,104 @@ export default function AdminBusinessProfileScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: PALETTE.surfaceAlt,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     paddingTop: 16,
-    paddingBottom: 12,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+    paddingBottom: 14,
+  },
+  eyebrow: {
+    ...TYPOGRAPHY.labelUppercase,
+    color: PALETTE.onSurfaceVariant,
+    marginBottom: 4,
   },
   title: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#0F172A',
+    ...TYPOGRAPHY.displayMd,
+    fontSize: 28,
+    lineHeight: 34,
+    color: PALETTE.onSurface,
   },
   subtitle: {
-    fontSize: 12,
-    color: '#64748B',
+    ...TYPOGRAPHY.caption,
+    color: PALETTE.onSurfaceVariant,
     marginTop: 2,
   },
   editButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 14,
-    backgroundColor: '#EDE9FE',
+    width: 44,
+    height: 44,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.surface,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#DDD6FE',
+    ...SHADOWS.softCard,
   },
   scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 100,
+    paddingHorizontal: 24,
+    paddingBottom: 120,
+    gap: 18,
   },
   brandingCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
     padding: 24,
     alignItems: 'center',
-    marginBottom: 16,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
+    ...SHADOWS.softCard,
   },
   logoCircle: {
     width: 76,
     height: 76,
-    borderRadius: 24,
-    backgroundColor: '#EDE9FE',
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.illusCoralBg,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
-    borderWidth: 1.5,
-    borderColor: '#DDD6FE',
+    marginBottom: 14,
   },
   businessName: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#0F172A',
+    ...TYPOGRAPHY.headlineLg,
+    color: PALETTE.onSurface,
+    textAlign: 'center',
+    marginBottom: 8,
   },
   categoryBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F3E8FF',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-    marginTop: 8,
+    gap: 6,
+    backgroundColor: PALETTE.surfaceContrast,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: RADII.full,
   },
   businessCategory: {
-    fontSize: 13,
-    color: '#7C3AED',
-    fontWeight: '600',
+    ...TYPOGRAPHY.labelSm,
+    fontSize: 12,
+    color: PALETTE.surface,
   },
   fieldsContainer: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    paddingVertical: 6,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 2,
+    gap: 10,
   },
   fieldItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.lg,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    padding: 16,
+    ...SHADOWS.softCard,
   },
   fieldIconBox: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+    width: 42,
+    height: 42,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.illusCoralBg,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 14,
@@ -263,27 +250,29 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   fieldLabel: {
-    fontSize: 11,
-    color: '#64748B',
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    ...TYPOGRAPHY.labelUppercase,
+    fontSize: 10,
+    color: PALETTE.onSurfaceVariant,
   },
   fieldValue: {
+    ...TYPOGRAPHY.labelMd,
     fontSize: 15,
-    fontWeight: '600',
-    color: '#0F172A',
+    color: PALETTE.onSurface,
     marginTop: 2,
   },
-  errorContainer: {
+  errorCard: {
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    padding: 28,
     alignItems: 'center',
-    paddingVertical: 40,
+    gap: 12,
+    ...SHADOWS.softCard,
   },
   errorText: {
-    fontSize: 14,
-    color: '#EF4444',
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurface,
     textAlign: 'center',
   },
-  mr4: { marginRight: 4 },
-  mb8: { marginBottom: 8 },
 });

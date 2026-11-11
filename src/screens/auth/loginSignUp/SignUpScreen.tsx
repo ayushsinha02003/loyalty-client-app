@@ -10,7 +10,18 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
+import {
+  ArrowLeft,
+  Check,
+  Mail,
+  MapPin,
+  Pencil,
+  Phone,
+  Store,
+  Upload,
+  User,
+} from 'lucide-react-native';
+import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../../constants/theme';
 import { registerUser, RegisterResponse } from '../../../services/authService';
 import PrimaryInputField from '../../../components/input/PrimaryInputField';
 import PrimaryPasswordField from '../../../components/input/PrimaryPasswordField';
@@ -266,7 +277,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignup, onLogin }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+      <StatusBar barStyle="dark-content" backgroundColor={PALETTE.surfaceAlt} />
 
       <KeyboardAvoidingView
         style={styles.keyboardView}
@@ -288,7 +299,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignup, onLogin }) => {
                     style={styles.backButton}
                     disabled={loading}
                   >
-                    <MaterialDesignIcons name="arrow-left" size={24} color="#1E293B" />
+                    <ArrowLeft size={20} strokeWidth={2} color={PALETTE.onSurface} />
                   </TouchableOpacity>
                 ) : (
                   <View style={styles.placeholderBox} />
@@ -532,9 +543,9 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignup, onLogin }) => {
                 >
                   <View style={styles.uploadIconCircle}>
                     {logoUploaded ? (
-                      <MaterialDesignIcons name="check" size={22} color="#16A34A" />
+                      <Check size={22} strokeWidth={2.5} color={PALETTE.primary} />
                     ) : (
-                      <MaterialDesignIcons name="cloud-upload-outline" size={22} color="#7C3AED" />
+                      <Upload size={22} strokeWidth={2} color={PALETTE.primary} />
                     )}
                   </View>
                   <Text style={styles.uploadText}>
@@ -631,7 +642,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignup, onLogin }) => {
                 {/* Header */}
                 <View style={styles.previewHeader}>
                   <View style={styles.previewLogo}>
-                    <MaterialDesignIcons name="storefront-outline" size={24} color="#7C3AED" />
+                    <Store size={22} strokeWidth={2} color={PALETTE.primary} />
                   </View>
                   <View style={styles.previewHeaderText}>
                     <Text style={styles.previewBusinessName}>
@@ -646,7 +657,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignup, onLogin }) => {
                     style={styles.editButton}
                     disabled={loading}
                   >
-                    <MaterialDesignIcons name="pencil-outline" size={18} color="#7C3AED" />
+                    <Pencil size={18} strokeWidth={2} color={PALETTE.primary} />
                   </TouchableOpacity>
                 </View>
 
@@ -654,21 +665,21 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignup, onLogin }) => {
 
                 {/* Details */}
                 <View style={styles.previewRow}>
-                  <MaterialDesignIcons name="map-marker-outline" size={16} color="#64748B" style={styles.previewIconMargin} />
+                  <MapPin size={16} strokeWidth={2} color={PALETTE.onSurfaceVariant} style={styles.previewIconMargin} />
                   <Text style={styles.previewText}>
                     {address ? `${address}, ${city}` : 'No address specified'}
                   </Text>
                 </View>
 
                 <View style={styles.previewRow}>
-                  <MaterialDesignIcons name="account-outline" size={16} color="#64748B" style={styles.previewIconMargin} />
+                  <User size={16} strokeWidth={2} color={PALETTE.onSurfaceVariant} style={styles.previewIconMargin} />
                   <Text style={styles.previewText}>
                     {ownerName || 'Admin Owner'}
                   </Text>
                 </View>
 
                 <View style={styles.previewRow}>
-                  <MaterialDesignIcons name="phone-outline" size={16} color="#64748B" style={styles.previewIconMargin} />
+                  <Phone size={16} strokeWidth={2} color={PALETTE.onSurfaceVariant} style={styles.previewIconMargin} />
                   <Text style={styles.previewText}>
                     +91 {businessPhone || '98765 43210'}
                   </Text>
@@ -676,7 +687,7 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignup, onLogin }) => {
 
                 {businessEmail ? (
                   <View style={styles.previewRow}>
-                    <MaterialDesignIcons name="email-outline" size={16} color="#64748B" style={styles.previewIconMargin} />
+                    <Mail size={16} strokeWidth={2} color={PALETTE.onSurfaceVariant} style={styles.previewIconMargin} />
                     <Text style={styles.previewText}>{businessEmail}</Text>
                   </View>
                 ) : null}
@@ -722,7 +733,7 @@ export default SignUpScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: PALETTE.surfaceAlt,
   },
   keyboardView: {
     flex: 1,
@@ -745,20 +756,23 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: '#F1F5F9',
+    width: 44,
+    height: 44,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.surface,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
     alignItems: 'center',
     justifyContent: 'center',
+    ...SHADOWS.softCard,
   },
   backArrow: {
     fontSize: 20,
-    color: '#1E293B',
+    color: PALETTE.onSurface,
     fontWeight: '600',
   },
   placeholderBox: {
-    width: 40,
+    width: 44,
   },
   stepperContainer: {
     flexDirection: 'row',
@@ -768,10 +782,10 @@ const styles = StyleSheet.create({
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: PALETTE.illusNeutralCream,
   },
   stepDotActive: {
-    backgroundColor: '#7B3FF2',
+    backgroundColor: PALETTE.primary,
     width: 12,
     height: 12,
     borderRadius: 6,
@@ -779,23 +793,20 @@ const styles = StyleSheet.create({
   stepLine: {
     width: 26,
     height: 2.5,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: PALETTE.illusNeutralCream,
     marginHorizontal: 4,
   },
   stepLineActive: {
-    backgroundColor: '#7B3FF2',
+    backgroundColor: PALETTE.primary,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#1E293B',
-    lineHeight: 36,
+    ...TYPOGRAPHY.displayMd,
+    color: PALETTE.onSurface,
   },
   subtitle: {
     marginTop: 6,
-    fontSize: 15,
-    color: '#64748B',
-    fontWeight: '500',
+    ...TYPOGRAPHY.bodyMd,
+    color: PALETTE.onSurfaceVariant,
   },
   roleContainer: {
     flexDirection: 'row',
@@ -806,44 +817,43 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#334155',
+    ...TYPOGRAPHY.labelUppercase,
+    color: PALETTE.onSurfaceVariant,
     marginBottom: 8,
   },
   uploadSection: {
     marginBottom: 20,
   },
   uploadCard: {
-    height: 100,
-    borderRadius: 16,
+    height: 104,
+    borderRadius: RADII.xl,
     borderWidth: 1.5,
-    borderColor: '#C7D2FE',
+    borderColor: PALETTE.border,
     borderStyle: 'dashed',
-    backgroundColor: '#F5F3FF',
+    backgroundColor: PALETTE.surface,
     alignItems: 'center',
     justifyContent: 'center',
+    ...SHADOWS.softCard,
   },
   uploadCardDone: {
-    borderColor: '#10B981',
-    backgroundColor: '#ECFDF5',
+    borderColor: PALETTE.primary,
+    backgroundColor: PALETTE.illusCoralBg,
   },
   uploadIconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#EDE9FE',
+    width: 40,
+    height: 40,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.illusCoralBg,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   uploadIcon: {
     fontSize: 18,
   },
   uploadText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#7B3FF2',
+    ...TYPOGRAPHY.labelSm,
+    color: PALETTE.onSurface,
   },
   buttonRow: {
     flexDirection: 'row',
@@ -867,8 +877,8 @@ const styles = StyleSheet.create({
   previewLogo: {
     width: 50,
     height: 50,
-    borderRadius: 25,
-    backgroundColor: '#EDE9FE',
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.illusCoralBg,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -880,15 +890,13 @@ const styles = StyleSheet.create({
     marginLeft: 14,
   },
   previewBusinessName: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#1E293B',
+    ...TYPOGRAPHY.headlineSm,
+    color: PALETTE.onSurface,
     marginBottom: 2,
   },
   previewCategory: {
-    fontSize: 14,
-    color: '#64748B',
-    fontWeight: '500',
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurfaceVariant,
   },
   editButton: {
     padding: 8,
@@ -898,7 +906,7 @@ const styles = StyleSheet.create({
   },
   previewDivider: {
     height: 1,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: PALETTE.border,
     marginVertical: 16,
   },
   previewRow: {
@@ -910,10 +918,9 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   previewText: {
-    fontSize: 14,
-    color: '#475569',
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurfaceVariant,
     flex: 1,
-    fontWeight: '500',
   },
   footer: {
     flexDirection: 'row',
@@ -923,13 +930,13 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   footerText: {
-    color: '#64748B',
-    fontSize: 15,
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurfaceVariant,
   },
   loginText: {
     marginLeft: 6,
-    color: '#7B3FF2',
-    fontSize: 15,
-    fontWeight: '700',
+    ...TYPOGRAPHY.labelSm,
+    fontSize: 14,
+    color: PALETTE.primary,
   },
 });

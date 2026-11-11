@@ -6,6 +6,7 @@ import {
   ViewStyle,
   StyleProp,
 } from 'react-native';
+import { PALETTE } from '../../constants/theme';
 
 export interface SkeletonProps {
   width?: number | string;
@@ -122,7 +123,7 @@ export const SkeletonBox: React.FC<{
 
 const styles = StyleSheet.create({
   skeleton: {
-    backgroundColor: '#E2E8F0',
+    backgroundColor: PALETTE.border,
   },
 });
 

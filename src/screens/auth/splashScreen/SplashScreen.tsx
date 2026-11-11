@@ -1,14 +1,8 @@
 import React, { useEffect } from 'react';
-import {
-  SafeAreaView,
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  StatusBar,
-} from 'react-native';
-
-import { COLORS } from '../../../constants/colors';
+import { Image, StatusBar, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Sparkles } from 'lucide-react-native';
+import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../../constants/theme';
 
 interface SplashScreenProps {
   onFinish: () => void;
@@ -25,25 +19,36 @@ const SplashScreen = ({ onFinish }: SplashScreenProps) => {
 
   return (
     <>
-      <StatusBar barStyle="light-content" backgroundColor={COLORS.primary} />
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={PALETTE.surfaceContrast}
+      />
 
       <SafeAreaView style={styles.container}>
-        {/* Decorative Stars */}
-        <Text style={styles.star1}>✦</Text>
-        <Text style={styles.star2}>✦</Text>
-        <Text style={styles.star3}>✦</Text>
+        <View style={styles.sparkleTopLeft}>
+          <Sparkles size={20} strokeWidth={2} color={PALETTE.primary} />
+        </View>
+        <View style={styles.sparkleTopRight}>
+          <Sparkles size={16} strokeWidth={2} color={PALETTE.warning} />
+        </View>
+        <View style={styles.sparkleBottomLeft}>
+          <Sparkles size={18} strokeWidth={2} color={PALETTE.primary} />
+        </View>
 
-        {/* Center */}
         <View style={styles.center}>
-          <Image
-            source={require('../../../assets/images/logo.png')}
-            style={styles.logo}
-            resizeMode="contain"
-          />
+          <View style={styles.logoFrame}>
+            <Image
+              source={require('../../../assets/images/logo.png')}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+          </View>
 
           <Text style={styles.title}>LoyaltyApp</Text>
 
-          <Text style={styles.subtitle}>Collect Stamps, Earn Rewards</Text>
+          <View style={styles.taglinePill}>
+            <Text style={styles.subtitle}>Collect Stamps, Earn Rewards</Text>
+          </View>
         </View>
       </SafeAreaView>
     </>
@@ -55,60 +60,64 @@ export default SplashScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.primary,
-    justifyContent: 'space-between',
+    backgroundColor: PALETTE.surfaceContrast,
+    justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 40,
   },
-
   center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 24,
   },
-
+  logoFrame: {
+    width: 148,
+    height: 148,
+    borderRadius: RADII.xl,
+    backgroundColor: PALETTE.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 28,
+    ...SHADOWS.softCard,
+  },
   logo: {
-    width: 150,
-    height: 150,
-    borderRadius: 40,
-    marginBottom: 25,
+    width: 118,
+    height: 118,
+    borderRadius: RADII.lg,
   },
-
   title: {
+    ...TYPOGRAPHY.displayMd,
     fontSize: 34,
-    fontWeight: '700',
-    color: '#FFFFFF',
+    color: PALETTE.surface,
   },
-
+  taglinePill: {
+    marginTop: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 7,
+    borderRadius: RADII.full,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+  },
   subtitle: {
-    marginTop: 10,
-    fontSize: 16,
-    color: COLORS.background,
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurfaceMuted,
   },
-  star1: {
+  sparkleTopLeft: {
     position: 'absolute',
-    top: 120,
+    top: 110,
+    left: 48,
+    opacity: 0.9,
+  },
+  sparkleTopRight: {
+    position: 'absolute',
+    top: 190,
+    right: 54,
+    opacity: 0.85,
+  },
+  sparkleBottomLeft: {
+    position: 'absolute',
+    bottom: 130,
     left: 60,
-    fontSize: 18,
-    color: '#FFFFFF',
-    opacity: 0.8,
-  },
-
-  star2: {
-    position: 'absolute',
-    top: 200,
-    right: 70,
-    fontSize: 14,
-    color: '#FFFFFF',
-    opacity: 0.8,
-  },
-
-  star3: {
-    position: 'absolute',
-    top: 260,
-    left: 90,
-    fontSize: 12,
-    color: '#FFFFFF',
-    opacity: 0.8,
+    opacity: 0.75,
   },
 });

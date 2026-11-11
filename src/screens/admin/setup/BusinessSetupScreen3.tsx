@@ -1,15 +1,27 @@
 import React from 'react';
 import {
-  SafeAreaView,
-  StatusBar,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
-import PrimaryCard from '../../../components/cards/PrimaryCard';
-import PrimaryButton from '../../../components/button/PrimaryButton';
+import {
+  ArrowLeft,
+  Mail,
+  MapPin,
+  Pencil,
+  Phone,
+  Store,
+} from 'lucide-react-native';
+import { PrimaryButton, PrimaryCard } from '../../../components';
+import {
+  PALETTE,
+  RADII,
+  SHADOWS,
+  SPACING,
+  TYPOGRAPHY,
+} from '../../../constants/theme';
 
 interface BusinessSetupScreen3Props {
   onBack?: () => void;
@@ -33,172 +45,180 @@ export default function BusinessSetupScreen3({
   email = 'business@email.com',
 }: BusinessSetupScreen3Props) {
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-
-      <View style={styles.content}>
-        {/* Header with Stepper */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={onBack} style={styles.backButton}>
-            <MaterialDesignIcons name="arrow-left" size={24} color="#1E293B" />
+    <View style={styles.screen}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.topRow}>
+          <TouchableOpacity
+            onPress={onBack}
+            activeOpacity={0.8}
+            style={styles.backButton}
+            accessibilityLabel="Go back"
+          >
+            <ArrowLeft
+              size={20}
+              color={PALETTE.onSurface}
+              strokeWidth={2}
+            />
           </TouchableOpacity>
 
-          <View style={styles.stepperContainer}>
-            <View style={[styles.stepDot, styles.stepDotActive]} />
-            <View style={[styles.stepLine, styles.stepLineActive]} />
-            <View style={[styles.stepDot, styles.stepDotActive]} />
-            <View style={[styles.stepLine, styles.stepLineActive]} />
-            <View style={[styles.stepDot, styles.stepDotActive]} />
+          <View style={styles.stepper}>
+            <View style={[styles.stepDot, styles.stepActive]} />
+            <View style={[styles.stepLine, styles.stepActive]} />
+            <View style={[styles.stepDot, styles.stepActive]} />
+            <View style={[styles.stepLine, styles.stepActive]} />
+            <View style={[styles.stepPill, styles.stepActive]} />
           </View>
 
-          <View style={styles.placeholder} />
+          <View style={styles.topSpacer} />
         </View>
 
-        {/* Title */}
-        <View style={styles.titleSection}>
-          <Text style={styles.title}>Almost Done!{'\n'}Review & Confirm</Text>
+        <View style={styles.headerBlock}>
+          <Text style={styles.eyebrow}>STEP 3 OF 3</Text>
+          <Text style={styles.title}>Review & Launch</Text>
+          <Text style={styles.subtitle}>
+            Confirm your store profile before launching your loyalty cards.
+          </Text>
         </View>
 
-        {/* Business Preview Card */}
-        <View style={styles.previewSection}>
-          <Text style={styles.previewHeading}>Business Preview</Text>
-
-          <PrimaryCard style={styles.previewCard}>
-            {/* Business Logo & Name Row */}
-            <View style={styles.cardHeader}>
-              <View style={styles.logoCircle}>
-                <MaterialDesignIcons name="storefront-outline" size={26} color="#7C3AED" />
-              </View>
-
-              <View style={styles.cardHeaderInfo}>
-                <Text style={styles.businessName}>{businessName}</Text>
-                <Text style={styles.businessCategory}>{category}</Text>
-              </View>
-
-              <TouchableOpacity onPress={onEdit} style={styles.editButton}>
-                <MaterialDesignIcons name="pencil-outline" size={18} color="#7C3AED" />
-              </TouchableOpacity>
+        <PrimaryCard style={styles.previewCard}>
+          <View style={styles.cardHeader}>
+            <View style={styles.storeIconCircle}>
+              <Store size={24} color={PALETTE.primary} strokeWidth={2} />
             </View>
-
-            <View style={styles.divider} />
-
-            {/* Details List */}
-            <View style={styles.detailRow}>
-              <MaterialDesignIcons name="map-marker-outline" size={16} color="#64748B" style={styles.detailIconMargin} />
-              <Text style={styles.detailText}>{address}</Text>
+            <View style={styles.cardHeaderInfo}>
+              <Text style={styles.businessName}>{businessName}</Text>
+              <Text style={styles.businessCategory}>{category}</Text>
             </View>
+            <TouchableOpacity
+              onPress={onEdit}
+              activeOpacity={0.8}
+              style={styles.editButton}
+              accessibilityLabel="Edit business details"
+            >
+              <Pencil size={16} color={PALETTE.primary} strokeWidth={2} />
+            </TouchableOpacity>
+          </View>
 
-            <View style={styles.detailRow}>
-              <MaterialDesignIcons name="phone-outline" size={16} color="#64748B" style={styles.detailIconMargin} />
-              <Text style={styles.detailText}>{phone}</Text>
-            </View>
+          <View style={styles.divider} />
 
-            <View style={styles.detailRow}>
-              <MaterialDesignIcons name="email-outline" size={16} color="#64748B" style={styles.detailIconMargin} />
-              <Text style={styles.detailText}>{email}</Text>
+          <View style={styles.detailRow}>
+            <View style={styles.detailIconWell}>
+              <MapPin size={16} color={PALETTE.primary} strokeWidth={2} />
             </View>
-          </PrimaryCard>
+            <Text style={styles.detailText}>{address}</Text>
+          </View>
+
+          <View style={styles.detailRow}>
+            <View style={styles.detailIconWell}>
+              <Phone size={16} color={PALETTE.primary} strokeWidth={2} />
+            </View>
+            <Text style={styles.detailText}>{phone}</Text>
+          </View>
+
+          <View style={[styles.detailRow, styles.lastDetailRow]}>
+            <View style={styles.detailIconWell}>
+              <Mail size={16} color={PALETTE.primary} strokeWidth={2} />
+            </View>
+            <Text style={styles.detailText}>{email}</Text>
+          </View>
+        </PrimaryCard>
+
+        <View style={styles.footer}>
+          <PrimaryButton title="Create Business" onPress={onCreateBusiness} />
         </View>
-
-        {/* Submit Button */}
-        <PrimaryButton
-          title="Create Business"
-          onPress={onCreateBusiness}
-        />
-      </View>
-    </SafeAreaView>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: PALETTE.surfaceAlt,
   },
-  content: {
-    flex: 1,
-    paddingHorizontal: 24,
-    justifyContent: 'space-between',
-    paddingBottom: 32,
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: SPACING.gutter,
+    paddingTop: 20,
+    paddingBottom: 36,
   },
-  header: {
+  topRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 12,
+    marginBottom: 28,
   },
   backButton: {
     width: 44,
     height: 44,
-    borderRadius: 14,
-    backgroundColor: '#F8FAFC',
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.surface,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
     alignItems: 'center',
     justifyContent: 'center',
+    ...SHADOWS.softCard,
   },
-  backArrow: {
-    fontSize: 22,
-    color: '#1E293B',
-    fontWeight: '600',
-  },
-  stepperContainer: {
+  stepper: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  stepDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#E2E8F0',
+  stepPill: {
+    width: 24,
+    height: 8,
+    borderRadius: RADII.full,
   },
-  stepDotActive: {
-    backgroundColor: '#7B3FF2',
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+  stepDot: {
+    width: 8,
+    height: 8,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.border,
   },
   stepLine: {
-    width: 24,
+    width: 20,
     height: 2,
-    backgroundColor: '#E2E8F0',
-    marginHorizontal: 4,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.border,
+    marginHorizontal: 6,
   },
-  stepLineActive: {
-    backgroundColor: '#7B3FF2',
+  stepActive: {
+    backgroundColor: PALETTE.primary,
   },
-  placeholder: {
+  topSpacer: {
     width: 44,
   },
-  titleSection: {
-    marginTop: 18,
-    marginBottom: 16,
+  headerBlock: {
+    marginBottom: 24,
+  },
+  eyebrow: {
+    ...TYPOGRAPHY.labelUppercase,
+    color: PALETTE.primary,
+    marginBottom: 8,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#1E293B',
-    lineHeight: 36,
+    ...TYPOGRAPHY.displayMd,
+    marginBottom: 8,
   },
-  previewSection: {
-    flex: 1,
-  },
-  previewHeading: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#64748B',
-    marginBottom: 12,
+  subtitle: {
+    ...TYPOGRAPHY.bodyMd,
+    color: PALETTE.onSurfaceVariant,
   },
   previewCard: {
-    padding: 20,
+    padding: SPACING.lg,
+    marginBottom: 24,
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  logoCircle: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
-    backgroundColor: '#EDE9FE',
+  storeIconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: RADII.lg,
+    backgroundColor: PALETTE.illusCoralBg,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -207,37 +227,51 @@ const styles = StyleSheet.create({
     marginLeft: 14,
   },
   businessName: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#1E293B',
+    ...TYPOGRAPHY.headlineLg,
     marginBottom: 4,
   },
   businessCategory: {
-    fontSize: 14,
-    color: '#64748B',
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurfaceVariant,
   },
   editButton: {
-    padding: 8,
-  },
-  editIcon: {
-    fontSize: 18,
+    width: 40,
+    height: 40,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.surfaceAlt,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   divider: {
     height: 1,
-    backgroundColor: '#F1F5F9',
-    marginVertical: 18,
+    backgroundColor: PALETTE.border,
+    marginVertical: 20,
   },
   detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 14,
   },
-  detailIconMargin: {
+  lastDetailRow: {
+    marginBottom: 0,
+  },
+  detailIconWell: {
+    width: 34,
+    height: 34,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.illusCoralBg,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginRight: 12,
   },
   detailText: {
-    fontSize: 14,
-    color: '#475569',
+    ...TYPOGRAPHY.bodyMd,
+    color: PALETTE.onSurfaceVariant,
     flex: 1,
+  },
+  footer: {
+    marginTop: 'auto',
   },
 });

@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
   StatusBar,
   StyleSheet,
   Text,
@@ -10,8 +9,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { ArrowLeft, ShieldCheck } from 'lucide-react-native';
 import PrimaryButton from '../../components/button/PrimaryButton';
+import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../constants/theme';
 
 interface OtpVerificationScreenProps {
   phoneNumber?: string;
@@ -45,7 +46,6 @@ export default function OtpVerificationScreen({
     newOtp[index] = value;
     setOtp(newOtp);
 
-    // Auto-focus next input
     if (value && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
@@ -59,9 +59,7 @@ export default function OtpVerificationScreen({
 
   const handleVerify = () => {
     const fullCode = otp.join('');
-    if (onVerify) {
-      onVerify(fullCode);
-    }
+    onVerify?.(fullCode);
   };
 
   const formatTimer = () => {
@@ -71,27 +69,27 @@ export default function OtpVerificationScreen({
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <StatusBar barStyle="dark-content" backgroundColor={PALETTE.surfaceAlt} />
 
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <View style={styles.content}>
-          {/* Header */}
           <View style={styles.header}>
             <TouchableOpacity
               onPress={onBack}
               style={styles.backButton}
-              activeOpacity={0.7}
+              activeOpacity={0.75}
+              accessibilityLabel="Back"
             >
-              <MaterialDesignIcons name="arrow-left" size={24} color="#1E293B" />
+              <ArrowLeft size={20} strokeWidth={2} color={PALETTE.onSurface} />
             </TouchableOpacity>
           </View>
 
-          {/* Title & Subtitle */}
           <View style={styles.titleSection}>
+            <Text style={styles.eyebrow}>Security Check</Text>
             <Text style={styles.title}>Verify OTP</Text>
             <Text style={styles.subtitle}>
               Enter the 6-digit code sent to{'\n'}
@@ -99,7 +97,6 @@ export default function OtpVerificationScreen({
             </Text>
           </View>
 
-          {/* 6 Digit Input Boxes */}
           <View style={styles.otpRow}>
             {otp.map((digit, index) => {
               const isFilled = digit.length > 0;
@@ -121,18 +118,16 @@ export default function OtpVerificationScreen({
             })}
           </View>
 
-          {/* Resend Timer */}
           <View style={styles.resendSection}>
             {timer > 0 ? (
               <Text style={styles.resendTimerText}>
-                Resend code in{' '}
-                <Text style={styles.timerBold}>{formatTimer()}</Text>
+                Resend code in <Text style={styles.timerBold}>{formatTimer()}</Text>
               </Text>
             ) : (
               <TouchableOpacity
                 onPress={() => {
                   setTimer(45);
-                  if (onResend) onResend();
+                  onResend?.();
                 }}
               >
                 <Text style={styles.resendLink}>Resend code</Text>
@@ -140,18 +135,16 @@ export default function OtpVerificationScreen({
             )}
           </View>
 
-          {/* Verify Button */}
           <PrimaryButton
             title="Verify & Continue"
             onPress={handleVerify}
             style={styles.verifyButton}
           />
 
-          {/* Security Assurance */}
           <View style={styles.securityRow}>
-            <MaterialDesignIcons name="shield-check-outline" size={18} color="#10B981" style={styles.shieldIconMargin} />
+            <ShieldCheck size={18} strokeWidth={2} color={PALETTE.primary} />
             <Text style={styles.securityText}>
-              Your data is 100% secure and will never be shared.
+              Your account details stay encrypted and private.
             </Text>
           </View>
         </View>
@@ -163,7 +156,7 @@ export default function OtpVerificationScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: PALETTE.surfaceAlt,
   },
   flex: {
     flex: 1,
@@ -179,97 +172,90 @@ const styles = StyleSheet.create({
   backButton: {
     width: 44,
     height: 44,
-    borderRadius: 14,
-    backgroundColor: '#F8FAFC',
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.surface,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  backArrow: {
-    fontSize: 22,
-    color: '#1E293B',
-    fontWeight: '600',
+    ...SHADOWS.softCard,
   },
   titleSection: {
     marginTop: 20,
     alignItems: 'center',
   },
+  eyebrow: {
+    ...TYPOGRAPHY.labelUppercase,
+    color: PALETTE.primary,
+    marginBottom: 8,
+  },
   title: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#1E293B',
+    ...TYPOGRAPHY.displayMd,
+    color: PALETTE.onSurface,
     marginBottom: 10,
-    letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 15,
-    color: '#64748B',
+    ...TYPOGRAPHY.bodyMd,
+    color: PALETTE.onSurfaceVariant,
     textAlign: 'center',
-    lineHeight: 22,
   },
   phoneHighlight: {
-    color: '#1E293B',
+    color: PALETTE.onSurface,
     fontWeight: '700',
   },
   otpRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 36,
+    marginTop: 32,
   },
   otpBox: {
-    width: 48,
+    width: 46,
     height: 56,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    borderRadius: RADII.lg,
     textAlign: 'center',
     fontSize: 22,
-    fontWeight: '700',
-    color: '#1E293B',
-    backgroundColor: '#F8FAFC',
+    fontWeight: '800',
+    color: PALETTE.onSurface,
+    backgroundColor: PALETTE.surface,
+    ...SHADOWS.softCard,
   },
   otpBoxFilled: {
-    borderColor: '#7B3FF2',
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#7B3FF2',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 2,
+    borderColor: PALETTE.primary,
+    borderWidth: 1.5,
   },
   resendSection: {
-    marginTop: 28,
+    marginTop: 26,
     alignItems: 'center',
   },
   resendTimerText: {
-    fontSize: 14,
-    color: '#64748B',
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurfaceVariant,
   },
   timerBold: {
-    color: '#7B3FF2',
+    color: PALETTE.primary,
     fontWeight: '700',
   },
   resendLink: {
+    ...TYPOGRAPHY.labelSm,
     fontSize: 14,
-    color: '#7B3FF2',
-    fontWeight: '700',
+    color: PALETTE.primary,
   },
   verifyButton: {
-    marginTop: 36,
+    marginTop: 32,
   },
   securityRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 32,
+    gap: 8,
+    marginTop: 28,
     paddingHorizontal: 16,
   },
-  shieldIconMargin: {
-    marginRight: 8,
-  },
   securityText: {
-    fontSize: 12.5,
-    color: '#94A3B8',
+    ...TYPOGRAPHY.caption,
+    color: PALETTE.onSurfaceVariant,
     textAlign: 'center',
-    lineHeight: 18,
   },
 });

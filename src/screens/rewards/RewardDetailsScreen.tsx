@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Image,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -9,8 +8,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { ArrowLeft, Check, Gift, Heart, Star } from 'lucide-react-native';
 import PrimaryButton from '../../components/button/PrimaryButton';
+import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../constants/theme';
 
 interface RewardDetailsScreenProps {
   title?: string;
@@ -24,31 +25,44 @@ interface RewardDetailsScreenProps {
 
 export default function RewardDetailsScreen({
   title = 'Free Coffee',
-  stampsCost = 100,
-  description = 'Enjoy any hot coffee on us. Valid in all our branches.',
-  imageUrl = 'https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=800&auto=format&fit=crop',
+  stampsCost = 10,
+  description = 'Enjoy any handcrafted drink on us. Valid in all participating branches.',
+  imageUrl,
   validityDays = 30,
   onBack,
   onRedeem,
 }: RewardDetailsScreenProps) {
+  const [liked, setLiked] = useState(false);
+
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <StatusBar barStyle="dark-content" backgroundColor={PALETTE.surfaceAlt} />
 
       {/* Top Navigation Bar */}
       <View style={styles.header}>
         <TouchableOpacity
           onPress={onBack}
           style={styles.headerButton}
-          activeOpacity={0.7}
+          activeOpacity={0.75}
+          accessibilityLabel="Back"
         >
-          <MaterialDesignIcons name="arrow-left" size={24} color="#1E293B" />
+          <ArrowLeft size={20} strokeWidth={2} color={PALETTE.onSurface} />
         </TouchableOpacity>
 
         <Text style={styles.headerTitle}>Reward Details</Text>
 
-        <TouchableOpacity style={styles.headerButton} activeOpacity={0.7}>
-          <MaterialDesignIcons name="heart-outline" size={22} color="#EF4444" />
+        <TouchableOpacity
+          style={styles.headerButton}
+          activeOpacity={0.75}
+          onPress={() => setLiked(prev => !prev)}
+          accessibilityLabel="Favorite"
+        >
+          <Heart
+            size={20}
+            strokeWidth={2}
+            color={PALETTE.primary}
+            fill={liked ? PALETTE.primary : 'none'}
+          />
         </TouchableOpacity>
       </View>
 
@@ -56,7 +70,7 @@ export default function RewardDetailsScreen({
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Large Hero Image */}
+        {/* Hero Card */}
         <View style={styles.imageCard}>
           {imageUrl ? (
             <Image
@@ -66,56 +80,51 @@ export default function RewardDetailsScreen({
             />
           ) : (
             <View style={styles.heroFallback}>
-              <MaterialDesignIcons name="gift" size={64} color="#7C3AED" />
+              <View style={styles.heroIconWell}>
+                <Gift size={42} strokeWidth={2} color={PALETTE.primary} />
+              </View>
+              <Text style={styles.heroCaption}>Reward Voucher</Text>
             </View>
           )}
         </View>
 
         {/* Title & Cost Badge */}
-        <View style={styles.detailsSection}>
-          <View style={styles.titleRow}>
-            <Text style={styles.rewardTitle}>{title}</Text>
-          </View>
-
+        <View style={styles.detailsCard}>
           <View style={styles.costBadge}>
-            <MaterialDesignIcons name="star" size={14} color="#4F46E5" style={styles.starIconMargin} />
+            <Star
+              size={14}
+              strokeWidth={2}
+              color={PALETTE.warning}
+              fill={PALETTE.warning}
+            />
             <Text style={styles.costBadgeText}>{stampsCost} Stamps</Text>
           </View>
 
+          <Text style={styles.rewardTitle}>{title}</Text>
           <Text style={styles.descriptionText}>{description}</Text>
 
-          {/* Terms & Conditions Section */}
+          {/* Terms & Conditions */}
           <View style={styles.termsSection}>
-            <View style={styles.termItem}>
-              <View style={styles.termIconCircle}>
-                <MaterialDesignIcons name="check" size={13} color="#059669" />
-              </View>
-              <Text style={styles.termText}>Valid for {validityDays} days</Text>
-            </View>
+            <Text style={styles.termsEyebrow}>Terms & Usage</Text>
 
-            <View style={styles.termItem}>
-              <View style={styles.termIconCircle}>
-                <MaterialDesignIcons name="check" size={13} color="#059669" />
+            {[
+              `Valid for ${validityDays} days after unlocking`,
+              'One-time use per redemption',
+              'Cannot be combined with other promo offers',
+            ].map(rule => (
+              <View key={rule} style={styles.termItem}>
+                <View style={styles.termIconCircle}>
+                  <Check size={12} strokeWidth={2.5} color={PALETTE.primary} />
+                </View>
+                <Text style={styles.termText}>{rule}</Text>
               </View>
-              <Text style={styles.termText}>One time use only</Text>
-            </View>
-
-            <View style={styles.termItem}>
-              <View style={styles.termIconCircle}>
-                <MaterialDesignIcons name="check" size={13} color="#059669" />
-              </View>
-              <Text style={styles.termText}>Not valid with other offers</Text>
-            </View>
+            ))}
           </View>
         </View>
       </ScrollView>
 
-      {/* Fixed Bottom Action Bar */}
       <View style={styles.bottomBar}>
-        <PrimaryButton
-          title="Redeem Now"
-          onPress={onRedeem}
-        />
+        <PrimaryButton title="Redeem Now" onPress={onRedeem || (() => {})} />
       </View>
     </SafeAreaView>
   );
@@ -124,159 +133,136 @@ export default function RewardDetailsScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: PALETTE.surfaceAlt,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingHorizontal: 24,
+    paddingVertical: 14,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1E293B',
+    ...TYPOGRAPHY.headlineSm,
+    color: PALETTE.onSurface,
   },
   headerButton: {
     width: 44,
     height: 44,
-    borderRadius: 14,
-    backgroundColor: '#F8FAFC',
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.surface,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  headerIcon: {
-    fontSize: 20,
-    color: '#1E293B',
-    fontWeight: '600',
+    ...SHADOWS.softCard,
   },
   scrollContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 100,
+    paddingHorizontal: 24,
+    paddingBottom: 130,
+    gap: 18,
   },
   imageCard: {
-    marginTop: 12,
-    borderRadius: 24,
+    marginTop: 4,
+    borderRadius: RADII.xl,
     overflow: 'hidden',
-    backgroundColor: '#F1F5F9',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
+    backgroundColor: PALETTE.surface,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    ...SHADOWS.softCard,
   },
   heroImage: {
     width: '100%',
-    height: 220,
+    height: 210,
   },
   heroFallback: {
-    width: '100%',
-    height: 220,
-    backgroundColor: '#F5F3FF',
+    height: 200,
+    backgroundColor: PALETTE.illusCoralBg,
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 10,
   },
-  detailsSection: {
-    marginTop: 24,
-  },
-  titleRow: {
-    flexDirection: 'row',
+  heroIconWell: {
+    width: 84,
+    height: 84,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.surface,
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
+    ...SHADOWS.softCard,
   },
-  rewardTitle: {
-    fontSize: 26,
-    fontWeight: '800',
-    color: '#1E293B',
+  heroCaption: {
+    ...TYPOGRAPHY.labelUppercase,
+    color: PALETTE.onSurfaceVariant,
+  },
+  detailsCard: {
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    padding: 22,
+    ...SHADOWS.softCard,
   },
   costBadge: {
+    alignSelf: 'flex-start',
     flexDirection: 'row',
     alignItems: 'center',
-    alignSelf: 'flex-start',
-    backgroundColor: '#EEF2FF',
-    borderColor: '#C7D2FE',
-    borderWidth: 1,
-    paddingHorizontal: 14,
+    gap: 6,
+    backgroundColor: PALETTE.border,
+    paddingHorizontal: 12,
     paddingVertical: 6,
-    borderRadius: 12,
-    marginTop: 10,
-    marginBottom: 16,
+    borderRadius: RADII.sm,
+    marginBottom: 12,
   },
   costBadgeText: {
-    color: '#4F46E5',
-    fontSize: 14,
-    fontWeight: '700',
+    ...TYPOGRAPHY.labelSm,
+    color: PALETTE.onSurface,
   },
-  starIconMargin: {
-    marginRight: 4,
+  rewardTitle: {
+    ...TYPOGRAPHY.displayMd,
+    fontSize: 26,
+    lineHeight: 32,
+    color: PALETTE.onSurface,
+    marginBottom: 8,
   },
   descriptionText: {
-    fontSize: 15,
-    color: '#64748B',
-    lineHeight: 22,
-    marginBottom: 24,
+    ...TYPOGRAPHY.bodyMd,
+    color: PALETTE.onSurfaceVariant,
   },
   termsSection: {
-    backgroundColor: '#F8FAFC',
-    borderRadius: 18,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    marginTop: 22,
+    paddingTop: 18,
+    borderTopWidth: 1,
+    borderTopColor: PALETTE.border,
+    gap: 12,
+  },
+  termsEyebrow: {
+    ...TYPOGRAPHY.labelUppercase,
+    color: PALETTE.onSurfaceVariant,
+    marginBottom: 4,
   },
   termItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 8,
+    gap: 10,
   },
   termIconCircle: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: '#ECFDF5',
-    borderWidth: 1,
-    borderColor: '#A7F3D0',
+    width: 24,
+    height: 24,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.illusCoralBg,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
-  },
-  termIcon: {
-    fontSize: 12,
-    color: '#7C3AED',
-    fontWeight: '800',
   },
   termText: {
-    fontSize: 14,
-    color: '#475569',
-    fontWeight: '500',
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurface,
+    flex: 1,
   },
   bottomBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 28,
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderColor: '#F1F5F9',
-  },
-  redeemButton: {
-    backgroundColor: '#6366F1',
-    height: 56,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#6366F1',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.28,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  redeemButtonText: {
-    color: '#FFFFFF',
-    fontSize: 17,
-    fontWeight: '700',
+    paddingHorizontal: 24,
+    paddingTop: 12,
+    paddingBottom: 24,
+    backgroundColor: PALETTE.surfaceAlt,
   },
 });

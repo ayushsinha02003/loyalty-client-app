@@ -1,62 +1,43 @@
 import React, { useEffect, useState } from 'react';
 import {
+  Alert,
+  Image,
+  ScrollView,
   StyleSheet,
   Text,
-  View,
-  Image,
   TouchableOpacity,
-  ScrollView,
-  Alert,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
+import {
+  Bell,
+  ChevronRight,
+  CreditCard,
+  Gift,
+  HelpCircle,
+  History,
+  IdCard,
+  LogOut,
+  Mail,
+  Phone,
+  Star,
+} from 'lucide-react-native';
 import { getCurrentUser, clearAuthData } from '../../services/authService';
 import { customerApi } from '../../services/api';
 import { ProfileScreenSkeleton } from '../../components/skeleton';
+import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../constants/theme';
 
 interface ProfileScreenProps {
   onLogout?: () => void;
   onViewActivity?: () => void;
 }
 
-interface MenuOption {
-  id: string;
-  label: string;
-  icon: React.ComponentProps<typeof MaterialDesignIcons>['name'];
-  color: string;
-  bgColor: string;
-}
-
-const menuOptions: MenuOption[] = [
-  {
-    id: 'Activity History',
-    label: 'Activity History',
-    icon: 'history',
-    color: '#7C3AED',
-    bgColor: '#EDE9FE',
-  },
-  {
-    id: 'Membership Details',
-    label: 'Membership Details',
-    icon: 'card-account-details-outline',
-    color: '#0284C7',
-    bgColor: '#E0F2FE',
-  },
-  {
-    id: 'Notifications',
-    label: 'Notifications',
-    icon: 'bell-outline',
-    color: '#EA580C',
-    bgColor: '#FFEDD5',
-  },
-  {
-    id: 'Help & Support',
-    label: 'Help & Support',
-    icon: 'help-circle-outline',
-    color: '#10B981',
-    bgColor: '#D1FAE5',
-  },
-];
+const MENU_OPTIONS = [
+  { id: 'Activity History', label: 'Activity History', Icon: History },
+  { id: 'Membership Details', label: 'Membership Details', Icon: IdCard },
+  { id: 'Notifications', label: 'Notifications', Icon: Bell },
+  { id: 'Help & Support', label: 'Help & Support', Icon: HelpCircle },
+] as const;
 
 const ProfileScreen = ({ onLogout, onViewActivity }: ProfileScreenProps) => {
   const [user, setUser] = useState<any>(null);
@@ -107,8 +88,8 @@ const ProfileScreen = ({ onLogout, onViewActivity }: ProfileScreenProps) => {
       {
         text: 'Sign Out',
         style: 'destructive',
-        onPress: () => {
-          clearAuthData();
+        onPress: async () => {
+          await clearAuthData();
           onLogout?.();
         },
       },
@@ -130,19 +111,21 @@ const ProfileScreen = ({ onLogout, onViewActivity }: ProfileScreenProps) => {
   const initial = user?.name ? user.name.charAt(0).toUpperCase() : 'U';
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header Hero */}
-        <View style={styles.header}>
+        <View style={styles.topHeader}>
+          <Text style={styles.eyebrow}>Account</Text>
+          <Text style={styles.screenTitle}>Profile</Text>
+        </View>
+
+        {/* Member Hero Card */}
+        <View style={styles.heroCard}>
           {user?.profileImage ? (
-            <Image
-              source={{ uri: user.profileImage }}
-              style={styles.avatar}
-            />
+            <Image source={{ uri: user.profileImage }} style={styles.avatar} />
           ) : (
             <View style={styles.avatarFallback}>
               <Text style={styles.avatarInitial}>{initial}</Text>
@@ -150,23 +133,35 @@ const ProfileScreen = ({ onLogout, onViewActivity }: ProfileScreenProps) => {
           )}
 
           <Text style={styles.name}>{user?.name || 'Customer'}</Text>
-          <View style={styles.phoneBadge}>
-            <MaterialDesignIcons name="phone-outline" size={13} color="#E9D5FF" style={styles.badgeIcon} />
-            <Text style={styles.phone}>{user?.phone || 'No phone'}</Text>
-          </View>
-          {user?.email ? (
-            <View style={styles.emailRow}>
-              <MaterialDesignIcons name="email-outline" size={13} color="#E9D5FF" style={styles.badgeIcon} />
-              <Text style={styles.email}>{user.email}</Text>
+
+          <View style={styles.contactBadges}>
+            <View style={styles.contrastPill}>
+              <Phone size={12} strokeWidth={2} color={PALETTE.primary} />
+              <Text style={styles.contrastPillText}>
+                {user?.phone || 'Member'}
+              </Text>
             </View>
-          ) : null}
+
+            {user?.email ? (
+              <View style={styles.secondaryPill}>
+                <Mail
+                  size={12}
+                  strokeWidth={2}
+                  color={PALETTE.onSurfaceVariant}
+                />
+                <Text style={styles.secondaryPillText} numberOfLines={1}>
+                  {user.email}
+                </Text>
+              </View>
+            ) : null}
+          </View>
         </View>
 
-        {/* Floating Stats Card */}
-        <View style={styles.statsContainer}>
+        {/* Stats Card */}
+        <View style={styles.statsCard}>
           <View style={styles.statBox}>
             <View style={styles.statIconCircle}>
-              <MaterialDesignIcons name="credit-card-outline" size={18} color="#7C3AED" />
+              <CreditCard size={18} strokeWidth={2} color={PALETTE.primary} />
             </View>
             <Text style={styles.statValue}>{stats.activeCards}</Text>
             <Text style={styles.statTitle}>Cards</Text>
@@ -175,8 +170,13 @@ const ProfileScreen = ({ onLogout, onViewActivity }: ProfileScreenProps) => {
           <View style={styles.divider} />
 
           <View style={styles.statBox}>
-            <View style={[styles.statIconCircle, styles.statIconCircleAmber]}>
-              <MaterialDesignIcons name="star" size={18} color="#F59E0B" />
+            <View style={[styles.statIconCircle, styles.statIconAmber]}>
+              <Star
+                size={18}
+                strokeWidth={2}
+                color={PALETTE.warning}
+                fill={PALETTE.warning}
+              />
             </View>
             <Text style={styles.statValue}>{stats.totalStamps}</Text>
             <Text style={styles.statTitle}>Stamps</Text>
@@ -185,46 +185,52 @@ const ProfileScreen = ({ onLogout, onViewActivity }: ProfileScreenProps) => {
           <View style={styles.divider} />
 
           <View style={styles.statBox}>
-            <View style={[styles.statIconCircle, styles.statIconCircleEmerald]}>
-              <MaterialDesignIcons name="gift" size={18} color="#10B981" />
+            <View style={[styles.statIconCircle, styles.statIconDark]}>
+              <Gift size={18} strokeWidth={2} color={PALETTE.surface} />
             </View>
             <Text style={styles.statValue}>{stats.rewardsRedeemed}</Text>
-            <Text style={styles.statTitle}>Rewards</Text>
+            <Text style={styles.statTitle}>Ready</Text>
           </View>
         </View>
 
-        {/* Menu Items */}
+        {/* Menu List */}
         <View style={styles.menuContainer}>
-          {menuOptions.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              style={styles.menuItem}
-              onPress={() => handleMenuPress(item.id)}
-              activeOpacity={0.7}
-            >
-              <View style={styles.menuItemLeft}>
-                <View style={[styles.menuIconBox, { backgroundColor: item.bgColor }]}>
-                  <MaterialDesignIcons name={item.icon} size={20} color={item.color} />
+          {MENU_OPTIONS.map(item => {
+            const { Icon } = item;
+            return (
+              <TouchableOpacity
+                key={item.id}
+                style={styles.menuItem}
+                onPress={() => handleMenuPress(item.id)}
+                activeOpacity={0.8}
+              >
+                <View style={styles.menuItemLeft}>
+                  <View style={styles.menuIconBox}>
+                    <Icon size={20} strokeWidth={2} color={PALETTE.onSurface} />
+                  </View>
+                  <Text style={styles.menuText}>{item.label}</Text>
                 </View>
-                <Text style={styles.menuText}>{item.label}</Text>
-              </View>
-              <MaterialDesignIcons name="chevron-right" size={22} color="#94A3B8" />
-            </TouchableOpacity>
-          ))}
+                <ChevronRight
+                  size={20}
+                  strokeWidth={2}
+                  color={PALETTE.onSurfaceMuted}
+                />
+              </TouchableOpacity>
+            );
+          })}
 
-          {/* Logout Button */}
           <TouchableOpacity
-            style={styles.logout}
+            style={styles.logoutCard}
             onPress={handleLogout}
-            activeOpacity={0.7}
+            activeOpacity={0.8}
           >
             <View style={styles.menuItemLeft}>
-              <View style={[styles.menuIconBox, styles.logoutIconBox]}>
-                <MaterialDesignIcons name="logout" size={20} color="#EF4444" />
+              <View style={styles.logoutIconBox}>
+                <LogOut size={20} strokeWidth={2} color={PALETTE.primary} />
               </View>
               <Text style={styles.logoutText}>Sign Out</Text>
             </View>
-            <MaterialDesignIcons name="chevron-right" size={22} color="#FCA5A5" />
+            <ChevronRight size={20} strokeWidth={2} color={PALETTE.primary} />
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -237,182 +243,198 @@ export default ProfileScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: PALETTE.surfaceAlt,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 100,
+    paddingHorizontal: 24,
+    paddingBottom: 120,
   },
-  header: {
-    backgroundColor: '#6D28D9',
-    paddingTop: 28,
-    paddingBottom: 44,
+  topHeader: {
+    paddingTop: 16,
+    paddingBottom: 14,
+  },
+  eyebrow: {
+    ...TYPOGRAPHY.labelUppercase,
+    color: PALETTE.onSurfaceVariant,
+    marginBottom: 4,
+  },
+  screenTitle: {
+    ...TYPOGRAPHY.displayMd,
+    color: PALETTE.onSurface,
+  },
+  heroCard: {
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    padding: 24,
     alignItems: 'center',
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
+    ...SHADOWS.softCard,
   },
   avatar: {
-    width: 86,
-    height: 86,
-    borderRadius: 43,
-    borderWidth: 3,
-    borderColor: '#FFFFFF',
+    width: 84,
+    height: 84,
+    borderRadius: RADII.full,
   },
   avatarFallback: {
-    width: 86,
-    height: 86,
-    borderRadius: 43,
-    backgroundColor: '#5B21B6',
-    borderWidth: 3,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
+    width: 84,
+    height: 84,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.illusWarmYellow,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 4,
   },
   avatarInitial: {
-    fontSize: 34,
-    fontWeight: '800',
-    color: '#FFFFFF',
+    ...TYPOGRAPHY.displayMd,
+    color: PALETTE.surfaceContrast,
   },
   name: {
+    ...TYPOGRAPHY.headlineLg,
+    color: PALETTE.onSurface,
+    marginTop: 14,
+  },
+  contactBadges: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 8,
     marginTop: 12,
-    fontSize: 22,
-    fontWeight: '800',
-    color: '#FFFFFF',
   },
-  phoneBadge: {
+  contrastPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 12,
+    gap: 6,
+    backgroundColor: PALETTE.surfaceContrast,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: RADII.full,
   },
-  phone: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  emailRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  email: {
-    color: '#E9D5FF',
+  contrastPillText: {
+    ...TYPOGRAPHY.labelSm,
     fontSize: 12,
+    color: PALETTE.surface,
   },
-  badgeIcon: {
-    marginRight: 4,
-  },
-  statsContainer: {
-    marginHorizontal: 20,
-    marginTop: -26,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+  secondaryPill: {
     flexDirection: 'row',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 10,
-    paddingVertical: 16,
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: PALETTE.surfaceAlt,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: PALETTE.border,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: RADII.full,
+    maxWidth: '100%',
+  },
+  secondaryPillText: {
+    ...TYPOGRAPHY.caption,
+    color: PALETTE.onSurfaceVariant,
+  },
+  statsCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    paddingVertical: 18,
+    paddingHorizontal: 12,
+    marginTop: 16,
+    ...SHADOWS.softCard,
   },
   statBox: {
     flex: 1,
     alignItems: 'center',
   },
   statIconCircle: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: '#EDE9FE',
+    width: 40,
+    height: 40,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.illusCoralBg,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 6,
+    marginBottom: 8,
   },
-  statIconCircleAmber: {
-    backgroundColor: '#FEF3C7',
+  statIconAmber: {
+    backgroundColor: PALETTE.border,
   },
-  statIconCircleEmerald: {
-    backgroundColor: '#D1FAE5',
+  statIconDark: {
+    backgroundColor: PALETTE.surfaceContrast,
+  },
+  statValue: {
+    ...TYPOGRAPHY.headlineLg,
+    color: PALETTE.onSurface,
+  },
+  statTitle: {
+    ...TYPOGRAPHY.labelUppercase,
+    fontSize: 10,
+    color: PALETTE.onSurfaceVariant,
+    marginTop: 2,
   },
   divider: {
     width: 1,
-    height: '60%',
-    alignSelf: 'center',
-    backgroundColor: '#E2E8F0',
-  },
-  statTitle: {
-    color: '#64748B',
-    fontSize: 11,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  statValue: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#1E293B',
-    marginBottom: 2,
+    height: 44,
+    backgroundColor: PALETTE.border,
   },
   menuContainer: {
-    margin: 20,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    paddingVertical: 6,
-    elevation: 2,
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    marginTop: 20,
+    gap: 10,
   },
   menuItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+    justifyContent: 'space-between',
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.lg,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    padding: 16,
+    ...SHADOWS.softCard,
   },
   menuItemLeft: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 14,
   },
   menuIconBox: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
+    width: 40,
+    height: 40,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.surfaceAlt,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 14,
   },
   menuText: {
+    ...TYPOGRAPHY.labelMd,
     fontSize: 15,
-    fontWeight: '600',
-    color: '#1E293B',
+    color: PALETTE.onSurface,
   },
-  logout: {
+  logoutCard: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-  logoutText: {
-    color: '#EF4444',
-    fontSize: 15,
-    fontWeight: '700',
+    justifyContent: 'space-between',
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.lg,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    padding: 16,
+    marginTop: 6,
+    ...SHADOWS.softCard,
   },
   logoutIconBox: {
-    backgroundColor: '#FEE2E2',
+    width: 40,
+    height: 40,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.illusCoralBg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoutText: {
+    ...TYPOGRAPHY.labelMd,
+    fontSize: 15,
+    color: PALETTE.primary,
   },
 });

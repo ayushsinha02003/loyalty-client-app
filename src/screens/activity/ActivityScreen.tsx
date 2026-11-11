@@ -1,17 +1,24 @@
 import React, { useState } from 'react';
 import {
-  SafeAreaView,
+  RefreshControl,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  RefreshControl,
 } from 'react-native';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  AlertCircle,
+  ArrowLeft,
+  Gift,
+  History,
+  Star,
+} from 'lucide-react-native';
 import { useStampHistory, useRewardHistory } from '../../hooks/useApi';
 import { ActivityScreenSkeleton } from '../../components/skeleton';
+import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../constants/theme';
 
 interface StampActivity {
   _id: string;
@@ -41,8 +48,6 @@ interface ActivityItem {
   amount: string;
   isPositive: boolean;
   time: string;
-  icon: string;
-  iconBg: string;
   date: string;
 }
 
@@ -54,6 +59,12 @@ interface ActivityGroup {
 interface ActivityScreenProps {
   onBack?: () => void;
 }
+
+const FILTER_OPTIONS: Array<'All' | 'Stamps' | 'Rewards'> = [
+  'All',
+  'Stamps',
+  'Rewards',
+];
 
 export default function ActivityScreen({ onBack }: ActivityScreenProps) {
   const [activeFilter, setActiveFilter] = useState<'All' | 'Stamps' | 'Rewards'>('All');
@@ -71,30 +82,25 @@ export default function ActivityScreen({ onBack }: ActivityScreenProps) {
     refetch: refetchRewards,
   } = useRewardHistory();
 
-  const filterOptions: Array<'All' | 'Stamps' | 'Rewards'> = [
-    'All',
-    'Stamps',
-    'Rewards',
-  ];
-
   const loading = stampLoading || rewardLoading;
 
-  if (loading && (!stampHistory || stampHistory.length === 0) && (!rewardHistory || rewardHistory.length === 0)) {
+  if (
+    loading &&
+    (!stampHistory || stampHistory.length === 0) &&
+    (!rewardHistory || rewardHistory.length === 0)
+  ) {
     return <ActivityScreenSkeleton />;
   }
+
   const error = stampError || rewardError;
 
-  // Transform API data to ActivityGroup format
   const transformActivities = (): ActivityGroup[] => {
     const allActivities: ActivityItem[] = [];
 
-    // Process stamp history
     if (stampHistory) {
       stampHistory.forEach((stamp: StampActivity) => {
         const date = new Date(stamp.createdAt);
         const businessName = stamp.business?.businessName || 'Store';
-        const icon = 'star';
-        const iconBg = '#FEF3C7';
 
         allActivities.push({
           id: stamp._id,
@@ -104,21 +110,16 @@ export default function ActivityScreen({ onBack }: ActivityScreenProps) {
           amount: `+${stamp.stampsAdded || 1}`,
           isPositive: true,
           time: date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          icon,
-          iconBg,
           date: date.toISOString().split('T')[0],
         });
       });
     }
 
-    // Process reward history
     if (rewardHistory) {
       rewardHistory.forEach((reward: RewardActivity) => {
         const date = new Date(reward.createdAt);
         const businessName = reward.business?.businessName || 'Store';
         const rewardName = reward.reward || 'Reward';
-        const icon = 'gift';
-        const iconBg = '#FCE7F3';
 
         allActivities.push({
           id: reward._id,
@@ -128,17 +129,13 @@ export default function ActivityScreen({ onBack }: ActivityScreenProps) {
           amount: `-${reward.loyaltyCard?.totalStamps || 10}`,
           isPositive: false,
           time: date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          icon,
-          iconBg,
           date: date.toISOString().split('T')[0],
         });
       });
     }
 
-    // Sort by date descending
     allActivities.sort((a, b) => (a.id > b.id ? -1 : 1));
 
-    // Group by date
     const groups: { [key: string]: ActivityItem[] } = {};
     allActivities.forEach(item => {
       const dateKey = item.date;
@@ -148,7 +145,6 @@ export default function ActivityScreen({ onBack }: ActivityScreenProps) {
       groups[dateKey].push(item);
     });
 
-    // Convert to ActivityGroup array with friendly date labels
     return Object.entries(groups).map(([date, items]) => {
       const dateObj = new Date(date);
       const today = new Date();
@@ -172,7 +168,6 @@ export default function ActivityScreen({ onBack }: ActivityScreenProps) {
 
   const activities = transformActivities();
 
-  // Filter activities
   const filteredGroups = activities
     .map(group => {
       if (activeFilter === 'All') return group;
@@ -198,18 +193,18 @@ export default function ActivityScreen({ onBack }: ActivityScreenProps) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <StatusBar barStyle="dark-content" backgroundColor={PALETTE.surfaceAlt} />
 
-      {/* Header */}
       <View style={styles.header}>
         {onBack ? (
           <TouchableOpacity
             onPress={onBack}
             style={styles.headerButton}
-            activeOpacity={0.7}
+            activeOpacity={0.75}
+            accessibilityLabel="Back"
           >
-            <MaterialDesignIcons name="arrow-left" size={22} color="#0F172A" />
+            <ArrowLeft size={20} strokeWidth={2} color={PALETTE.onSurface} />
           </TouchableOpacity>
         ) : (
           <View style={styles.placeholder} />
@@ -219,21 +214,20 @@ export default function ActivityScreen({ onBack }: ActivityScreenProps) {
         <View style={styles.placeholder} />
       </View>
 
-      {/* Filter Pills */}
       <View style={styles.filtersWrapper}>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.filterScroll}
         >
-          {filterOptions.map(option => {
+          {FILTER_OPTIONS.map(option => {
             const isActive = activeFilter === option;
             return (
               <TouchableOpacity
                 key={option}
                 style={[styles.filterPill, isActive && styles.filterPillActive]}
                 onPress={() => setActiveFilter(option)}
-                activeOpacity={0.8}
+                activeOpacity={0.85}
               >
                 <Text
                   style={[
@@ -249,17 +243,20 @@ export default function ActivityScreen({ onBack }: ActivityScreenProps) {
         </ScrollView>
       </View>
 
-      {/* Activity Group List */}
       <ScrollView
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={handleRefresh} />
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={handleRefresh}
+            tintColor={PALETTE.primary}
+          />
         }
       >
         {error ? (
-          <View style={styles.errorContainer}>
-            <MaterialDesignIcons name="alert-circle-outline" size={40} color="#EF4444" style={styles.mb8} />
+          <View style={styles.errorCard}>
+            <AlertCircle size={36} strokeWidth={2} color={PALETTE.primary} />
             <Text style={styles.errorText}>{error}</Text>
             <TouchableOpacity style={styles.retryButton} onPress={handleRefresh}>
               <Text style={styles.retryButtonText}>Retry</Text>
@@ -276,31 +273,55 @@ export default function ActivityScreen({ onBack }: ActivityScreenProps) {
                     <View
                       style={[
                         styles.iconCircle,
-                        { backgroundColor: item.iconBg },
+                        item.type === 'stamp'
+                          ? styles.iconCircleStamp
+                          : styles.iconCircleReward,
                       ]}
                     >
-                      <MaterialDesignIcons
-                        name={item.type === 'stamp' ? 'star' : 'gift'}
-                        size={20}
-                        color={item.type === 'stamp' ? '#D97706' : '#7C3AED'}
-                      />
+                      {item.type === 'stamp' ? (
+                        <Star
+                          size={18}
+                          strokeWidth={2}
+                          color={PALETTE.warning}
+                          fill={PALETTE.warning}
+                        />
+                      ) : (
+                        <Gift
+                          size={18}
+                          strokeWidth={2}
+                          color={PALETTE.primary}
+                        />
+                      )}
                     </View>
 
                     <View style={styles.infoCol}>
                       <Text style={styles.itemTitle}>{item.title}</Text>
-                      <Text style={styles.itemStore}>{item.store}</Text>
+                      <Text style={styles.itemStore} numberOfLines={1}>
+                        {item.store}
+                      </Text>
                     </View>
                   </View>
 
                   <View style={styles.rightCol}>
-                    <Text
+                    <View
                       style={[
-                        styles.amountText,
-                        item.isPositive ? styles.amountPositive : styles.amountNegative,
+                        styles.amountPill,
+                        item.isPositive
+                          ? styles.amountPillPositive
+                          : styles.amountPillNegative,
                       ]}
                     >
-                      {item.amount}
-                    </Text>
+                      <Text
+                        style={[
+                          styles.amountText,
+                          item.isPositive
+                            ? styles.amountPositive
+                            : styles.amountNegative,
+                        ]}
+                      >
+                        {item.amount}
+                      </Text>
+                    </View>
                     <Text style={styles.timeText}>{item.time}</Text>
                   </View>
                 </View>
@@ -310,11 +331,11 @@ export default function ActivityScreen({ onBack }: ActivityScreenProps) {
         ) : (
           <View style={styles.emptyState}>
             <View style={styles.emptyIconCircle}>
-              <MaterialDesignIcons name="history" size={48} color="#94A3B8" />
+              <History size={28} strokeWidth={2} color={PALETTE.primary} />
             </View>
             <Text style={styles.emptyTitle}>No Activity Yet</Text>
             <Text style={styles.emptySubtitle}>
-              Your stamp collection and reward redemptions will appear here.
+              Your stamp collections and reward redemptions will appear here.
             </Text>
           </View>
         )}
@@ -326,199 +347,201 @@ export default function ActivityScreen({ onBack }: ActivityScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: PALETTE.surfaceAlt,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingHorizontal: 24,
+    paddingVertical: 14,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#1E293B',
+    ...TYPOGRAPHY.headlineSm,
+    color: PALETTE.onSurface,
   },
   headerButton: {
     width: 44,
     height: 44,
-    borderRadius: 14,
-    backgroundColor: '#F8FAFC',
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.surface,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
     alignItems: 'center',
     justifyContent: 'center',
+    ...SHADOWS.softCard,
   },
   placeholder: {
     width: 44,
   },
-  headerIcon: {
-    fontSize: 20,
-    color: '#1E293B',
-    fontWeight: '600',
-  },
   filtersWrapper: {
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderColor: '#F1F5F9',
+    paddingVertical: 6,
   },
   filterScroll: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     gap: 10,
   },
   filterPill: {
+    backgroundColor: PALETTE.surface,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
     paddingHorizontal: 18,
     paddingVertical: 9,
-    borderRadius: 20,
-    backgroundColor: '#F8FAFC',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderRadius: RADII.full,
   },
   filterPillActive: {
-    backgroundColor: '#7B3FF2',
-    borderColor: '#7B3FF2',
+    backgroundColor: PALETTE.surfaceContrast,
+    borderColor: PALETTE.surfaceContrast,
   },
   filterText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#64748B',
+    ...TYPOGRAPHY.labelSm,
+    color: PALETTE.onSurfaceVariant,
   },
   filterTextActive: {
-    color: '#FFFFFF',
+    color: PALETTE.surface,
   },
   listContent: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 40,
+    paddingHorizontal: 24,
+    paddingTop: 12,
+    paddingBottom: 120,
   },
   dateGroup: {
-    marginBottom: 24,
+    marginBottom: 22,
   },
   dateHeader: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#94A3B8',
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    marginBottom: 12,
+    ...TYPOGRAPHY.labelUppercase,
+    color: PALETTE.onSurfaceVariant,
+    marginBottom: 10,
   },
   activityCard: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderColor: '#F8FAFC',
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.lg,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    padding: 16,
+    marginBottom: 10,
+    ...SHADOWS.softCard,
   },
   leftRow: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
+    marginRight: 10,
   },
   iconCircle: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
+    width: 44,
+    height: 44,
+    borderRadius: RADII.full,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 14,
+    marginRight: 12,
   },
-  itemEmoji: {
-    fontSize: 20,
+  iconCircleStamp: {
+    backgroundColor: PALETTE.border,
+  },
+  iconCircleReward: {
+    backgroundColor: PALETTE.illusCoralBg,
   },
   infoCol: {
     flex: 1,
-    justifyContent: 'center',
   },
   itemTitle: {
+    ...TYPOGRAPHY.labelMd,
     fontSize: 15,
-    fontWeight: '700',
-    color: '#1E293B',
-    marginBottom: 3,
+    color: PALETTE.onSurface,
   },
   itemStore: {
-    fontSize: 13,
-    color: '#64748B',
+    ...TYPOGRAPHY.caption,
+    color: PALETTE.onSurfaceVariant,
+    marginTop: 2,
   },
   rightCol: {
     alignItems: 'flex-end',
-    marginLeft: 8,
+  },
+  amountPill: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: RADII.sm,
+  },
+  amountPillPositive: {
+    backgroundColor: PALETTE.surfaceContrast,
+  },
+  amountPillNegative: {
+    backgroundColor: PALETTE.illusCoralBg,
   },
   amountText: {
-    fontSize: 16,
-    fontWeight: '800',
-    marginBottom: 3,
+    ...TYPOGRAPHY.labelSm,
   },
   amountPositive: {
-    color: '#10B981',
+    color: PALETTE.surface,
   },
   amountNegative: {
-    color: '#EF4444',
+    color: PALETTE.primary,
   },
   timeText: {
-    fontSize: 12,
-    color: '#94A3B8',
+    ...TYPOGRAPHY.caption,
+    fontSize: 11,
+    color: PALETTE.onSurfaceMuted,
+    marginTop: 4,
   },
-  loadingContainer: {
-    flex: 1,
+  errorCard: {
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    padding: 28,
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 60,
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#64748B',
-  },
-  errorContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
+    gap: 12,
+    ...SHADOWS.softCard,
   },
   errorText: {
-    fontSize: 16,
-    color: '#EF4444',
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurface,
     textAlign: 'center',
-    marginBottom: 16,
   },
   retryButton: {
-    backgroundColor: '#7B3FF2',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
+    backgroundColor: PALETTE.primary,
+    paddingHorizontal: 28,
+    height: 48,
+    borderRadius: RADII.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...SHADOWS.btn,
   },
   retryButtonText: {
-    fontSize: 16,
-    color: '#FFFFFF',
-    fontWeight: '600',
+    ...TYPOGRAPHY.labelMd,
+    color: PALETTE.onPrimary,
   },
   emptyState: {
-    alignItems: 'center',
-    paddingVertical: 60,
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    paddingVertical: 40,
     paddingHorizontal: 24,
+    alignItems: 'center',
+    ...SHADOWS.softCard,
   },
   emptyIconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#F1F5F9',
+    width: 64,
+    height: 64,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.illusCoralBg,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
   },
   emptyTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1E293B',
-    marginBottom: 8,
+    ...TYPOGRAPHY.headlineMd,
+    color: PALETTE.onSurface,
+    marginBottom: 6,
   },
   emptySubtitle: {
-    fontSize: 15,
-    color: '#64748B',
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurfaceVariant,
     textAlign: 'center',
-    lineHeight: 22,
-  },
-  mb8: {
-    marginBottom: 8,
   },
 });

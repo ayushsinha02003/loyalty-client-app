@@ -1,101 +1,66 @@
 import React from 'react';
 import {
-  View,
-  StyleSheet,
-  Image,
-  ImageSourcePropType,
   StyleProp,
+  StyleSheet,
+  TouchableOpacity,
+  View,
   ViewStyle,
-  Pressable,
 } from 'react-native';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
+import { Check, Gift, Sparkles, Star, Store } from 'lucide-react-native';
 import PrimaryText from '../../text/PrimaryText';
+import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../../constants/theme';
 
 export interface PrimaryLoyaltyStampCardProps {
   merchantName: string;
   rewardText: string;
   currentStamps: number;
   totalStamps: number;
-  merchantImage?: ImageSourcePropType;
-  activeColor?: string;
-  merchantIconBackground?: string;
-  customStyle?: StyleProp<ViewStyle>;
-  onPress?: () => void;
   isRewardAvailable?: boolean;
   backgroundColor?: string;
   textColor?: string;
+  customStyle?: StyleProp<ViewStyle>;
+  onPress?: () => void;
 }
 
 const PrimaryLoyaltyStampCard = ({
   merchantName,
   rewardText,
   currentStamps,
-  totalStamps = 10,
-  merchantImage,
-  activeColor = '#6D3DF5',
-  merchantIconBackground = '#173D20',
+  totalStamps,
+  isRewardAvailable = false,
   customStyle,
   onPress,
-  isRewardAvailable = false,
-  backgroundColor,
-  textColor,
 }: PrimaryLoyaltyStampCardProps) => {
-  const safeTotalStamps = Math.max(totalStamps || 10, 1);
-  const safeCurrentStamps = Math.min(
-    Math.max(currentStamps || 0, 0),
-    safeTotalStamps,
-  );
-  const stamps = Array.from(
-    { length: safeTotalStamps },
-    (_, index) => index + 1,
-  );
+  const safeTotal = Math.max(totalStamps, 1);
+  const clampedStamps = Math.min(Math.max(currentStamps, 0), safeTotal);
+  const remaining = Math.max(safeTotal - clampedStamps, 0);
+  const rewardReady = isRewardAvailable || remaining === 0;
+  const stamps = Array.from({ length: safeTotal }, (_, i) => i < clampedStamps);
 
-  const cardActiveColor = backgroundColor || activeColor;
+  const Wrapper = onPress ? TouchableOpacity : View;
 
   return (
-    <Pressable
-      onPress={onPress}
-      disabled={!onPress}
-      style={({ pressed }) => [
-        styles.card,
-        customStyle,
-        pressed && styles.cardPressed,
-      ]}
+    <Wrapper
+      style={[styles.card, customStyle]}
+      {...(onPress ? { activeOpacity: 0.9, onPress } : {})}
     >
-      {/* Merchant Information */}
-      <View style={styles.header}>
-        <View style={styles.merchantInfo}>
-          {/* Merchant Logo */}
-          <View
-            style={[
-              styles.merchantIcon,
-              {
-                backgroundColor: merchantIconBackground,
-              },
-            ]}
-          >
-            {merchantImage ? (
-              <Image
-                source={merchantImage}
-                style={styles.merchantImage}
-                resizeMode="contain"
-              />
-            ) : (
-              <MaterialDesignIcons
-                name="store-outline"
-                size={22}
-                color="#FFFFFF"
-              />
-            )}
-          </View>
+      <View style={styles.headerRow}>
+        <View style={[styles.storeAvatar, rewardReady && styles.storeAvatarReady]}>
+          {rewardReady ? (
+            <Gift size={22} strokeWidth={2} color={PALETTE.surface} />
+          ) : (
+            <Store size={22} strokeWidth={2} color={PALETTE.primary} />
+          )}
+        </View>
 
-          {/* Name + Reward */}
-          <View style={styles.merchantTextContainer}>
-            <PrimaryText
-              text={merchantName}
-              customStyle={[styles.merchantName, textColor ? { color: textColor } : null]}
-              numberOfLines={1}
-            />
+        <View style={styles.headerInfo}>
+          <PrimaryText
+            text={merchantName}
+            customStyle={styles.merchantName}
+            numberOfLines={1}
+          />
+          <View style={styles.rewardRow}>
+            <Gift size={13} strokeWidth={2} color={PALETTE.primary} />
             <PrimaryText
               text={rewardText}
               customStyle={styles.rewardText}
@@ -104,77 +69,58 @@ const PrimaryLoyaltyStampCard = ({
           </View>
         </View>
 
-        {/* Progress or Reward Ready Badge */}
-        {isRewardAvailable ? (
-          <View style={styles.rewardReadyBadge}>
-            <MaterialDesignIcons name="gift" size={13} color="#059669" style={styles.rewardIconMargin} />
-            <PrimaryText text="Reward Ready!" customStyle={styles.rewardReadyText} />
-          </View>
-        ) : (
+        <View style={styles.statBadge}>
+          <Star
+            size={13}
+            strokeWidth={2}
+            color={PALETTE.warning}
+            fill={PALETTE.warning}
+          />
+          <PrimaryText
+            text={`${clampedStamps}/${safeTotal}`}
+            customStyle={styles.statBadgeText}
+          />
+        </View>
+      </View>
+
+      <View style={styles.stampGrid}>
+        {stamps.map((earned, index) => (
           <View
+            key={index}
             style={[
-              styles.progressBadge,
-              {
-                backgroundColor: `${cardActiveColor}18`,
-              },
+              styles.stampSlot,
+              earned ? styles.stampSlotEarned : styles.stampSlotEmpty,
             ]}
           >
-            <PrimaryText
-              text={`${safeCurrentStamps} / ${safeTotalStamps}`}
-              customStyle={[
-                styles.progressText,
-                {
-                  color: cardActiveColor,
-                },
-              ]}
-            />
+            {earned ? (
+              <Check size={15} strokeWidth={2.5} color={PALETTE.surface} />
+            ) : (
+              <View style={styles.stampEmptyDot} />
+            )}
           </View>
-        )}
+        ))}
       </View>
 
-      {/* Stamp Row */}
-      <View style={styles.stampContainer}>
-        {stamps.map(stampNumber => {
-          const earned = stampNumber <= safeCurrentStamps;
-          const isFinalReward = stampNumber === safeTotalStamps;
+      <View style={styles.footerRow}>
+        <PrimaryText
+          text={
+            rewardReady
+              ? 'Reward unlocked — show in store'
+              : `${remaining} more ${remaining === 1 ? 'stamp' : 'stamps'} to reward`
+          }
+          customStyle={styles.footerLabel}
+          numberOfLines={1}
+        />
 
-          return (
-            <View
-              key={stampNumber}
-              style={[
-                styles.stamp,
-                earned
-                  ? {
-                      backgroundColor: cardActiveColor,
-                      borderColor: cardActiveColor,
-                    }
-                  : styles.stampInactive,
-                isFinalReward && !earned && styles.finalStampSlot,
-              ]}
-            >
-              {earned ? (
-                <MaterialDesignIcons
-                  name={isFinalReward ? "gift" : "star"}
-                  size={18}
-                  color="#FFFFFF"
-                />
-              ) : isFinalReward ? (
-                <MaterialDesignIcons
-                  name="gift-outline"
-                  size={16}
-                  color="#9CA3AF"
-                />
-              ) : (
-                <PrimaryText
-                  text={stampNumber.toString()}
-                  customStyle={styles.stampNumber}
-                />
-              )}
-            </View>
-          );
-        })}
+        <View style={styles.statusPill}>
+          <Sparkles size={12} strokeWidth={2} color={PALETTE.primary} />
+          <PrimaryText
+            text={rewardReady ? 'Ready' : 'Active'}
+            customStyle={styles.statusPillText}
+          />
+        </View>
       </View>
-    </Pressable>
+    </Wrapper>
   );
 };
 
@@ -183,122 +129,116 @@ export default PrimaryLoyaltyStampCard;
 const styles = StyleSheet.create({
   card: {
     width: '100%',
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
     borderWidth: 1,
-    borderColor: '#EEF0F4',
-    shadowColor: '#000000',
-    shadowOffset: {
-      width: 0,
-      height: 3,
-    },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
-    marginBottom: 12,
-  },
-  cardPressed: {
-    opacity: 0.92,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    borderColor: PALETTE.border,
+    padding: 20,
     marginBottom: 16,
+    ...SHADOWS.softCard,
   },
-  merchantInfo: {
-    flex: 1,
+  headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  merchantIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+  storeAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: RADII.lg,
+    backgroundColor: PALETTE.illusCoralBg,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 12,
   },
-  merchantImage: {
-    width: 30,
-    height: 30,
+  storeAvatarReady: {
+    backgroundColor: PALETTE.surfaceContrast,
   },
-  merchantTextContainer: {
+  headerInfo: {
     flex: 1,
+    marginRight: 10,
   },
   merchantName: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#111827',
+    ...TYPOGRAPHY.headlineSm,
+    color: PALETTE.onSurface,
+  },
+  rewardRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginTop: 4,
   },
   rewardText: {
-    marginTop: 2,
-    fontSize: 13,
-    fontWeight: '500',
-    color: '#6B7280',
+    ...TYPOGRAPHY.caption,
+    color: PALETTE.onSurfaceVariant,
+    flex: 1,
   },
-  progressBadge: {
-    minWidth: 52,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 8,
-  },
-  progressText: {
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  rewardReadyBadge: {
-    backgroundColor: '#ECFDF5',
-    borderColor: '#A7F3D0',
-    borderWidth: 1,
-    flexDirection: 'row',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 8,
-  },
-  rewardReadyText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#059669',
-  },
-  rewardIconMargin: {
-    marginRight: 4,
-  },
-  stampContainer: {
+  statBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-start',
+    gap: 5,
+    backgroundColor: PALETTE.border,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: RADII.sm,
+  },
+  statBadgeText: {
+    ...TYPOGRAPHY.labelSm,
+    fontWeight: '800',
+    color: PALETTE.onSurface,
+  },
+  stampGrid: {
+    flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
-    width: '100%',
+    marginTop: 18,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: PALETTE.border,
   },
-  stamp: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+  stampSlot: {
+    width: 34,
+    height: 34,
+    borderRadius: RADII.full,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
   },
-  stampInactive: {
-    backgroundColor: '#F8FAFC',
-    borderColor: '#E2E8F0',
+  stampSlotEarned: {
+    backgroundColor: PALETTE.primary,
   },
-  finalStampSlot: {
-    backgroundColor: '#FEF3C7',
-    borderColor: '#FDE68A',
+  stampSlotEmpty: {
+    backgroundColor: PALETTE.surfaceAlt,
+    borderWidth: 1.5,
+    borderColor: PALETTE.illusNeutralCream,
   },
-  stampNumber: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#94A3B8',
+  stampEmptyDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: PALETTE.onSurfaceMuted,
+  },
+  footerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 16,
+    gap: 10,
+  },
+  footerLabel: {
+    flex: 1,
+    ...TYPOGRAPHY.caption,
+    color: PALETTE.onSurfaceVariant,
+  },
+  statusPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: PALETTE.surfaceContrast,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: RADII.full,
+  },
+  statusPillText: {
+    ...TYPOGRAPHY.labelSm,
+    color: PALETTE.surface,
   },
 });

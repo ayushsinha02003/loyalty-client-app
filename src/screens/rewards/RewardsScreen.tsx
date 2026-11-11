@@ -1,22 +1,24 @@
 import React, { useMemo, useState } from 'react';
 import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  ScrollView,
   Alert,
   RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Check, Gift, History, Sparkles } from 'lucide-react-native';
 import PrimaryText from '../../components/text/PrimaryText';
 import { useAvailableRewards, useRewardHistory } from '../../hooks/useApi';
 import { rewardApi } from '../../services/api';
 import { RewardsScreenSkeleton } from '../../components/skeleton';
+import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../constants/theme';
 
 type TabKey = 'available' | 'claimed';
 
-const tabs: { key: TabKey; label: string }[] = [
+const TABS: { key: TabKey; label: string }[] = [
   { key: 'available', label: 'Available' },
   { key: 'claimed', label: 'Claimed' },
 ];
@@ -39,7 +41,6 @@ const RewardsScreen = () => {
 
   const [redeemingId, setRedeemingId] = useState<string | null>(null);
 
-  // Hook must be called unconditionally at the top level
   const filteredRewards = useMemo(() => {
     if (activeTab === 'available') {
       return rewards || [];
@@ -52,7 +53,7 @@ const RewardsScreen = () => {
     try {
       const response = await rewardApi.redeem(customerCardId);
       if (response.success) {
-        Alert.alert('Success', 'Reward redeemed successfully! Enjoy your gift.');
+        Alert.alert('Success', 'Reward redeemed successfully! Enjoy your perk.');
         refetchRewards();
         refetchHistory();
       } else {
@@ -70,24 +71,26 @@ const RewardsScreen = () => {
   }
 
   return (
-    <View style={styles.container}>
-      <PrimaryText text="Rewards" customStyle={styles.title} />
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <View style={styles.header}>
+        <PrimaryText text="Earned Perks" customStyle={styles.eyebrow} />
+        <PrimaryText text="Rewards" customStyle={styles.title} />
+      </View>
 
       <View style={styles.tabs}>
-        {tabs.map(tab => {
+        {TABS.map(tab => {
           const isActive = activeTab === tab.key;
-          let count = 0;
-          if (tab.key === 'available') {
-            count = rewards?.length || 0;
-          } else {
-            count = claimedRewards?.length || 0;
-          }
+          const count =
+            tab.key === 'available'
+              ? rewards?.length || 0
+              : claimedRewards?.length || 0;
 
           return (
             <TouchableOpacity
               key={tab.key}
               style={[styles.tab, isActive && styles.activeTab]}
               onPress={() => setActiveTab(tab.key)}
+              activeOpacity={0.85}
             >
               <Text style={[styles.tabText, isActive && styles.activeText]}>
                 {tab.label} ({count})
@@ -116,6 +119,7 @@ const RewardsScreen = () => {
           <RefreshControl
             refreshing={rewardsLoading || historyLoading}
             onRefresh={activeTab === 'available' ? refetchRewards : refetchHistory}
+            tintColor={PALETTE.primary}
           />
         }
       >
@@ -126,21 +130,29 @@ const RewardsScreen = () => {
               item.loyaltyCard?.business?.businessName ||
               item.business?.businessName ||
               'Participating Business';
-            const rewardText = item.loyaltyCard?.reward || item.reward || 'Special Reward';
+            const rewardText =
+              item.loyaltyCard?.reward || item.reward || 'Special Reward';
             const totalStamps = item.loyaltyCard?.totalStamps || 10;
             const currentStamps = item.currentStamps || totalStamps;
-            const progress = totalStamps > 0 ? Math.min((currentStamps / totalStamps) * 100, 100) : 100;
+            const progress =
+              totalStamps > 0
+                ? Math.min((currentStamps / totalStamps) * 100, 100)
+                : 100;
 
             return (
               <View key={item._id} style={styles.card}>
                 <View style={styles.cardContent}>
                   <View style={styles.rewardIcon}>
-                    <MaterialDesignIcons name="gift" size={24} color="#7C3AED" />
+                    <Gift size={22} strokeWidth={2} color={PALETTE.primary} />
                   </View>
 
                   <View style={styles.info}>
-                    <Text style={styles.rewardTitle}>{rewardText}</Text>
-                    <Text style={styles.businessName}>{businessName}</Text>
+                    <Text style={styles.rewardTitle} numberOfLines={1}>
+                      {rewardText}
+                    </Text>
+                    <Text style={styles.businessName} numberOfLines={1}>
+                      {businessName}
+                    </Text>
 
                     {isAvailable && (
                       <View style={styles.progressContainer}>
@@ -159,7 +171,7 @@ const RewardsScreen = () => {
                     )}
                   </View>
 
-                  {isAvailable && (
+                  {isAvailable ? (
                     <TouchableOpacity
                       style={[
                         styles.button,
@@ -167,16 +179,24 @@ const RewardsScreen = () => {
                       ]}
                       onPress={() => handleRedeem(item._id)}
                       disabled={redeemingId !== null}
+                      activeOpacity={0.85}
                     >
+                      <Sparkles
+                        size={14}
+                        strokeWidth={2}
+                        color={PALETTE.onPrimary}
+                      />
                       <Text style={styles.buttonText}>
-                        {redeemingId === item._id ? 'Redeeming...' : 'Redeem'}
+                        {redeemingId === item._id ? 'Wait...' : 'Redeem'}
                       </Text>
                     </TouchableOpacity>
-                  )}
-
-                  {!isAvailable && (
+                  ) : (
                     <View style={styles.claimedBadge}>
-                      <MaterialDesignIcons name="check" size={13} color="#059669" style={styles.claimedCheckMargin} />
+                      <Check
+                        size={12}
+                        strokeWidth={2.5}
+                        color={PALETTE.primary}
+                      />
                       <Text style={styles.claimedBadgeText}>Claimed</Text>
                     </View>
                   )}
@@ -193,24 +213,26 @@ const RewardsScreen = () => {
         ) : (
           <View style={styles.emptyState}>
             <View style={styles.emptyIconCircle}>
-              <MaterialDesignIcons
-                name={activeTab === 'available' ? 'gift-open-outline' : 'history'}
-                size={44}
-                color="#94A3B8"
-              />
+              {activeTab === 'available' ? (
+                <Gift size={28} strokeWidth={2} color={PALETTE.primary} />
+              ) : (
+                <History size={28} strokeWidth={2} color={PALETTE.primary} />
+              )}
             </View>
             <Text style={styles.emptyTitle}>
-              {activeTab === 'available' ? 'No Available Rewards' : 'No Claimed Rewards'}
+              {activeTab === 'available'
+                ? 'No Available Rewards'
+                : 'No Claimed Rewards'}
             </Text>
             <Text style={styles.emptySubtitle}>
               {activeTab === 'available'
-                ? 'Complete your stamp cards to unlock and redeem free rewards!'
+                ? 'Complete your stamp cards to unlock and redeem free perks.'
                 : 'Your redeemed rewards history will appear here.'}
             </Text>
           </View>
         )}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -219,188 +241,183 @@ export default RewardsScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
-    paddingHorizontal: 18,
-    paddingTop: 20,
+    backgroundColor: PALETTE.surfaceAlt,
+  },
+  header: {
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 12,
+  },
+  eyebrow: {
+    ...TYPOGRAPHY.labelUppercase,
+    color: PALETTE.onSurfaceVariant,
+    marginBottom: 4,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#111827',
-    marginBottom: 20,
+    ...TYPOGRAPHY.displayMd,
+    color: PALETTE.onSurface,
   },
   tabs: {
     flexDirection: 'row',
-    marginBottom: 20,
-    flexWrap: 'wrap',
+    paddingHorizontal: 24,
+    marginBottom: 18,
     gap: 10,
   },
   tab: {
-    backgroundColor: '#ECECEC',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
+    backgroundColor: PALETTE.surface,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: RADII.full,
   },
   activeTab: {
-    backgroundColor: '#7B3FF2',
+    backgroundColor: PALETTE.surfaceContrast,
+    borderColor: PALETTE.surfaceContrast,
   },
   tabText: {
-    color: '#666',
-    fontWeight: '500',
+    ...TYPOGRAPHY.labelSm,
+    color: PALETTE.onSurfaceVariant,
   },
   activeText: {
-    color: '#fff',
-    fontWeight: '600',
+    color: PALETTE.surface,
   },
   scrollList: {
-    paddingBottom: 100,
-  },
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 60,
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-    color: '#64748B',
-  },
-  errorContainer: {
-    backgroundColor: '#FEF2F2',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 16,
-  },
-  errorText: {
-    fontSize: 14,
-    color: '#EF4444',
-    textAlign: 'center',
+    paddingHorizontal: 24,
+    paddingBottom: 120,
+    gap: 14,
   },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 18,
-    padding: 15,
-    marginBottom: 15,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: PALETTE.border,
+    padding: 18,
+    ...SHADOWS.softCard,
   },
   cardContent: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   rewardIcon: {
-    width: 55,
-    height: 55,
-    borderRadius: 12,
-    backgroundColor: '#F5F3FF',
+    width: 48,
+    height: 48,
+    borderRadius: RADII.lg,
+    backgroundColor: PALETTE.illusCoralBg,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  rewardIconText: {
-    fontSize: 24,
+    marginRight: 14,
   },
   info: {
     flex: 1,
-    marginLeft: 15,
+    marginRight: 10,
   },
   rewardTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#111827',
+    ...TYPOGRAPHY.headlineSm,
+    color: PALETTE.onSurface,
   },
   businessName: {
-    color: '#7B3FF2',
+    ...TYPOGRAPHY.caption,
+    color: PALETTE.onSurfaceVariant,
     marginTop: 2,
-    fontSize: 13,
-    fontWeight: '500',
   },
   progressContainer: {
-    marginTop: 8,
+    marginTop: 10,
   },
   progressBar: {
     height: 6,
-    backgroundColor: '#E2E8F0',
     borderRadius: 3,
+    backgroundColor: PALETTE.border,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#7B3FF2',
+    backgroundColor: PALETTE.primary,
     borderRadius: 3,
   },
   progressText: {
-    fontSize: 12,
-    color: '#64748B',
+    ...TYPOGRAPHY.caption,
+    fontSize: 11,
+    color: PALETTE.onSurfaceMuted,
     marginTop: 4,
-    fontWeight: '500',
   },
   button: {
-    backgroundColor: '#7B3FF2',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  buttonLoading: {
-    backgroundColor: '#A5B4FC',
-  },
-  buttonText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-  claimedBadge: {
-    backgroundColor: '#ECFDF5',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#A7F3D0',
+    gap: 5,
+    backgroundColor: PALETTE.primary,
+    paddingHorizontal: 16,
+    height: 40,
+    borderRadius: RADII.full,
+    ...SHADOWS.btn,
+  },
+  buttonLoading: {
+    opacity: 0.7,
+  },
+  buttonText: {
+    ...TYPOGRAPHY.labelSm,
+    color: PALETTE.onPrimary,
+  },
+  claimedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: PALETTE.surfaceContrast,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: RADII.full,
   },
   claimedBadgeText: {
-    color: '#059669',
-    fontWeight: '600',
-    fontSize: 13,
-  },
-  claimedCheckMargin: {
-    marginRight: 3,
+    ...TYPOGRAPHY.labelSm,
+    fontSize: 11,
+    color: PALETTE.surface,
   },
   claimedDate: {
-    marginTop: 8,
-    fontSize: 12,
-    color: '#94A3B8',
+    ...TYPOGRAPHY.caption,
+    color: PALETTE.onSurfaceMuted,
+    marginTop: 12,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: PALETTE.border,
+  },
+  errorContainer: {
+    marginHorizontal: 24,
+    marginBottom: 14,
+    padding: 14,
+    borderRadius: RADII.lg,
+    backgroundColor: PALETTE.illusCoralBg,
+  },
+  errorText: {
+    ...TYPOGRAPHY.caption,
+    color: PALETTE.onSurface,
   },
   emptyState: {
-    alignItems: 'center',
-    paddingVertical: 60,
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    paddingVertical: 40,
     paddingHorizontal: 24,
+    alignItems: 'center',
+    ...SHADOWS.softCard,
   },
   emptyIconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#F1F5F9',
+    width: 64,
+    height: 64,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.illusCoralBg,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
   },
   emptyTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1E293B',
-    marginBottom: 8,
+    ...TYPOGRAPHY.headlineMd,
+    color: PALETTE.onSurface,
+    marginBottom: 6,
   },
   emptySubtitle: {
-    fontSize: 15,
-    color: '#64748B',
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurfaceVariant,
     textAlign: 'center',
-    lineHeight: 22,
   },
 });

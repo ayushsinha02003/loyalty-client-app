@@ -1,280 +1,264 @@
 import React, { useState } from 'react';
 import {
-    KeyboardAvoidingView,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { loginUser, LoginResponse } from '../../../services/authService';
 import PrimaryInputField from '../../../components/input/PrimaryInputField';
 import PrimaryPasswordField from '../../../components/input/PrimaryPasswordField';
 import PrimaryButton from '../../../components/button/PrimaryButton';
 import PrimaryErrorBanner from '../../../components/common/PrimaryErrorBanner';
+import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../../constants/theme';
 
 interface LoginScreenProps {
-    role?: 'customer' | 'business';
-    onLogin: (data?: LoginResponse) => void;
-    onSignup: () => void;
+  role?: 'customer' | 'business';
+  onLogin: (data?: LoginResponse) => void;
+  onSignup: () => void;
 }
 
 const LoginScreen: React.FC<LoginScreenProps> = ({
-    role: _role = 'customer',
-    onLogin,
-    onSignup,
+  role: _role = 'customer',
+  onLogin,
+  onSignup,
 }) => {
-    const [phone, setPhone] = useState('');
-    const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [phoneError, setPhoneError] = useState('');
-    const [passwordError, setPasswordError] = useState('');
-    const [generalError, setGeneralError] = useState('');
+  const [phone, setPhone] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [phoneError, setPhoneError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [generalError, setGeneralError] = useState('');
 
-    const handleLogin = async () => {
-        let hasError = false;
+  const handleLogin = async () => {
+    let hasError = false;
 
-        setPhoneError('');
-        setPasswordError('');
-        setGeneralError('');
+    setPhoneError('');
+    setPasswordError('');
+    setGeneralError('');
 
-        const trimmedPhone = phone.trim();
-        if (!trimmedPhone) {
-            setPhoneError('Please enter phone number');
-            hasError = true;
-        } else if (trimmedPhone.length < 10) {
-            setPhoneError('Please enter a valid 10-digit phone number');
-            hasError = true;
+    const trimmedPhone = phone.trim();
+    if (!trimmedPhone) {
+      setPhoneError('Please enter phone number');
+      hasError = true;
+    } else if (trimmedPhone.length < 10) {
+      setPhoneError('Please enter a valid 10-digit phone number');
+      hasError = true;
+    }
+
+    if (!password) {
+      setPasswordError('Please enter password');
+      hasError = true;
+    }
+
+    if (hasError) {
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await loginUser({
+        phone: trimmedPhone,
+        password,
+      });
+
+      if (response.success) {
+        onLogin(response);
+      } else {
+        const rawMessage = response.message || '';
+        const lower = rawMessage.toLowerCase();
+        if (
+          lower.includes('user not found') ||
+          lower.includes('not found') ||
+          lower.includes('invalid') ||
+          lower.includes('credential') ||
+          lower.includes('password')
+        ) {
+          setGeneralError('Incorrect phone no. or password');
+        } else {
+          setGeneralError(rawMessage || 'Incorrect phone no. or password');
         }
+      }
+    } catch (error: any) {
+      setGeneralError(
+        error?.message ||
+          'Unable to connect to the server. Please check your internet connection.'
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        if (!password) {
-            setPasswordError('Please enter password');
-            hasError = true;
-        }
+  return (
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <StatusBar barStyle="dark-content" backgroundColor={PALETTE.surfaceAlt} />
 
-        if (hasError) {
-            return;
-        }
+      <KeyboardAvoidingView
+        style={styles.keyboardView}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.header}>
+            <Text style={styles.eyebrow}>Account Access</Text>
+            <Text style={styles.title}>Welcome Back</Text>
+            <Text style={styles.subtitle}>
+              Sign in to access your digital loyalty cards
+            </Text>
+          </View>
 
-        setLoading(true);
-
-        try {
-            const response = await loginUser({
-                phone: trimmedPhone,
-                password: password,
-            });
-
-            if (response.success) {
-                onLogin(response);
-            } else {
-                const rawMessage = response.message || '';
-                const lower = rawMessage.toLowerCase();
-                if (
-                    lower.includes('user not found') ||
-                    lower.includes('not found') ||
-                    lower.includes('invalid') ||
-                    lower.includes('credential') ||
-                    lower.includes('password')
-                ) {
-                    setGeneralError('Incorrect phone no. or password');
-                } else {
-                    setGeneralError(rawMessage || 'Incorrect phone no. or password');
-                }
-            }
-        } catch (error: any) {
-            setGeneralError(
-                error?.message ||
-                'Unable to connect to the server. Please check your internet connection.'
-            );
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    return (
-        <SafeAreaView style={styles.container}>
-            <StatusBar
-                barStyle="dark-content"
-                backgroundColor="#FFFFFF"
+          <View style={styles.formCard}>
+            <PrimaryInputField
+              label="Phone Number"
+              placeholder="Enter 10-digit phone number"
+              keyboardType="phone-pad"
+              value={phone}
+              onChangeText={text => {
+                setPhone(text);
+                if (phoneError) setPhoneError('');
+                if (generalError) setGeneralError('');
+              }}
+              maxLength={10}
+              editable={!loading}
+              error={phoneError}
+              hasError={Boolean(generalError)}
             />
 
-            <KeyboardAvoidingView
-                style={styles.keyboardView}
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+            <PrimaryPasswordField
+              label="Password"
+              placeholder="Enter password"
+              value={password}
+              visible={showPassword}
+              onToggle={() => setShowPassword(!showPassword)}
+              onChangeText={text => {
+                setPassword(text);
+                if (passwordError) setPasswordError('');
+                if (generalError) setGeneralError('');
+              }}
+              editable={!loading}
+              error={passwordError}
+              hasError={Boolean(generalError)}
+              containerStyle={styles.passwordContainerStyle}
+            />
+
+            <TouchableOpacity
+              onPress={() => {}}
+              disabled={loading}
+              style={styles.forgotPasswordTouchable}
             >
-                <ScrollView
-                    contentContainerStyle={styles.scrollContent}
-                    keyboardShouldPersistTaps="handled"
-                    showsVerticalScrollIndicator={false}
-                >
-                    <View style={styles.header}>
-                        <Text style={styles.title}>Welcome Back</Text>
-                        <Text style={styles.subtitle}>
-                            Please sign in to continue
-                        </Text>
-                    </View>
+              <Text style={styles.forgotPassword}>Forgot Password?</Text>
+            </TouchableOpacity>
 
-                    {/* Inputs Card Container */}
-                    <View style={styles.formContainer}>
-                        {/* Phone Number Input */}
-                        <PrimaryInputField
-                            label="Enter Phone Number"
-                            placeholder="Enter 10-digit phone number"
-                            keyboardType="phone-pad"
-                            value={phone}
-                            onChangeText={(text) => {
-                                setPhone(text);
-                                if (phoneError) setPhoneError('');
-                                if (generalError) setGeneralError('');
-                            }}
-                            maxLength={10}
-                            editable={!loading}
-                            error={phoneError}
-                            hasError={Boolean(generalError)}
-                        />
+            <PrimaryErrorBanner message={generalError} />
 
-                        {/* Password Input */}
-                        <PrimaryPasswordField
-                            label="Enter Password"
-                            placeholder="Enter password"
-                            value={password}
-                            visible={showPassword}
-                            onToggle={() => setShowPassword(!showPassword)}
-                            onChangeText={(text) => {
-                                setPassword(text);
-                                if (passwordError) setPasswordError('');
-                                if (generalError) setGeneralError('');
-                            }}
-                            editable={!loading}
-                            error={passwordError}
-                            hasError={Boolean(generalError)}
-                            containerStyle={styles.passwordContainerStyle}
-                        />
+            <PrimaryButton
+              title="Login"
+              loading={loading}
+              onPress={handleLogin}
+              style={styles.loginButton}
+            />
+          </View>
 
-                        <TouchableOpacity
-                            onPress={() => {}}
-                            disabled={loading}
-                            style={styles.forgotPasswordTouchable}
-                        >
-                            <Text style={styles.forgotPassword}>
-                                Forgot Password?
-                            </Text>
-                        </TouchableOpacity>
-
-                        {/* Error Banner */}
-                        <PrimaryErrorBanner message={generalError} />
-
-                        {/* Login Button */}
-                        <PrimaryButton
-                            title="Login"
-                            loading={loading}
-                            onPress={handleLogin}
-                            style={styles.loginButton}
-                        />
-                    </View>
-
-                    <View style={styles.footerRow}>
-                        <Text style={styles.footerText}>
-                            Don't have an account?
-                        </Text>
-                        <TouchableOpacity onPress={onSignup} disabled={loading} style={styles.signupTouch}>
-                            <Text style={styles.signupText}>
-                                Create Account
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                </ScrollView>
-            </KeyboardAvoidingView>
-        </SafeAreaView>
-    );
+          <View style={styles.footerRow}>
+            <Text style={styles.footerText}>Don&apos;t have an account?</Text>
+            <TouchableOpacity
+              onPress={onSignup}
+              disabled={loading}
+              style={styles.signupTouch}
+            >
+              <Text style={styles.signupText}>Create Account</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
 };
 
 export default LoginScreen;
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#FFFFFF',
-    },
-
-    keyboardView: {
-        flex: 1,
-    },
-
-    scrollContent: {
-        flexGrow: 1,
-        justifyContent: 'center',
-        paddingHorizontal: 24,
-        paddingVertical: 32,
-    },
-
-    header: {
-        marginBottom: 32,
-    },
-
-    title: {
-        fontSize: 30,
-        fontWeight: '800',
-        color: '#1E293B',
-        letterSpacing: -0.5,
-    },
-
-    subtitle: {
-        marginTop: 8,
-        fontSize: 16,
-        color: '#64748B',
-        fontWeight: '500',
-    },
-
-    formContainer: {
-        marginBottom: 28,
-    },
-
-    passwordContainerStyle: {
-        marginBottom: 12,
-    },
-
-    forgotPasswordTouchable: {
-        alignSelf: 'flex-end',
-        marginBottom: 24,
-        paddingVertical: 4,
-    },
-
-    forgotPassword: {
-        color: '#7B3FF2',
-        fontWeight: '600',
-        fontSize: 14,
-    },
-
-    loginButton: {
-        marginTop: 4,
-    },
-
-    footerRow: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingVertical: 12,
-    },
-
-    footerText: {
-        color: '#64748B',
-        fontSize: 15,
-        fontWeight: '500',
-    },
-
-    signupTouch: {
-        paddingVertical: 4,
-        paddingHorizontal: 6,
-    },
-
-    signupText: {
-        color: '#7B3FF2',
-        fontSize: 15,
-        fontWeight: '700',
-    },
+  container: {
+    flex: 1,
+    backgroundColor: PALETTE.surfaceAlt,
+  },
+  keyboardView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 32,
+  },
+  header: {
+    marginBottom: 24,
+  },
+  eyebrow: {
+    ...TYPOGRAPHY.labelUppercase,
+    color: PALETTE.primary,
+    marginBottom: 6,
+  },
+  title: {
+    ...TYPOGRAPHY.displayMd,
+    color: PALETTE.onSurface,
+  },
+  subtitle: {
+    marginTop: 8,
+    ...TYPOGRAPHY.bodyMd,
+    color: PALETTE.onSurfaceVariant,
+  },
+  formCard: {
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    padding: 20,
+    marginBottom: 24,
+    ...SHADOWS.softCard,
+  },
+  passwordContainerStyle: {
+    marginBottom: 8,
+  },
+  forgotPasswordTouchable: {
+    alignSelf: 'flex-end',
+    marginBottom: 20,
+    paddingVertical: 4,
+  },
+  forgotPassword: {
+    ...TYPOGRAPHY.labelSm,
+    color: PALETTE.primary,
+  },
+  loginButton: {
+    marginTop: 4,
+  },
+  footerRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+  footerText: {
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurfaceVariant,
+  },
+  signupTouch: {
+    paddingVertical: 4,
+    paddingHorizontal: 6,
+  },
+  signupText: {
+    ...TYPOGRAPHY.labelSm,
+    fontSize: 14,
+    color: PALETTE.primary,
+  },
 });

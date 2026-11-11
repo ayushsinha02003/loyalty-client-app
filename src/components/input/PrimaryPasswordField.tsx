@@ -10,6 +10,8 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
+import { Eye, EyeOff } from 'lucide-react-native';
+import { PALETTE, RADII, SHADOWS } from '../../constants/theme';
 
 export interface PrimaryPasswordFieldProps extends TextInputProps {
   label?: string;
@@ -53,7 +55,7 @@ export default function PrimaryPasswordField({
           {...inputProps}
           editable={editable}
           style={[styles.input, inputStyle]}
-          placeholderTextColor="#94A3B8"
+          placeholderTextColor={PALETTE.onSurfaceMuted}
           secureTextEntry={!visible}
         />
 
@@ -62,8 +64,13 @@ export default function PrimaryPasswordField({
             onPress={onToggle}
             disabled={!editable}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            style={styles.eyeButton}
           >
-            <Text style={styles.toggle}>{visible ? 'Hide' : 'Show'}</Text>
+            {visible ? (
+              <EyeOff size={18} color={PALETTE.onSurfaceVariant} strokeWidth={2} />
+            ) : (
+              <Eye size={18} color={PALETTE.onSurfaceVariant} strokeWidth={2} />
+            )}
           </TouchableOpacity>
         ) : null}
       </View>
@@ -75,47 +82,51 @@ export default function PrimaryPasswordField({
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 20,
+    marginBottom: 18,
   },
   label: {
-    fontSize: 14,
+    fontSize: 11,
     fontWeight: '600',
-    color: '#334155',
+    letterSpacing: 0.88,
+    textTransform: 'uppercase',
+    color: PALETTE.onSurfaceVariant,
     marginBottom: 8,
+    marginLeft: 6,
   },
   field: {
-    height: 54,
+    height: 52,
     borderWidth: 1,
-    borderColor: '#CBD5E1',
-    borderRadius: 14,
+    borderColor: PALETTE.border,
+    borderRadius: RADII.full,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 20,
+    backgroundColor: PALETTE.surface,
+    ...SHADOWS.softCard,
   },
   input: {
     flex: 1,
-    fontSize: 16,
-    color: '#0F172A',
+    fontSize: 14,
+    fontWeight: '500',
+    color: PALETTE.onSurface,
     paddingVertical: 0,
   },
-  toggle: {
-    color: '#7B3FF2',
-    fontWeight: '600',
-    fontSize: 14,
+  eyeButton: {
+    paddingLeft: 8,
   },
   inputErrorBorder: {
-    borderColor: '#DC2626',
+    borderColor: PALETTE.primary,
     borderWidth: 1.5,
   },
   inputDisabled: {
-    backgroundColor: '#F8FAFC',
-    opacity: 0.8,
+    backgroundColor: PALETTE.surfaceAlt,
+    opacity: 0.75,
   },
   fieldError: {
-    color: '#DC2626',
-    fontSize: 13,
+    color: PALETTE.primary,
+    fontSize: 12,
     marginTop: 6,
-    fontWeight: '500',
+    marginLeft: 8,
+    fontWeight: '600',
   },
 });

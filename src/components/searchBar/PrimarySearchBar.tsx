@@ -1,121 +1,100 @@
 import React, { useState } from 'react';
 import {
-    View,
-    TextInput,
-    StyleSheet,
-    TextInputProps,
-    Pressable,
+  Pressable,
+  StyleSheet,
+  TextInput,
+  TextInputProps,
+  View,
 } from 'react-native';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
+import { Search, SlidersHorizontal } from 'lucide-react-native';
+import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../constants/theme';
 
 interface PrimarySearchBarProps extends TextInputProps {
-    value: string;
-    onChangeText: (text: string) => void;
-    placeholder?: string;
-    onFilterPress?: () => void;
-    showFilter?: boolean;
+  value: string;
+  onChangeText: (text: string) => void;
+  placeholder?: string;
+  onFilterPress?: () => void;
+  showFilter?: boolean;
+  onSubmitSearch?: () => void;
 }
 
 const PrimarySearchBar = ({
-    value,
-    onChangeText,
-    placeholder = 'Search...',
-    onFilterPress,
-    showFilter = false,
-    ...props
+  value,
+  onChangeText,
+  placeholder = 'Search...',
+  onFilterPress,
+  showFilter = false,
+  onSubmitSearch,
+  ...props
 }: PrimarySearchBarProps) => {
-    const [focused, setFocused] = useState(false);
+  const [focused, setFocused] = useState(false);
 
-    return (
-        <View
-            style={[
-                styles.container,
-                focused && styles.containerFocused,
-            ]}
+  return (
+    <View style={[styles.container, focused && styles.containerFocused]}>
+      <TextInput
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        placeholderTextColor={PALETTE.onSurfaceMuted}
+        style={styles.input}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        returnKeyType="search"
+        onSubmitEditing={onSubmitSearch}
+        {...props}
+      />
+
+      {showFilter && onFilterPress ? (
+        <Pressable
+          style={styles.actionCircle}
+          onPress={onFilterPress}
+          accessibilityLabel="Filter results"
         >
-            <View style={styles.iconContainer}>
-                <MaterialDesignIcons
-                    name="magnify"
-                    size={20}
-                    color="#7C3AED"
-                />
-            </View>
-
-            <TextInput
-                value={value}
-                onChangeText={onChangeText}
-                placeholder={placeholder}
-                placeholderTextColor="#94A3B8"
-                style={styles.input}
-                onFocus={() => setFocused(true)}
-                onBlur={() => setFocused(false)}
-                {...props}
-            />
-
-            {showFilter && (
-                <Pressable
-                    style={styles.filterButton}
-                    onPress={onFilterPress}
-                >
-                    <MaterialDesignIcons
-                        name="tune-vertical"
-                        size={18}
-                        color="#FFFFFF"
-                    />
-                </Pressable>
-            )}
-        </View>
-    );
+          <SlidersHorizontal size={18} strokeWidth={2} color={PALETTE.surface} />
+        </Pressable>
+      ) : (
+        <Pressable
+          style={styles.actionCircle}
+          onPress={onSubmitSearch}
+          accessibilityLabel="Search"
+        >
+          <Search size={18} strokeWidth={2} color={PALETTE.surface} />
+        </Pressable>
+      )}
+    </View>
+  );
 };
 
 export default PrimarySearchBar;
 
 const styles = StyleSheet.create({
-    container: {
-        height: 50,
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#FFFFFF',
-        borderRadius: 25,
-        paddingHorizontal: 12,
-        borderWidth: 1,
-        borderColor: '#ECECEC',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 6,
-        },
-        shadowOpacity: 0.06,
-        shadowRadius: 10,
-        elevation: 5,
-    },
-    containerFocused: {
-        borderColor: '#7C3AED',
-        shadowColor: '#7C3AED',
-        shadowOpacity: 0.15,
-    },
-    iconContainer: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
-        backgroundColor: '#F3E8FF',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    input: {
-        flex: 1,
-        marginLeft: 8,
-        fontSize: 15,
-        fontWeight: '500',
-        color: '#111827',
-    },
-    filterButton: {
-        width: 38,
-        height: 38,
-        borderRadius: 12,
-        backgroundColor: '#7C3AED',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginLeft: 5,
-    },
+  container: {
+    height: 54,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.full,
+    paddingLeft: 20,
+    paddingRight: 7,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    ...SHADOWS.softCard,
+  },
+  containerFocused: {
+    borderColor: PALETTE.primary,
+  },
+  input: {
+    flex: 1,
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurface,
+    paddingRight: 10,
+  },
+  actionCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });

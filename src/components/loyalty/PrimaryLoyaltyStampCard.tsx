@@ -1,145 +1,135 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
-
+import { ChevronRight, Gift, Star, Store } from 'lucide-react-native';
 import PrimaryText from '../../components/text/PrimaryText';
+import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../constants/theme';
 
-interface StepItem {
-    id: number;
-    title: string;
-    description: string;
-    icon: string;
-    backgroundColor: string;
-    iconColor: string;
-}
-
-const steps: StepItem[] = [
-    {
-        id: 1,
-        title: 'Visit',
-        description: 'Visit a business',
-        icon: 'storefront-outline',
-        backgroundColor: '#EDE9FE',
-        iconColor: '#7C3AED',
-    },
-    {
-        id: 2,
-        title: 'Collect',
-        description: 'Collect stamps',
-        icon: 'star',
-        backgroundColor: '#FEF3C7',
-        iconColor: '#475569',
-    },
-    {
-        id: 3,
-        title: 'Redeem',
-        description: 'Redeem rewards',
-        icon: 'gift-outline',
-        backgroundColor: '#DCFCE7',
-        iconColor: '#475569',
-    },
-];
+const STEPS = [
+  {
+    id: 1,
+    title: 'Visit',
+    description: 'Visit a business',
+    Icon: Store,
+    backgroundColor: PALETTE.illusCoralBg,
+    iconColor: PALETTE.primary,
+  },
+  {
+    id: 2,
+    title: 'Collect',
+    description: 'Collect stamps',
+    Icon: Star,
+    backgroundColor: PALETTE.border,
+    iconColor: PALETTE.warning,
+  },
+  {
+    id: 3,
+    title: 'Redeem',
+    description: 'Redeem rewards',
+    Icon: Gift,
+    backgroundColor: PALETTE.surfaceContrast,
+    iconColor: PALETTE.surface,
+  },
+] as const;
 
 const LoyaltySteps = () => {
-    return (
-        <View style={styles.container}>
-            {/* Icons + connecting lines */}
-            <View style={styles.stepsRow}>
-                {steps.map((step, index) => (
-                    <React.Fragment key={step.id}>
-                        <View style={styles.step}>
-                            <View
-                                style={[
-                                    styles.iconContainer,
-                                    {
-                                        backgroundColor: step.backgroundColor,
-                                    },
-                                ]}>
-                                <MaterialDesignIcons
-                                    name={step.icon as any}
-                                    size={24}
-                                    color={step.iconColor}
-                                />
-                            </View>
-                            <PrimaryText
-                                text={`${step.id}. ${step.title}`}
-                                customStyle={styles.title}
-                            />
-                            <PrimaryText
-                                text={step.description}
-                                customStyle={styles.description}
-                                numberOfLines={1}
-                            />
-                        </View>
+  return (
+    <View style={styles.container}>
+      <View style={styles.stepsRow}>
+        {STEPS.map((step, index) => {
+          const { Icon } = step;
+          return (
+            <React.Fragment key={step.id}>
+              <View style={styles.step}>
+                <View
+                  style={[
+                    styles.iconContainer,
+                    { backgroundColor: step.backgroundColor },
+                  ]}
+                >
+                  <Icon size={22} strokeWidth={2} color={step.iconColor} />
+                </View>
+                <PrimaryText
+                  text={`${step.id}. ${step.title}`}
+                  customStyle={styles.title}
+                />
+                <PrimaryText
+                  text={step.description}
+                  customStyle={styles.description}
+                  numberOfLines={1}
+                />
+              </View>
 
-                        {/* Connector */}
-                        {index < steps.length - 1 && (
-                            <View style={styles.connectorContainer}>
-                                <View style={styles.connector} />
-                                <MaterialDesignIcons
-                                    name="chevron-right"
-                                    size={14}
-                                    color="#C4B5FD"
-                                />
-                            </View>
-                        )}
-                    </React.Fragment>
-                ))}
-            </View>
-        </View>
-    );
+              {index < STEPS.length - 1 && (
+                <View style={styles.connectorContainer}>
+                  <View style={styles.connector} />
+                  <ChevronRight
+                    size={14}
+                    strokeWidth={2}
+                    color={PALETTE.onSurfaceMuted}
+                  />
+                </View>
+              )}
+            </React.Fragment>
+          );
+        })}
+      </View>
+    </View>
+  );
 };
 
 export default LoyaltySteps;
 
 const styles = StyleSheet.create({
-    container: {
-        width: '100%',
-        backgroundColor: '#FFFFFF',
-        paddingVertical: 10,
-        borderRadius: 16,
-    },
-    stepsRow: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-    },
-    step: {
-        flex: 1,
-        alignItems: 'center',
-    },
-    iconContainer: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: 7,
-    },
-    title: {
-        fontSize: 13,
-        fontWeight: '700',
-        color: '#111827',
-        textAlign: 'center',
-    },
-    description: {
-        marginTop: 2,
-        fontSize: 10,
-        fontWeight: '400',
-        color: '#64748B',
-        textAlign: 'center',
-    },
-    connectorContainer: {
-        width: 40,
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginHorizontal: -10,
-        marginTop: 23,
-    },
-    connector: {
-        flex: 1,
-        height: 1,
-        borderTopWidth: 1,
-        borderStyle: 'dashed',
-        borderColor: '#C4B5FD',
-    },
+  container: {
+    width: '100%',
+    backgroundColor: PALETTE.surface,
+    paddingVertical: 18,
+    paddingHorizontal: 14,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    ...SHADOWS.softCard,
+  },
+  stepsRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  step: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: RADII.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  title: {
+    ...TYPOGRAPHY.labelSm,
+    color: PALETTE.onSurface,
+    textAlign: 'center',
+  },
+  description: {
+    marginTop: 2,
+    fontSize: 11,
+    fontWeight: '500',
+    color: PALETTE.onSurfaceVariant,
+    textAlign: 'center',
+  },
+  connectorContainer: {
+    width: 36,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: -10,
+    marginTop: 20,
+  },
+  connector: {
+    flex: 1,
+    height: 1,
+    borderTopWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: PALETTE.illusNeutralCream,
+  },
 });

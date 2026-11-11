@@ -1,14 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import {
+  RefreshControl,
   ScrollView,
   StyleSheet,
-  View,
-  RefreshControl,
   Text,
   TouchableOpacity,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
+import {
+  Coffee,
+  Dumbbell,
+  QrCode,
+  Scissors,
+  Sparkles,
+  Utensils,
+} from 'lucide-react-native';
 import { getCurrentUser } from '../../services/authService';
 import PrimaryHeader from '../../components/common/PrimaryHeader';
 import PrimaryStampProgressCard from '../../components/cards/stampProgressCard/PrimaryStampProgressCard';
@@ -17,15 +24,59 @@ import PrimaryLoyaltyStampCard from '../../components/cards/loyaltyStampCard/Pri
 import LoyaltySteps from '../../components/loyalty/PrimaryLoyaltyStampCard';
 import { useCustomerDashboard } from '../../hooks/useApi';
 import { HomeScreenSkeleton } from '../../components/skeleton';
+import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../constants/theme';
 
 interface HomeScreenProps {
   onOpenScanner?: () => void;
   onSeeAll?: () => void;
 }
 
+const FEATURED_CATEGORIES = [
+  {
+    key: 'Cafe',
+    label: 'Coffee',
+    subtitle: 'Daily brews',
+    bg: PALETTE.illusWarmYellow,
+    iconColor: PALETTE.surfaceContrast,
+    textColor: PALETTE.surfaceContrast,
+    subColor: PALETTE.surfaceContrast,
+    Icon: Coffee,
+  },
+  {
+    key: 'Restaurant',
+    label: 'Dining',
+    subtitle: 'Local bites',
+    bg: PALETTE.illusWarmOrange,
+    iconColor: PALETTE.surface,
+    textColor: PALETTE.surface,
+    subColor: PALETTE.surface,
+    Icon: Utensils,
+  },
+  {
+    key: 'Salon',
+    label: 'Beauty',
+    subtitle: 'Self care',
+    bg: PALETTE.illusNeutralCream,
+    iconColor: PALETTE.surfaceContrast,
+    textColor: PALETTE.surfaceContrast,
+    subColor: PALETTE.onSurfaceVariant,
+    Icon: Scissors,
+  },
+  {
+    key: 'Fitness',
+    label: 'Fitness',
+    subtitle: 'Wellness clubs',
+    bg: PALETTE.illusCoolBlue,
+    iconColor: PALETTE.surface,
+    textColor: PALETTE.surface,
+    subColor: PALETTE.onSurfaceMuted,
+    Icon: Dumbbell,
+  },
+] as const;
+
 const HomeScreen = ({ onOpenScanner, onSeeAll }: HomeScreenProps) => {
   const { dashboard, loading, error, refetch } = useCustomerDashboard();
-  const [userName, setUserName] = useState('User');
+  const [userName, setUserName] = useState('Friend');
 
   useEffect(() => {
     const user = getCurrentUser();
@@ -38,11 +89,15 @@ const HomeScreen = ({ onOpenScanner, onSeeAll }: HomeScreenProps) => {
     refetch();
   };
 
-  // Get the first active card for progress display
-  const activeCard = dashboard?.customerCards?.find((card: any) => !card.isRewardAvailable);
-  const completedCard = dashboard?.customerCards?.find((card: any) => card.isRewardAvailable);
-
+  const activeCard = dashboard?.customerCards?.find(
+    (card: any) => !card.isRewardAvailable
+  );
+  const completedCard = dashboard?.customerCards?.find(
+    (card: any) => card.isRewardAvailable
+  );
   const displayCard = activeCard || completedCard || dashboard?.customerCards?.[0];
+  const rewardReadyCount =
+    dashboard?.customerCards?.filter((c: any) => c.isRewardAvailable).length || 0;
 
   if (loading) {
     return <HomeScreenSkeleton />;
@@ -50,30 +105,32 @@ const HomeScreen = ({ onOpenScanner, onSeeAll }: HomeScreenProps) => {
 
   if (error) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top']}>
         <PrimaryHeader
           name={userName}
-          subtitle="Collect stamps. Earn rewards."
+          subtitle="Welcome back"
           notificationCount={0}
         />
         <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={handleRefresh}>
-            <Text style={styles.retryButtonText}>Retry</Text>
-          </TouchableOpacity>
+          <View style={styles.errorCard}>
+            <Text style={styles.errorText}>{error}</Text>
+            <TouchableOpacity style={styles.retryButton} onPress={handleRefresh}>
+              <Text style={styles.retryButtonText}>Retry</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <PrimaryHeader
         name={userName}
-        subtitle="Collect stamps. Earn rewards."
-        notificationCount={dashboard?.customerCards?.filter((c: any) => c.isRewardAvailable).length || 0}
+        subtitle="Loyalty Wallet"
+        notificationCount={rewardReadyCount}
         onNotificationPress={() => {
-          console.log('Notification pressed');
+          onSeeAll?.();
         }}
       />
 
@@ -81,36 +138,92 @@ const HomeScreen = ({ onOpenScanner, onSeeAll }: HomeScreenProps) => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={handleRefresh} />
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={handleRefresh}
+            tintColor={PALETTE.primary}
+          />
         }
       >
+        {/* Active Stamp Progress Card or Empty Scanner CTA */}
         {displayCard ? (
           <PrimaryStampProgressCard
+            title={displayCard.loyaltyCard?.title || 'Featured Card'}
             currentStamps={displayCard.currentStamps || 0}
             totalStamps={displayCard.loyaltyCard?.totalStamps || 10}
+            message={
+              (typeof displayCard.loyaltyCard?.business === 'object'
+                ? displayCard.loyaltyCard.business?.businessName
+                : undefined) || 'Keep collecting to unlock rewards'
+            }
           />
         ) : (
-          <View style={styles.emptyState}>
+          <View style={styles.emptyHeroCard}>
+            <View style={styles.heroBadge}>
+              <Sparkles size={13} strokeWidth={2} color={PALETTE.primary} />
+              <Text style={styles.heroBadgeText}>Start Collecting</Text>
+            </View>
             <Text style={styles.emptyTitle}>No Stamp Cards Yet</Text>
             <Text style={styles.emptySubtitle}>
-              Scan a QR code at a participating business to join their loyalty program!
+              Scan a QR code at any participating shop to join their loyalty card and earn rewards.
             </Text>
             {onOpenScanner && (
               <TouchableOpacity
                 style={styles.scanButton}
                 onPress={onOpenScanner}
-                activeOpacity={0.8}
+                activeOpacity={0.85}
               >
-                <MaterialDesignIcons name="qrcode-scan" size={18} color="#FFFFFF" style={styles.scanIconMargin} />
+                <QrCode size={18} strokeWidth={2} color={PALETTE.onPrimary} />
                 <Text style={styles.scanButtonText}>Open QR Scanner</Text>
               </TouchableOpacity>
             )}
           </View>
         )}
 
-        <View style={styles.titleContainer}>
-          <PrimaryText text="My Stamp Cards" customStyle={styles.title} />
-          <TouchableOpacity onPress={onSeeAll}>
+        {/* Featured Categories Showcase */}
+        <View style={styles.sectionHeader}>
+          <PrimaryText text="Popular Perks" customStyle={styles.sectionTitle} />
+          {onSeeAll && (
+            <TouchableOpacity onPress={onSeeAll} activeOpacity={0.7}>
+              <PrimaryText text="See all" customStyle={styles.seeAll} />
+            </TouchableOpacity>
+          )}
+        </View>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.tilesRow}
+        >
+          {FEATURED_CATEGORIES.map(tile => {
+            const { Icon } = tile;
+            return (
+              <TouchableOpacity
+                key={tile.key}
+                style={[styles.categoryTile, { backgroundColor: tile.bg }]}
+                onPress={onSeeAll}
+                activeOpacity={0.88}
+              >
+                <View style={styles.tileIconBadge}>
+                  <Icon size={22} strokeWidth={2} color={tile.iconColor} />
+                </View>
+                <View>
+                  <Text style={[styles.tileTitle, { color: tile.textColor }]}>
+                    {tile.label}
+                  </Text>
+                  <Text style={[styles.tileSubtitle, { color: tile.subColor }]}>
+                    {tile.subtitle}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+
+        {/* My Stamp Cards */}
+        <View style={styles.sectionHeader}>
+          <PrimaryText text="My Stamp Cards" customStyle={styles.sectionTitle} />
+          <TouchableOpacity onPress={onSeeAll} activeOpacity={0.7}>
             <PrimaryText text="See all" customStyle={styles.seeAll} />
           </TouchableOpacity>
         </View>
@@ -119,7 +232,11 @@ const HomeScreen = ({ onOpenScanner, onSeeAll }: HomeScreenProps) => {
           dashboard.customerCards.map((card: any) => (
             <PrimaryLoyaltyStampCard
               key={card._id}
-              merchantName={card.loyaltyCard?.business?.businessName || card.loyaltyCard?.title || 'Unknown Business'}
+              merchantName={
+                card.loyaltyCard?.business?.businessName ||
+                card.loyaltyCard?.title ||
+                'Local Store'
+              }
               rewardText={card.loyaltyCard?.reward || 'Earn rewards!'}
               currentStamps={card.currentStamps || 0}
               totalStamps={card.loyaltyCard?.totalStamps || 10}
@@ -129,26 +246,27 @@ const HomeScreen = ({ onOpenScanner, onSeeAll }: HomeScreenProps) => {
             />
           ))
         ) : (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyTitle}>No Stamp Cards Yet</Text>
+          <View style={styles.emptyCard}>
+            <Text style={styles.emptyTitle}>Your Wallet Is Ready</Text>
             <Text style={styles.emptySubtitle}>
-              Scan a QR code at a participating business to join their loyalty program!
+              Tap below to scan a store QR code and collect your very first stamp.
             </Text>
             {onOpenScanner && (
               <TouchableOpacity
                 style={styles.scanButton}
                 onPress={onOpenScanner}
-                activeOpacity={0.8}
+                activeOpacity={0.85}
               >
-                <MaterialDesignIcons name="qrcode-scan" size={18} color="#FFFFFF" style={styles.scanIconMargin} />
-                <Text style={styles.scanButtonText}>Open QR Scanner</Text>
+                <QrCode size={18} strokeWidth={2} color={PALETTE.onPrimary} />
+                <Text style={styles.scanButtonText}>Scan Store QR</Text>
               </TouchableOpacity>
             )}
           </View>
         )}
 
-        <View style={styles.titleContainer}>
-          <PrimaryText text="How It Works" customStyle={styles.title} />
+        {/* How It Works */}
+        <View style={styles.sectionHeader}>
+          <PrimaryText text="How It Works" customStyle={styles.sectionTitle} />
         </View>
 
         <LoyaltySteps />
@@ -162,39 +280,57 @@ export default HomeScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: PALETTE.surfaceAlt,
   },
   scrollContent: {
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 90,
+    paddingHorizontal: 24,
+    paddingTop: 8,
+    paddingBottom: 120,
   },
-  titleContainer: {
+  sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 12,
+    marginTop: 24,
+    marginBottom: 14,
   },
-  title: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#1E293B',
+  sectionTitle: {
+    ...TYPOGRAPHY.headlineMd,
+    color: PALETTE.onSurface,
   },
   seeAll: {
+    ...TYPOGRAPHY.labelSm,
     fontSize: 14,
-    color: '#7B3FF2',
-    fontWeight: '600',
+    color: PALETTE.primary,
   },
-  loadingContainer: {
-    flex: 1,
+  tilesRow: {
+    gap: 12,
+    paddingRight: 8,
+  },
+  categoryTile: {
+    width: 148,
+    height: 152,
+    borderRadius: RADII.xl,
+    padding: 18,
+    justifyContent: 'space-between',
+    ...SHADOWS.softCard,
+  },
+  tileIconBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: RADII.full,
+    backgroundColor: 'rgba(255, 255, 255, 0.28)',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: 60,
   },
-  loadingText: {
-    fontSize: 16,
-    color: '#64748B',
+  tileTitle: {
+    ...TYPOGRAPHY.headlineSm,
+    fontWeight: '800',
+  },
+  tileSubtitle: {
+    ...TYPOGRAPHY.caption,
+    marginTop: 2,
+    opacity: 0.9,
   },
   errorContainer: {
     flex: 1,
@@ -202,66 +338,93 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 24,
   },
+  errorCard: {
+    width: '100%',
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    padding: 24,
+    alignItems: 'center',
+    ...SHADOWS.softCard,
+  },
   errorText: {
-    fontSize: 16,
-    color: '#EF4444',
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurface,
     textAlign: 'center',
     marginBottom: 16,
   },
   retryButton: {
-    backgroundColor: '#7B3FF2',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
+    backgroundColor: PALETTE.primary,
+    paddingHorizontal: 28,
+    height: 48,
+    borderRadius: RADII.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...SHADOWS.btn,
   },
   retryButtonText: {
-    fontSize: 16,
-    color: '#FFFFFF',
-    fontWeight: '600',
+    ...TYPOGRAPHY.labelMd,
+    color: PALETTE.onPrimary,
   },
-  emptyState: {
-    alignItems: 'center',
-    paddingVertical: 32,
-    paddingHorizontal: 24,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    marginTop: 10,
+  emptyHeroCard: {
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: PALETTE.border,
+    padding: 24,
+    alignItems: 'center',
+    ...SHADOWS.softCard,
+  },
+  heroBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: PALETTE.surfaceContrast,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: RADII.full,
+    marginBottom: 14,
+  },
+  heroBadgeText: {
+    ...TYPOGRAPHY.labelSm,
+    color: PALETTE.surface,
+  },
+  emptyCard: {
+    alignItems: 'center',
+    paddingVertical: 28,
+    paddingHorizontal: 24,
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    ...SHADOWS.softCard,
   },
   emptyTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1E293B',
+    ...TYPOGRAPHY.headlineMd,
+    color: PALETTE.onSurface,
     marginBottom: 8,
+    textAlign: 'center',
   },
   emptySubtitle: {
-    fontSize: 14,
-    color: '#64748B',
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurfaceVariant,
     textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 16,
+    marginBottom: 20,
   },
   scanButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#7B3FF2',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 12,
-    shadowColor: '#7B3FF2',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 3,
-  },
-  scanIconMargin: {
-    marginRight: 8,
+    gap: 8,
+    backgroundColor: PALETTE.primary,
+    paddingHorizontal: 24,
+    height: 52,
+    borderRadius: RADII.full,
+    ...SHADOWS.btn,
   },
   scanButtonText: {
-    color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '700',
+    ...TYPOGRAPHY.labelMd,
+    color: PALETTE.onPrimary,
   },
 });

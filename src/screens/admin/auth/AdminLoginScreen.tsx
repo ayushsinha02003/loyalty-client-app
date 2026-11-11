@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
+  ScrollView,
   StatusBar,
   StyleSheet,
   Text,
@@ -10,6 +10,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { ArrowLeft, Eye, EyeOff } from 'lucide-react-native';
+import PrimaryButton from '../../../components/button/PrimaryButton';
+import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../../constants/theme';
 
 interface AdminLoginScreenProps {
   onBack?: () => void;
@@ -27,54 +31,55 @@ export default function AdminLoginScreen({
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <StatusBar barStyle="dark-content" backgroundColor={PALETTE.surfaceAlt} />
 
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <View style={styles.content}>
-          {/* Back Button */}
+        <ScrollView
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
           <View style={styles.header}>
             <TouchableOpacity
               onPress={onBack}
               style={styles.backButton}
-              activeOpacity={0.7}
+              activeOpacity={0.75}
+              accessibilityLabel="Back"
             >
-              <Text style={styles.backArrow}>←</Text>
+              <ArrowLeft size={20} strokeWidth={2} color={PALETTE.onSurface} />
             </TouchableOpacity>
           </View>
 
-          {/* Title Header */}
           <View style={styles.titleSection}>
-            <Text style={styles.title}>Welcome Back!</Text>
+            <Text style={styles.eyebrow}>Merchant Portal</Text>
+            <Text style={styles.title}>Welcome Back</Text>
             <Text style={styles.subtitle}>Login to your business account</Text>
           </View>
 
-          {/* Form Fields */}
-          <View style={styles.formContainer}>
-            {/* Mobile Number Input */}
+          <View style={styles.formCard}>
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Mobile Number</Text>
               <TextInput
                 style={styles.input}
-                placeholder="+91  98765 43210"
-                placeholderTextColor="#94A3B8"
+                placeholder="+91 98765 43210"
+                placeholderTextColor={PALETTE.onSurfaceMuted}
                 keyboardType="phone-pad"
                 value={phone}
                 onChangeText={setPhone}
               />
             </View>
 
-            {/* Password Input */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Password</Text>
               <View style={styles.passwordContainer}>
                 <TextInput
                   style={styles.passwordInput}
-                  placeholder="••••••••••••"
-                  placeholderTextColor="#94A3B8"
+                  placeholder="Enter password"
+                  placeholderTextColor={PALETTE.onSurfaceMuted}
                   secureTextEntry={!showPassword}
                   value={password}
                   onChangeText={setPassword}
@@ -82,57 +87,55 @@ export default function AdminLoginScreen({
                 <TouchableOpacity
                   onPress={() => setShowPassword(!showPassword)}
                   activeOpacity={0.7}
+                  style={styles.toggleBtn}
                 >
-                  <Text style={styles.toggleText}>
-                    {showPassword ? 'Hide' : 'Show'}
-                  </Text>
+                  {showPassword ? (
+                    <EyeOff
+                      size={20}
+                      strokeWidth={2}
+                      color={PALETTE.onSurfaceVariant}
+                    />
+                  ) : (
+                    <Eye
+                      size={20}
+                      strokeWidth={2}
+                      color={PALETTE.onSurfaceVariant}
+                    />
+                  )}
                 </TouchableOpacity>
               </View>
             </View>
 
-            {/* Forgot Password */}
             <TouchableOpacity style={styles.forgotPasswordContainer}>
               <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </TouchableOpacity>
 
-            {/* Login Button */}
-            <TouchableOpacity
-              style={styles.loginButton}
-              onPress={onLogin}
-              activeOpacity={0.85}
-            >
-              <Text style={styles.loginButtonText}>Login</Text>
-            </TouchableOpacity>
-
-            {/* Divider */}
-            <View style={styles.dividerRow}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>or continue with</Text>
-              <View style={styles.dividerLine} />
-            </View>
-
-            {/* Social Login Options */}
-            <View style={styles.socialRow}>
-              <TouchableOpacity style={styles.socialButton} activeOpacity={0.75}>
-                <Text style={styles.socialIcon}>G</Text>
-                <Text style={styles.socialLabel}>Google</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.socialButton} activeOpacity={0.75}>
-                <Text style={styles.socialIcon}></Text>
-                <Text style={styles.socialLabel}>Apple</Text>
-              </TouchableOpacity>
-            </View>
+            <PrimaryButton title="Login" onPress={onLogin || (() => {})} />
           </View>
 
-          {/* Footer Link */}
+          <View style={styles.dividerRow}>
+            <View style={styles.dividerLine} />
+            <Text style={styles.dividerText}>or continue with</Text>
+            <View style={styles.dividerLine} />
+          </View>
+
+          <View style={styles.socialRow}>
+            <TouchableOpacity style={styles.socialButton} activeOpacity={0.75}>
+              <Text style={styles.socialLabel}>Google</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.socialButton} activeOpacity={0.75}>
+              <Text style={styles.socialLabel}>Apple</Text>
+            </TouchableOpacity>
+          </View>
+
           <View style={styles.footerRow}>
-            <Text style={styles.footerText}>Don't have an account? </Text>
+            <Text style={styles.footerText}>Don&apos;t have an account? </Text>
             <TouchableOpacity onPress={onSignUp}>
               <Text style={styles.signUpLink}>Sign Up</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -141,168 +144,150 @@ export default function AdminLoginScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: PALETTE.surfaceAlt,
   },
   flex: {
     flex: 1,
   },
   content: {
-    flex: 1,
+    flexGrow: 1,
     paddingHorizontal: 24,
-    justifyContent: 'space-between',
-    paddingBottom: 24,
+    paddingBottom: 32,
   },
   header: {
-    paddingVertical: 10,
+    paddingVertical: 14,
   },
   backButton: {
     width: 44,
     height: 44,
-    borderRadius: 14,
-    backgroundColor: '#F8FAFC',
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.surface,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  backArrow: {
-    fontSize: 22,
-    color: '#1E293B',
-    fontWeight: '600',
+    ...SHADOWS.softCard,
   },
   titleSection: {
     marginTop: 8,
     marginBottom: 24,
   },
+  eyebrow: {
+    ...TYPOGRAPHY.labelUppercase,
+    color: PALETTE.primary,
+    marginBottom: 6,
+  },
   title: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#1E293B',
-    marginBottom: 8,
+    ...TYPOGRAPHY.displayMd,
+    color: PALETTE.onSurface,
   },
   subtitle: {
-    fontSize: 15,
-    color: '#64748B',
+    ...TYPOGRAPHY.bodyMd,
+    color: PALETTE.onSurfaceVariant,
+    marginTop: 6,
   },
-  formContainer: {
-    flex: 1,
+  formCard: {
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    padding: 20,
+    ...SHADOWS.softCard,
   },
   inputGroup: {
-    marginBottom: 20,
+    marginBottom: 16,
+    gap: 8,
   },
   label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#334155',
-    marginBottom: 8,
+    ...TYPOGRAPHY.labelUppercase,
+    color: PALETTE.onSurfaceVariant,
+    marginLeft: 4,
   },
   input: {
-    height: 54,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    color: '#0F172A',
-    backgroundColor: '#FFFFFF',
+    height: 52,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.surfaceAlt,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    paddingHorizontal: 20,
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurface,
   },
   passwordContainer: {
-    height: 54,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    borderRadius: 14,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    backgroundColor: '#FFFFFF',
+    height: 52,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.surfaceAlt,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    paddingLeft: 20,
+    paddingRight: 12,
   },
   passwordInput: {
     flex: 1,
-    fontSize: 16,
-    color: '#0F172A',
-    paddingVertical: 0,
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurface,
   },
-  toggleText: {
-    color: '#6366F1',
-    fontWeight: '600',
-    fontSize: 14,
+  toggleBtn: {
+    padding: 6,
   },
   forgotPasswordContainer: {
     alignSelf: 'flex-end',
-    marginBottom: 24,
+    marginBottom: 20,
   },
   forgotPasswordText: {
-    color: '#6366F1',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  loginButton: {
-    backgroundColor: '#4F46E5',
-    height: 56,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: '#4F46E5',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  loginButtonText: {
-    color: '#FFFFFF',
-    fontSize: 17,
-    fontWeight: '700',
+    ...TYPOGRAPHY.labelSm,
+    color: PALETTE.primary,
   },
   dividerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 26,
+    gap: 12,
+    marginVertical: 22,
   },
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: PALETTE.border,
   },
   dividerText: {
-    marginHorizontal: 14,
-    color: '#94A3B8',
-    fontSize: 13,
+    ...TYPOGRAPHY.caption,
+    color: PALETTE.onSurfaceMuted,
   },
   socialRow: {
     flexDirection: 'row',
-    gap: 14,
+    gap: 12,
   },
   socialButton: {
     flex: 1,
-    flexDirection: 'row',
     height: 50,
-    borderRadius: 14,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.surface,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-  },
-  socialIcon: {
-    fontSize: 18,
-    fontWeight: '700',
+    ...SHADOWS.softCard,
   },
   socialLabel: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#334155',
+    ...TYPOGRAPHY.labelSm,
+    fontSize: 14,
+    color: PALETTE.onSurface,
   },
   footerRow: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: 16,
+    marginTop: 24,
   },
   footerText: {
-    color: '#64748B',
-    fontSize: 14,
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurfaceVariant,
   },
   signUpLink: {
-    color: '#4F46E5',
+    ...TYPOGRAPHY.labelSm,
     fontSize: 14,
-    fontWeight: '700',
+    color: PALETTE.primary,
   },
 });

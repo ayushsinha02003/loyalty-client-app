@@ -1,11 +1,27 @@
 import React from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
+import {
+  BarChart3,
+  Bookmark,
+  Gift,
+  QrCode,
+  Sparkles,
+  Store,
+  UserPlus,
+  Users,
+} from 'lucide-react-native';
 import PrimaryText from '../text/PrimaryText';
+import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../constants/theme';
+
+type ActionIconComponent = React.ComponentType<{
+  size?: number;
+  strokeWidth?: number;
+  color?: string;
+}>;
 
 type Action = {
   label: string;
-  icon: React.ComponentProps<typeof MaterialDesignIcons>['name'];
+  icon: string | ActionIconComponent;
 };
 
 interface PrimaryAdminActionGridProps {
@@ -13,54 +29,81 @@ interface PrimaryAdminActionGridProps {
   onPressAction?: (index: number) => void;
 }
 
+const ICON_MAP: Record<string, ActionIconComponent> = {
+  'account-plus': UserPlus,
+  'gift-outline': Gift,
+  'qrcode-scan': QrCode,
+  'chart-bar': BarChart3,
+  bookmark: Bookmark,
+  users: Users,
+  store: Store,
+};
+
 export default function PrimaryAdminActionGrid({
   actions,
   onPressAction,
 }: PrimaryAdminActionGridProps) {
   return (
     <View style={styles.grid}>
-      {actions.map((action, index) => (
-        <TouchableOpacity
-          key={action.label}
-          style={styles.action}
-          activeOpacity={0.8}
-          onPress={() => onPressAction?.(index)}
-        >
-          <View style={styles.icon}>
-            <MaterialDesignIcons name={action.icon} size={26} color="#7B3FF2" />
-          </View>
-          <PrimaryText text={action.label} customStyle={styles.label} />
-        </TouchableOpacity>
-      ))}
+      {actions.map((action, index) => {
+        const IconComp =
+          typeof action.icon === 'string'
+            ? ICON_MAP[action.icon] || Sparkles
+            : action.icon;
+
+        return (
+          <TouchableOpacity
+            key={action.label}
+            style={styles.action}
+            activeOpacity={0.85}
+            onPress={() => onPressAction?.(index)}
+          >
+            <View style={styles.icon}>
+              <IconComp size={22} strokeWidth={2} color={PALETTE.primary} />
+            </View>
+            <PrimaryText
+              text={action.label}
+              customStyle={styles.label}
+              numberOfLines={2}
+            />
+          </TouchableOpacity>
+        );
+      })}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  grid: { flexDirection: 'row', gap: 10 },
+  grid: {
+    flexDirection: 'row',
+    gap: 10,
+  },
   action: {
     flex: 1,
     minHeight: 112,
-    borderRadius: 16,
-    backgroundColor: '#FFFFFF',
+    borderRadius: RADII.lg,
+    backgroundColor: PALETTE.surface,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 3,
-    elevation: 2,
+    paddingHorizontal: 6,
+    paddingVertical: 12,
+    ...SHADOWS.softCard,
   },
   icon: {
     width: 46,
     height: 46,
-    borderRadius: 14,
-    backgroundColor: '#F0E9FF',
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.illusCoralBg,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 9,
+    marginBottom: 10,
   },
   label: {
+    ...TYPOGRAPHY.labelSm,
     fontSize: 11,
-    color: '#334155',
+    color: PALETTE.onSurface,
     textAlign: 'center',
-    fontWeight: '700',
   },
 });

@@ -1,11 +1,12 @@
 import React from 'react';
-import { StyleSheet, TouchableOpacity } from 'react-native';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { Briefcase, User } from 'lucide-react-native';
 import PrimaryText from '../text/PrimaryText';
+import { PALETTE, RADII, SHADOWS } from '../../constants/theme';
 
 type PrimaryRoleButtonProps = {
   label: string;
-  icon?: React.ComponentProps<typeof MaterialDesignIcons>['name'];
+  icon?: 'account' | 'user' | 'briefcase' | 'business' | string;
   active: boolean;
   onPress: () => void;
 };
@@ -16,24 +17,31 @@ export default function PrimaryRoleButton({
   active,
   onPress,
 }: PrimaryRoleButtonProps) {
+  const iconColor = active ? PALETTE.primary : PALETTE.onSurfaceVariant;
+
+  const renderIcon = () => {
+    if (!icon) return null;
+    if (icon === 'briefcase' || icon === 'business') {
+      return <Briefcase size={18} color={iconColor} strokeWidth={2} />;
+    }
+    return <User size={18} color={iconColor} strokeWidth={2} />;
+  };
+
   return (
-    <TouchableOpacity
-      style={[styles.button, active && styles.activeButton]}
+    <Pressable
+      style={({ pressed }) => [
+        styles.button,
+        active && styles.activeButton,
+        pressed && styles.pressed,
+      ]}
       onPress={onPress}
     >
-      {icon && (
-        <MaterialDesignIcons
-          name={icon}
-          size={18}
-          color={active ? '#7B3FF2' : '#64748B'}
-          style={styles.icon}
-        />
-      )}
+      {icon ? <View style={styles.icon}>{renderIcon()}</View> : null}
       <PrimaryText
         text={label}
         customStyle={[styles.text, active && styles.activeText]}
       />
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
@@ -42,25 +50,30 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 52,
     flexDirection: 'row',
+    backgroundColor: PALETTE.surface,
     borderWidth: 1,
-    borderColor: '#CBD5E1',
-    borderRadius: 14,
+    borderColor: PALETTE.border,
+    borderRadius: RADII.full,
     justifyContent: 'center',
     alignItems: 'center',
+    ...SHADOWS.softCard,
+  },
+  pressed: {
+    transform: [{ scale: 0.97 }],
   },
   icon: {
     marginRight: 8,
   },
   activeButton: {
-    borderColor: '#7B3FF2',
-    backgroundColor: '#F3EEFF',
+    borderColor: PALETTE.primary,
+    backgroundColor: PALETTE.illusCoralBg,
   },
   text: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#334155',
+    fontSize: 14,
+    fontWeight: '700',
+    color: PALETTE.onSurfaceVariant,
   },
   activeText: {
-    color: '#7B3FF2',
+    color: PALETTE.onSurface,
   },
 });

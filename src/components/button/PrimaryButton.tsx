@@ -9,6 +9,8 @@ import {
   TouchableOpacityProps,
 } from 'react-native';
 
+import { PALETTE, RADII, SHADOWS } from '../../constants/theme';
+
 export interface PrimaryButtonProps extends TouchableOpacityProps {
   title?: string;
   label?: string;
@@ -71,7 +73,7 @@ export default function PrimaryButton({
     >
       {loading ? (
         <ActivityIndicator
-          color={variant === 'primary' ? '#FFFFFF' : '#7B3FF2'}
+          color={variant === 'primary' ? PALETTE.onPrimary : PALETTE.primary}
           size="small"
         />
       ) : children ? (
@@ -85,45 +87,42 @@ export default function PrimaryButton({
 
 const styles = StyleSheet.create({
   baseButton: {
-    height: 56,
-    borderRadius: 16,
+    height: 54,
+    borderRadius: RADII.full,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
   },
   primaryButton: {
-    backgroundColor: '#7B3FF2',
-    shadowColor: '#7B3FF2',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.22,
-    shadowRadius: 8,
-    elevation: 3,
+    backgroundColor: PALETTE.primary,
+    ...SHADOWS.btn,
   },
   secondaryButton: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.5,
-    borderColor: '#CBD5E1',
+    backgroundColor: PALETTE.surface,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    ...SHADOWS.softCard,
   },
   outlineButton: {
     backgroundColor: 'transparent',
     borderWidth: 1.5,
-    borderColor: '#7B3FF2',
+    borderColor: PALETTE.primary,
   },
   buttonDisabled: {
     opacity: 0.6,
   },
   primaryButtonText: {
-    color: '#FFFFFF',
-    fontSize: 17,
+    color: PALETTE.onPrimary,
+    fontSize: 16,
     fontWeight: '700',
   },
   secondaryButtonText: {
-    color: '#475569',
+    color: PALETTE.onSurface,
     fontSize: 16,
     fontWeight: '700',
   },
   outlineButtonText: {
-    color: '#7B3FF2',
+    color: PALETTE.primary,
     fontSize: 16,
     fontWeight: '700',
   },

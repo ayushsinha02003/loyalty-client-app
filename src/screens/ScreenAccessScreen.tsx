@@ -6,9 +6,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
-
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Briefcase, ChevronRight, User } from 'lucide-react-native';
 import type { TabId } from '../components/common/BottomNav';
+import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../constants/theme';
 
 export type ScreenId =
   | TabId
@@ -43,8 +44,11 @@ export type ScreenId =
   | 'AdminBusinessProfile'
   | 'AdminMore';
 
-export const SCREEN_OPTIONS: Array<{ id: ScreenId; label: string; section?: string }> = [
-  // Customer Screens
+export const SCREEN_OPTIONS: Array<{
+  id: ScreenId;
+  label: string;
+  section?: string;
+}> = [
   { id: 'Splash', label: '1. Splash Screen', section: 'CUSTOMER' },
   { id: 'Onboarding', label: '2-4. Onboarding Screens' },
   { id: 'Welcome', label: '5. Welcome Screen' },
@@ -58,8 +62,6 @@ export const SCREEN_OPTIONS: Array<{ id: ScreenId; label: string; section?: stri
   { id: 'Rewards', label: '13. Rewards Screen' },
   { id: 'Activity', label: '14. Activity History Screen' },
   { id: 'Profile', label: '15. Profile Screen' },
-
-  // Admin Screens
   { id: 'AdminHome', label: '1. Admin Dashboard', section: 'ADMIN' },
   { id: 'AdminCustomers', label: '2. Customers Screen (Manage & Stamp)' },
   { id: 'AdminStampCards', label: '3. Stamp Cards (Manage)' },
@@ -81,89 +83,139 @@ export default function ScreenAccessScreen({
   onSelectScreen,
 }: ScreenAccessScreenProps) {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Explore Screens</Text>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <View style={styles.header}>
+        <Text style={styles.eyebrow}>Directory</Text>
+        <Text style={styles.title}>Explore Screens</Text>
+      </View>
 
-      <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
-        {SCREEN_OPTIONS.map(screen => (
-          <React.Fragment key={screen.id}>
-            {screen.section ? (
-              <View style={styles.sectionHeadingRow}>
-                <MaterialDesignIcons
-                  name={screen.section === 'CUSTOMER' ? 'account-outline' : 'briefcase-outline'}
-                  size={16}
-                  color={screen.section === 'CUSTOMER' ? '#7C3AED' : '#D97706'}
-                  style={styles.mr6}
-                />
-                <Text style={styles.sectionHeading}>
-                  {screen.section === 'CUSTOMER' ? 'CUSTOMER EXPERIENCE' : 'BUSINESS OWNER EXPERIENCE'}
+      <ScrollView
+        contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
+      >
+        {SCREEN_OPTIONS.map(screen => {
+          const isAdmin =
+            screen.id.startsWith('Admin') || screen.id.startsWith('Business');
+          return (
+            <React.Fragment key={screen.id}>
+              {screen.section ? (
+                <View style={styles.sectionHeadingRow}>
+                  <View
+                    style={[
+                      styles.sectionIconCircle,
+                      screen.section === 'ADMIN' && styles.sectionIconAdmin,
+                    ]}
+                  >
+                    {screen.section === 'CUSTOMER' ? (
+                      <User size={14} strokeWidth={2} color={PALETTE.primary} />
+                    ) : (
+                      <Briefcase
+                        size={14}
+                        strokeWidth={2}
+                        color={PALETTE.surface}
+                      />
+                    )}
+                  </View>
+                  <Text style={styles.sectionHeading}>
+                    {screen.section === 'CUSTOMER'
+                      ? 'CUSTOMER EXPERIENCE'
+                      : 'BUSINESS OWNER EXPERIENCE'}
+                  </Text>
+                </View>
+              ) : null}
+
+              <TouchableOpacity
+                style={[styles.button, isAdmin && styles.adminButton]}
+                onPress={() => onSelectScreen(screen.id)}
+                activeOpacity={0.85}
+              >
+                <Text
+                  style={[styles.buttonText, isAdmin && styles.adminButtonText]}
+                >
+                  {screen.label}
                 </Text>
-              </View>
-            ) : null}
-            <TouchableOpacity
-              style={[
-                styles.button,
-                (screen.id.startsWith('Admin') || screen.id.startsWith('Business')) &&
-                  styles.adminButton,
-              ]}
-              onPress={() => onSelectScreen(screen.id)}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.buttonText}>{screen.label}</Text>
-            </TouchableOpacity>
-          </React.Fragment>
-        ))}
+                <ChevronRight
+                  size={18}
+                  strokeWidth={2}
+                  color={isAdmin ? PALETTE.surface : PALETTE.onSurfaceMuted}
+                />
+              </TouchableOpacity>
+            </React.Fragment>
+          );
+        })}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
-    paddingHorizontal: 20,
-    paddingTop: 52,
+    backgroundColor: PALETTE.surfaceAlt,
+  },
+  header: {
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 10,
+  },
+  eyebrow: {
+    ...TYPOGRAPHY.labelUppercase,
+    color: PALETTE.primary,
+    marginBottom: 4,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#111827',
-    marginBottom: 8,
+    ...TYPOGRAPHY.displayMd,
+    color: PALETTE.onSurface,
   },
   sectionHeadingRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 8,
+    gap: 8,
+    marginTop: 18,
+    marginBottom: 6,
   },
-  mr6: {
-    marginRight: 6,
-  },
-  sectionHeading: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: '#7B3FF2',
-    letterSpacing: 1,
-  },
-  list: {
-    gap: 12,
-    paddingBottom: 120,
-  },
-  button: {
-    backgroundColor: '#7B3FF2',
-    borderRadius: 16,
-    paddingVertical: 15,
-    paddingHorizontal: 18,
+  sectionIconCircle: {
+    width: 26,
+    height: 26,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.illusCoralBg,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  sectionIconAdmin: {
+    backgroundColor: PALETTE.surfaceContrast,
+  },
+  sectionHeading: {
+    ...TYPOGRAPHY.labelUppercase,
+    color: PALETTE.onSurfaceVariant,
+  },
+  list: {
+    paddingHorizontal: 24,
+    gap: 10,
+    paddingBottom: 120,
+  },
+  button: {
+    flexDirection: 'row',
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.full,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    ...SHADOWS.softCard,
+  },
   adminButton: {
-    backgroundColor: '#4C1D95',
+    backgroundColor: PALETTE.surfaceContrast,
+    borderColor: PALETTE.surfaceContrast,
   },
   buttonText: {
-    color: '#FFFFFF',
+    ...TYPOGRAPHY.labelMd,
     fontSize: 15,
-    fontWeight: '700',
+    color: PALETTE.onSurface,
+  },
+  adminButtonText: {
+    color: PALETTE.surface,
   },
 });

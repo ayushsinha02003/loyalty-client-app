@@ -1,21 +1,28 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  SafeAreaView,
+  ActivityIndicator,
+  Alert,
+  Modal,
+  PermissionsAndroid,
+  Platform,
   StatusBar,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
-  TextInput,
-  Modal,
-  Alert,
-  ActivityIndicator,
-  Platform,
-  PermissionsAndroid,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Camera, CameraType } from 'react-native-camera-kit';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
+import {
+  ArrowLeft,
+  CameraOff,
+  Flashlight,
+  FlashlightOff,
+  Keyboard,
+} from 'lucide-react-native';
 import { qrApi } from '../../services/api';
+import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../constants/theme';
 
 interface BarcodeReadEvent {
   nativeEvent: {
@@ -48,7 +55,6 @@ export default function QrScannerScreen({
   const [manualCode, setManualCode] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // Prevent multiple scans of the same code in quick succession
   const isProcessingRef = useRef(false);
 
   useEffect(() => {
@@ -62,7 +68,8 @@ export default function QrScannerScreen({
           PermissionsAndroid.PERMISSIONS.CAMERA,
           {
             title: 'Camera Permission Needed',
-            message: 'LoyaltyApp needs camera access to scan business QR codes and award your stamps.',
+            message:
+              'LoyaltyApp needs camera access to scan business QR codes and award your stamps.',
             buttonNeutral: 'Ask Later',
             buttonNegative: 'Cancel',
             buttonPositive: 'Grant Permission',
@@ -93,7 +100,8 @@ export default function QrScannerScreen({
       const response = await qrApi.scan(trimmed);
       if (response.success) {
         const customerCard = response.data?.customerCard || response.customerCard;
-        const stampsEarned = response.data?.stampsEarned ?? response.stampsEarned ?? 1;
+        const stampsEarned =
+          response.data?.stampsEarned ?? response.stampsEarned ?? 1;
         const businessName =
           customerCard?.loyaltyCard?.business?.businessName ||
           customerCard?.loyaltyCard?.title ||
@@ -145,9 +153,11 @@ export default function QrScannerScreen({
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#000000" />
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={PALETTE.surfaceContrast}
+      />
 
-      {/* Live Native Camera Feed */}
       {hasPermission && !cameraError ? (
         <Camera
           style={StyleSheet.absoluteFill}
@@ -164,16 +174,15 @@ export default function QrScannerScreen({
         <View style={styles.fallbackBackdrop} />
       )}
 
-      {/* Semi-transparent Dark Mask Overlay */}
-      <SafeAreaView style={styles.overlay}>
-        {/* Header Controls */}
+      <SafeAreaView style={styles.overlay} edges={['top', 'bottom']}>
         <View style={styles.header}>
           <TouchableOpacity
             onPress={onBack}
             style={styles.iconButton}
-            activeOpacity={0.7}
+            activeOpacity={0.75}
+            accessibilityLabel="Back"
           >
-            <MaterialDesignIcons name="arrow-left" size={24} color="#FFFFFF" />
+            <ArrowLeft size={20} strokeWidth={2} color={PALETTE.surface} />
           </TouchableOpacity>
 
           <Text style={styles.headerTitle}>Scan QR Code</Text>
@@ -181,22 +190,22 @@ export default function QrScannerScreen({
           <TouchableOpacity
             onPress={() => setTorchOn(!torchOn)}
             style={[styles.iconButton, torchOn && styles.iconButtonActive]}
-            activeOpacity={0.7}
+            activeOpacity={0.75}
+            accessibilityLabel="Toggle flashlight"
           >
-            <MaterialDesignIcons
-              name={torchOn ? 'flashlight' : 'flashlight-off'}
-              size={22}
-              color="#FFFFFF"
-            />
+            {torchOn ? (
+              <Flashlight size={20} strokeWidth={2} color={PALETTE.surface} />
+            ) : (
+              <FlashlightOff size={20} strokeWidth={2} color={PALETTE.surface} />
+            )}
           </TouchableOpacity>
         </View>
 
-        {/* Central Viewfinder */}
         <View style={styles.centerContainer}>
           {hasPermission === false || cameraError ? (
             <View style={styles.permissionCard}>
               <View style={styles.permissionIconCircle}>
-                <MaterialDesignIcons name="camera-off-outline" size={44} color="#C084FC" />
+                <CameraOff size={32} strokeWidth={2} color={PALETTE.primary} />
               </View>
               <Text style={styles.permissionTitle}>
                 {cameraError ? 'Camera Unavailable' : 'Camera Permission Needed'}
@@ -211,7 +220,7 @@ export default function QrScannerScreen({
                 <TouchableOpacity
                   style={styles.permissionButton}
                   onPress={requestPermission}
-                  activeOpacity={0.8}
+                  activeOpacity={0.85}
                 >
                   <Text style={styles.permissionButtonText}>Grant Permission</Text>
                 </TouchableOpacity>
@@ -222,13 +231,12 @@ export default function QrScannerScreen({
                 onPress={() => setModalVisible(true)}
                 activeOpacity={0.8}
               >
-                <MaterialDesignIcons name="keyboard-outline" size={18} color="#CBD5E1" style={styles.fallbackIconMargin} />
+                <Keyboard size={16} strokeWidth={2} color={PALETTE.onSurfaceVariant} />
                 <Text style={styles.manualFallbackText}>Enter Code Manually</Text>
               </TouchableOpacity>
             </View>
           ) : (
             <View style={styles.scanTarget}>
-              {/* Corner Accents */}
               <View style={[styles.corner, styles.cornerTL]} />
               <View style={[styles.corner, styles.cornerTR]} />
               <View style={[styles.corner, styles.cornerBL]} />
@@ -236,7 +244,7 @@ export default function QrScannerScreen({
 
               {loading && (
                 <View style={styles.scanningIndicator}>
-                  <ActivityIndicator size="large" color="#FFFFFF" />
+                  <ActivityIndicator size="large" color={PALETTE.primary} />
                   <Text style={styles.scanningText}>Processing Stamp...</Text>
                 </View>
               )}
@@ -248,20 +256,18 @@ export default function QrScannerScreen({
           </Text>
         </View>
 
-        {/* Bottom Bar: Manual Code Option */}
         <View style={styles.bottomBar}>
           <TouchableOpacity
             style={styles.manualCodeButton}
             onPress={() => setModalVisible(true)}
-            activeOpacity={0.8}
+            activeOpacity={0.85}
           >
-            <MaterialDesignIcons name="keyboard-outline" size={20} color="#FFFFFF" style={styles.manualCodeIconMargin} />
+            <Keyboard size={18} strokeWidth={2} color={PALETTE.surface} />
             <Text style={styles.manualCodeText}>Enter Code Manually</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
 
-      {/* Manual Code Input Modal */}
       <Modal
         visible={modalVisible}
         transparent
@@ -272,13 +278,13 @@ export default function QrScannerScreen({
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Enter Merchant Code</Text>
             <Text style={styles.modalSubtitle}>
-              Type the code shown below the business QR code to claim your stamp:
+              Type the code displayed below the store QR code to claim your stamp:
             </Text>
 
             <TextInput
               style={styles.modalInput}
-              placeholder="e.g. 8f4a19c... or QR text"
-              placeholderTextColor="#94A3B8"
+              placeholder="e.g. 8f4a19c..."
+              placeholderTextColor={PALETTE.onSurfaceMuted}
               value={manualCode}
               onChangeText={setManualCode}
               autoCapitalize="none"
@@ -300,7 +306,7 @@ export default function QrScannerScreen({
                 disabled={loading}
               >
                 {loading ? (
-                  <ActivityIndicator color="#FFFFFF" size="small" />
+                  <ActivityIndicator color={PALETTE.onPrimary} size="small" />
                 ) : (
                   <Text style={styles.modalSubmitText}>Claim Stamp</Text>
                 )}
@@ -316,7 +322,7 @@ export default function QrScannerScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: PALETTE.surfaceContrast,
   },
   fallbackBackdrop: {
     position: 'absolute',
@@ -324,235 +330,202 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: '#090D16',
+    backgroundColor: PALETTE.surfaceContrast,
   },
   overlay: {
     flex: 1,
     justifyContent: 'space-between',
-    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    backgroundColor: 'rgba(26, 33, 56, 0.52)',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     paddingTop: 12,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#FFFFFF',
+    ...TYPOGRAPHY.headlineSm,
+    color: PALETTE.surface,
   },
   iconButton: {
     width: 44,
     height: 44,
-    borderRadius: 22,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: RADII.full,
+    backgroundColor: 'rgba(255, 255, 255, 0.16)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   iconButtonActive: {
-    backgroundColor: '#7C3AED',
-  },
-  headerIconText: {
-    fontSize: 18,
-    color: '#FFFFFF',
+    backgroundColor: PALETTE.primary,
   },
   centerContainer: {
     alignItems: 'center',
-    justifyContent: 'center',
     paddingHorizontal: 24,
   },
   scanTarget: {
-    width: 260,
-    height: 260,
-    borderRadius: 24,
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.25)',
-    alignItems: 'center',
+    width: 246,
+    height: 246,
     justifyContent: 'center',
-    position: 'relative',
+    alignItems: 'center',
   },
   corner: {
     position: 'absolute',
-    width: 32,
-    height: 32,
-    borderColor: '#A855F7',
+    width: 36,
+    height: 36,
+    borderColor: PALETTE.primary,
   },
   cornerTL: {
-    top: -2,
-    left: -2,
+    top: 0,
+    left: 0,
     borderTopWidth: 4,
     borderLeftWidth: 4,
-    borderTopLeftRadius: 20,
+    borderTopLeftRadius: 16,
   },
   cornerTR: {
-    top: -2,
-    right: -2,
+    top: 0,
+    right: 0,
     borderTopWidth: 4,
     borderRightWidth: 4,
-    borderTopRightRadius: 20,
+    borderTopRightRadius: 16,
   },
   cornerBL: {
-    bottom: -2,
-    left: -2,
+    bottom: 0,
+    left: 0,
     borderBottomWidth: 4,
     borderLeftWidth: 4,
-    borderBottomLeftRadius: 20,
+    borderBottomLeftRadius: 16,
   },
   cornerBR: {
-    bottom: -2,
-    right: -2,
+    bottom: 0,
+    right: 0,
     borderBottomWidth: 4,
     borderRightWidth: 4,
-    borderBottomRightRadius: 20,
+    borderBottomRightRadius: 16,
   },
   scanningIndicator: {
+    backgroundColor: PALETTE.surfaceContrast,
+    paddingHorizontal: 22,
+    paddingVertical: 16,
+    borderRadius: RADII.lg,
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    borderRadius: 16,
-    padding: 16,
+    gap: 10,
   },
   scanningText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '600',
-    marginTop: 8,
+    ...TYPOGRAPHY.labelSm,
+    color: PALETTE.surface,
   },
   instructionText: {
-    marginTop: 24,
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.85)',
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.surface,
     textAlign: 'center',
-    lineHeight: 20,
-    paddingHorizontal: 16,
+    marginTop: 22,
+    maxWidth: 280,
   },
   permissionCard: {
-    backgroundColor: 'rgba(15, 23, 42, 0.95)',
-    borderRadius: 20,
+    width: '100%',
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
     padding: 24,
     alignItems: 'center',
-    maxWidth: 320,
-    borderWidth: 1,
-    borderColor: '#334155',
+    ...SHADOWS.softCard,
   },
   permissionIconCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: 'rgba(168, 85, 247, 0.15)',
+    width: 68,
+    height: 68,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.illusCoralBg,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
   },
   permissionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#FFFFFF',
+    ...TYPOGRAPHY.headlineMd,
+    color: PALETTE.onSurface,
     marginBottom: 8,
     textAlign: 'center',
   },
   permissionSubtitle: {
-    fontSize: 13,
-    color: '#94A3B8',
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurfaceVariant,
     textAlign: 'center',
-    lineHeight: 18,
-    marginBottom: 20,
+    marginBottom: 18,
   },
   permissionButton: {
-    backgroundColor: '#7C3AED',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 12,
-    width: '100%',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  permissionButtonText: {
-    color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '700',
-  },
-  manualFallbackButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    flexDirection: 'row',
+    backgroundColor: PALETTE.primary,
+    paddingHorizontal: 26,
+    height: 48,
+    borderRadius: RADII.full,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 12,
-    width: '100%',
+    ...SHADOWS.btn,
+  },
+  permissionButtonText: {
+    ...TYPOGRAPHY.labelMd,
+    color: PALETTE.onPrimary,
+  },
+  manualFallbackButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 16,
+    paddingVertical: 8,
   },
   manualFallbackText: {
-    color: '#CBD5E1',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  fallbackIconMargin: {
-    marginRight: 8,
+    ...TYPOGRAPHY.labelSm,
+    color: PALETTE.onSurfaceVariant,
   },
   bottomBar: {
     paddingHorizontal: 24,
-    paddingBottom: 28,
+    paddingBottom: 24,
     alignItems: 'center',
   },
   manualCodeButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 16,
+    gap: 8,
+    backgroundColor: 'rgba(26, 33, 56, 0.85)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.25)',
-  },
-  manualCodeIconMargin: {
-    marginRight: 10,
+    borderColor: 'rgba(255, 255, 255, 0.16)',
+    paddingHorizontal: 22,
+    height: 48,
+    borderRadius: RADII.full,
   },
   manualCodeText: {
-    color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '700',
+    ...TYPOGRAPHY.labelSm,
+    color: PALETTE.surface,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.65)',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
+    backgroundColor: 'rgba(26, 33, 56, 0.6)',
+    justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    backgroundColor: PALETTE.surface,
+    borderTopLeftRadius: RADII.xl,
+    borderTopRightRadius: RADII.xl,
     padding: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    elevation: 8,
+    paddingBottom: 34,
   },
   modalTitle: {
-    fontSize: 19,
-    fontWeight: '800',
-    color: '#0F172A',
-    marginBottom: 8,
+    ...TYPOGRAPHY.headlineMd,
+    color: PALETTE.onSurface,
+    marginBottom: 6,
   },
   modalSubtitle: {
-    fontSize: 14,
-    color: '#64748B',
-    lineHeight: 20,
-    marginBottom: 16,
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurfaceVariant,
+    marginBottom: 18,
   },
   modalInput: {
-    backgroundColor: '#F1F5F9',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: 16,
-    color: '#0F172A',
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
+    height: 52,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.surfaceAlt,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    paddingHorizontal: 20,
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurface,
     marginBottom: 20,
   },
   modalButtonRow: {
@@ -561,28 +534,28 @@ const styles = StyleSheet.create({
   },
   modalCancelButton: {
     flex: 1,
-    paddingVertical: 12,
-    borderRadius: 12,
-    backgroundColor: '#F1F5F9',
+    height: 50,
+    borderRadius: RADII.full,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
     alignItems: 'center',
     justifyContent: 'center',
   },
   modalCancelText: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#64748B',
+    ...TYPOGRAPHY.labelMd,
+    color: PALETTE.onSurfaceVariant,
   },
   modalSubmitButton: {
     flex: 1,
-    paddingVertical: 12,
-    borderRadius: 12,
-    backgroundColor: '#7C3AED',
+    height: 50,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.primary,
     alignItems: 'center',
     justifyContent: 'center',
+    ...SHADOWS.btn,
   },
   modalSubmitText: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#FFFFFF',
+    ...TYPOGRAPHY.labelMd,
+    color: PALETTE.onPrimary,
   },
 });

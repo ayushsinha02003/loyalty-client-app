@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import {
+  RefreshControl,
   ScrollView,
   StyleSheet,
-  View,
   Text,
   TouchableOpacity,
-  RefreshControl,
+  View,
 } from 'react-native';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Bell, Gift, Store } from 'lucide-react-native';
 import PrimaryText from '../../components/text/PrimaryText';
 import PrimaryAdminActionGrid from '../../components/admin/PrimaryAdminActionGrid';
 import PrimaryAdminActivity from '../../components/admin/PrimaryAdminActivity';
@@ -15,16 +16,17 @@ import PrimaryAdminMetric from '../../components/admin/PrimaryAdminMetric';
 import PrimaryAdminStatCard from '../../components/admin/PrimaryAdminStatCard';
 import { useBusinessDashboard, useBusinessStampHistory } from '../../hooks/useApi';
 import { AdminHomeScreenSkeleton } from '../../components/skeleton';
+import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../constants/theme';
 
 interface AdminHomeScreenProps {
   onActionPress?: (action: string) => void;
 }
 
-const actions = [
-  { label: 'Add Customer', icon: 'account-plus' as const },
-  { label: 'Create Reward', icon: 'gift-outline' as const },
-  { label: 'Scan QR Code', icon: 'qrcode-scan' as const },
-  { label: 'View Reports', icon: 'chart-bar' as const },
+const ACTIONS = [
+  { label: 'Add Customer', icon: 'account-plus' },
+  { label: 'Create Reward', icon: 'gift-outline' },
+  { label: 'Scan QR Code', icon: 'qrcode-scan' },
+  { label: 'View Reports', icon: 'chart-bar' },
 ];
 
 export default function AdminHomeScreen({ onActionPress }: AdminHomeScreenProps) {
@@ -38,7 +40,6 @@ export default function AdminHomeScreen({ onActionPress }: AdminHomeScreenProps)
     }
   }, [dashboard]);
 
-  // Transform stamp history to activity format
   const recentActivity =
     stampHistory?.slice(0, 4).map((stamp: any) => ({
       title: 'New Stamp Added',
@@ -57,55 +58,76 @@ export default function AdminHomeScreen({ onActionPress }: AdminHomeScreenProps)
 
   if (error) {
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top']}>
         <View style={styles.header}>
-          <MaterialDesignIcons name="store" size={30} color="#7B3FF2" />
+          <View style={styles.storeIconCircle}>
+            <Store size={22} strokeWidth={2} color={PALETTE.primary} />
+          </View>
           <View style={styles.headerCopy}>
-            <PrimaryText text={`Hello, ${businessName}!`} customStyle={styles.title} />
-            <PrimaryText text="Manage your business & rewards" customStyle={styles.subtitle} />
+            <PrimaryText text="Merchant Hub" customStyle={styles.eyebrow} />
+            <PrimaryText
+              text={`Hello, ${businessName}`}
+              customStyle={styles.title}
+              numberOfLines={1}
+            />
           </View>
         </View>
         <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={refetch}>
-            <Text style={styles.retryButtonText}>Retry</Text>
-          </TouchableOpacity>
+          <View style={styles.errorCard}>
+            <Text style={styles.errorText}>{error}</Text>
+            <TouchableOpacity style={styles.retryButton} onPress={refetch}>
+              <Text style={styles.retryButtonText}>Retry</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={refetch} />
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={refetch}
+            tintColor={PALETTE.primary}
+          />
         }
       >
         <View style={styles.header}>
-          <MaterialDesignIcons name="store" size={30} color="#7B3FF2" />
-          <View style={styles.headerCopy}>
-            <PrimaryText text={`Hello, ${businessName}!`} customStyle={styles.title} />
-            <PrimaryText text="Manage your business & rewards" customStyle={styles.subtitle} />
+          <View style={styles.storeIconCircle}>
+            <Store size={22} strokeWidth={2} color={PALETTE.primary} />
           </View>
-          <MaterialDesignIcons name="bell-outline" size={26} color="#172033" />
+          <View style={styles.headerCopy}>
+            <PrimaryText text="Merchant Hub" customStyle={styles.eyebrow} />
+            <PrimaryText
+              text={`Hello, ${businessName}`}
+              customStyle={styles.title}
+              numberOfLines={1}
+            />
+          </View>
+          <View style={styles.bellChrome}>
+            <Bell size={20} strokeWidth={2} color={PALETTE.onSurface} />
+          </View>
         </View>
 
+        {/* Deep Slate-Indigo Contrast Banner */}
         <View style={styles.banner}>
           <PrimaryAdminMetric
-            label="Total Customers"
+            label="Customers"
             value={dashboard?.totalCustomers?.toString() || '0'}
             change="enrolled"
           />
           <PrimaryAdminMetric
-            label="Active Stamps"
+            label="Stamps"
             value={dashboard?.totalStamps?.toString() || '0'}
             change="issued"
           />
           <PrimaryAdminMetric
-            label="Redemptions"
+            label="Redeemed"
             value={dashboard?.totalRewardsRedeemed?.toString() || '0'}
             change="claimed"
           />
@@ -113,22 +135,27 @@ export default function AdminHomeScreen({ onActionPress }: AdminHomeScreenProps)
 
         <PrimaryText text="Quick Actions" customStyle={styles.heading} />
         <PrimaryAdminActionGrid
-          actions={actions}
+          actions={ACTIONS}
           onPressAction={(index: number) => {
-            const label = actions[index]?.label;
+            const label = ACTIONS[index]?.label;
             onActionPress?.(label);
           }}
         />
 
         <View style={styles.callout}>
           <View style={styles.calloutCopy}>
-            <PrimaryText text="Boost Engagement!" customStyle={styles.calloutTitle} />
             <PrimaryText
-              text="Create exciting rewards and keep your customers coming back for more stamps."
+              text="Boost Engagement"
+              customStyle={styles.calloutTitle}
+            />
+            <PrimaryText
+              text="Create rewarding perks and keep loyal customers returning for every visit."
               customStyle={styles.calloutText}
             />
           </View>
-          <MaterialDesignIcons name="gift-outline" size={50} color="#8B5CF6" />
+          <View style={styles.calloutIconWell}>
+            <Gift size={26} strokeWidth={2} color={PALETTE.primary} />
+          </View>
         </View>
 
         <View style={styles.sectionRow}>
@@ -147,7 +174,7 @@ export default function AdminHomeScreen({ onActionPress }: AdminHomeScreenProps)
           ) : (
             <PrimaryAdminActivity
               title="No recent activity"
-              detail="Activity will appear here when customers interact with your loyalty program"
+              detail="Customer stamps and reward events will appear here"
               time="—"
             />
           )}
@@ -161,87 +188,134 @@ export default function AdminHomeScreen({ onActionPress }: AdminHomeScreenProps)
             label="Total Cards"
             value={dashboard?.totalLoyaltyCards?.toString() || '0'}
             change="active"
-            color="#F2EAFF"
           />
           <PrimaryAdminStatCard
-            label="Pending Rewards"
+            label="Pending"
             value={dashboard?.rewardsAvailable?.toString() || '0'}
             change="ready"
-            color="#FFF7E7"
           />
           <PrimaryAdminStatCard
-            label="Customers"
+            label="Members"
             value={dashboard?.totalCustomers?.toString() || '0'}
             change="total"
-            color="#ECF9F0"
           />
         </View>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F8FAFC' },
-  content: { padding: 16, paddingTop: 20, paddingBottom: 100 },
-  header: { flexDirection: 'row', alignItems: 'center', marginBottom: 20, paddingHorizontal: 4 },
-  headerCopy: { flex: 1, marginHorizontal: 14 },
-  title: { fontSize: 22, fontWeight: '800', color: '#172033' },
-  subtitle: { marginTop: 3, fontSize: 13, color: '#64748B' },
+  container: {
+    flex: 1,
+    backgroundColor: PALETTE.surfaceAlt,
+  },
+  content: {
+    paddingHorizontal: 24,
+    paddingTop: 14,
+    paddingBottom: 120,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  storeIconCircle: {
+    width: 46,
+    height: 46,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.illusCoralBg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerCopy: {
+    flex: 1,
+    marginHorizontal: 14,
+  },
+  eyebrow: {
+    ...TYPOGRAPHY.labelUppercase,
+    color: PALETTE.onSurfaceVariant,
+  },
+  title: {
+    ...TYPOGRAPHY.headlineMd,
+    color: PALETTE.onSurface,
+    marginTop: 2,
+  },
+  bellChrome: {
+    width: 44,
+    height: 44,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.surface,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...SHADOWS.softCard,
+  },
   banner: {
     flexDirection: 'row',
-    backgroundColor: '#7139EF',
-    borderRadius: 22,
+    backgroundColor: PALETTE.surfaceContrast,
+    borderRadius: RADII.xl,
     paddingVertical: 20,
+    paddingHorizontal: 10,
     marginBottom: 24,
+    ...SHADOWS.softCard,
   },
   heading: {
-    fontSize: 19,
-    fontWeight: '800',
-    color: '#172033',
-    marginBottom: 13,
+    ...TYPOGRAPHY.headlineMd,
+    color: PALETTE.onSurface,
+    marginBottom: 14,
   },
   callout: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F4ECFF',
-    borderRadius: 20,
-    padding: 18,
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    padding: 20,
     marginVertical: 24,
+    ...SHADOWS.softCard,
   },
-  calloutCopy: { flex: 1, paddingRight: 10 },
+  calloutCopy: {
+    flex: 1,
+    paddingRight: 14,
+  },
   calloutTitle: {
-    color: '#7B3FF2',
-    fontSize: 16,
-    fontWeight: '800',
-    marginBottom: 6,
+    ...TYPOGRAPHY.headlineSm,
+    color: PALETTE.onSurface,
+    marginBottom: 4,
   },
-  calloutText: { color: '#64748B', fontSize: 13, lineHeight: 19 },
+  calloutText: {
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurfaceVariant,
+  },
+  calloutIconWell: {
+    width: 52,
+    height: 52,
+    borderRadius: RADII.lg,
+    backgroundColor: PALETTE.illusCoralBg,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   sectionRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
   },
   activityCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    paddingHorizontal: 14,
-    marginBottom: 26,
-    elevation: 2,
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    marginBottom: 24,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: PALETTE.border,
+    ...SHADOWS.softCard,
   },
-  overviewRow: { flexDirection: 'row', gap: 10 },
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 60,
-  },
-  loadingText: {
-    fontSize: 16,
-    color: '#64748B',
+  overviewRow: {
+    flexDirection: 'row',
+    gap: 10,
   },
   errorContainer: {
     flex: 1,
@@ -249,21 +323,33 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 24,
   },
+  errorCard: {
+    width: '100%',
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    padding: 24,
+    alignItems: 'center',
+    ...SHADOWS.softCard,
+  },
   errorText: {
-    fontSize: 16,
-    color: '#EF4444',
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurface,
     textAlign: 'center',
     marginBottom: 16,
   },
   retryButton: {
-    backgroundColor: '#7B3FF2',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
+    backgroundColor: PALETTE.primary,
+    paddingHorizontal: 28,
+    height: 48,
+    borderRadius: RADII.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...SHADOWS.btn,
   },
   retryButtonText: {
-    fontSize: 16,
-    color: '#FFFFFF',
-    fontWeight: '600',
+    ...TYPOGRAPHY.labelMd,
+    color: PALETTE.onPrimary,
   },
 });

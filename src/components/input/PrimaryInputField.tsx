@@ -9,6 +9,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
+import { PALETTE, RADII, SHADOWS } from '../../constants/theme';
 
 export interface PrimaryInputFieldProps extends TextInputProps {
   label?: string;
@@ -39,7 +40,7 @@ export default function PrimaryInputField({
       <TextInput
         {...inputProps}
         editable={editable}
-        placeholderTextColor="#94A3B8"
+        placeholderTextColor={PALETTE.onSurfaceMuted}
         style={[
           styles.input,
           isError && styles.inputErrorBorder,
@@ -56,36 +57,42 @@ export default function PrimaryInputField({
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 20,
+    marginBottom: 18,
   },
   label: {
-    fontSize: 14,
+    fontSize: 11,
     fontWeight: '600',
-    color: '#334155',
+    letterSpacing: 0.88,
+    textTransform: 'uppercase',
+    color: PALETTE.onSurfaceVariant,
     marginBottom: 8,
+    marginLeft: 6,
   },
   input: {
-    height: 54,
+    height: 52,
     borderWidth: 1,
-    borderColor: '#CBD5E1',
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    color: '#0F172A',
-    backgroundColor: '#FFFFFF',
+    borderColor: PALETTE.border,
+    borderRadius: RADII.full,
+    paddingHorizontal: 20,
+    fontSize: 14,
+    fontWeight: '500',
+    color: PALETTE.onSurface,
+    backgroundColor: PALETTE.surface,
+    ...SHADOWS.softCard,
   },
   inputErrorBorder: {
-    borderColor: '#DC2626',
+    borderColor: PALETTE.primary,
     borderWidth: 1.5,
   },
   inputDisabled: {
-    backgroundColor: '#F8FAFC',
-    opacity: 0.8,
+    backgroundColor: PALETTE.surfaceAlt,
+    opacity: 0.75,
   },
   fieldError: {
-    color: '#DC2626',
-    fontSize: 13,
+    color: PALETTE.primary,
+    fontSize: 12,
     marginTop: 6,
-    fontWeight: '500',
+    marginLeft: 8,
+    fontWeight: '600',
   },
 });

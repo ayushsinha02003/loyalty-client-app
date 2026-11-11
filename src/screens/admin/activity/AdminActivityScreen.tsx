@@ -1,28 +1,47 @@
 import React, { useState } from 'react';
 import {
-  SafeAreaView,
+  RefreshControl,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  RefreshControl,
-  ActivityIndicator,
 } from 'react-native';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
-import { useBusinessStampHistory, useBusinessRewardHistory } from '../../../hooks/useApi';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Gift, History, Star } from 'lucide-react-native';
+import {
+  useBusinessStampHistory,
+  useBusinessRewardHistory,
+} from '../../../hooks/useApi';
 import { AdminActivityScreenSkeleton } from '../../../components/skeleton';
+import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../../constants/theme';
+
+const FILTERS = ['All', 'Stamps', 'Rewards'] as const;
 
 export default function AdminActivityScreen() {
   const [filter, setFilter] = useState<'All' | 'Stamps' | 'Rewards'>('All');
-  const { history: stampHistory, loading: stampLoading, error: stampError, refetch: refetchStamps } = useBusinessStampHistory();
-  const { history: rewardHistory, loading: rewardLoading, error: rewardError, refetch: refetchRewards } = useBusinessRewardHistory();
+  const {
+    history: stampHistory,
+    loading: stampLoading,
+    error: stampError,
+    refetch: refetchStamps,
+  } = useBusinessStampHistory();
+  const {
+    history: rewardHistory,
+    loading: rewardLoading,
+    error: rewardError,
+    refetch: refetchRewards,
+  } = useBusinessRewardHistory();
 
   const loading = stampLoading || rewardLoading;
   const error = stampError || rewardError;
 
-  if (loading && (!stampHistory || stampHistory.length === 0) && (!rewardHistory || rewardHistory.length === 0)) {
+  if (
+    loading &&
+    (!stampHistory || stampHistory.length === 0) &&
+    (!rewardHistory || rewardHistory.length === 0)
+  ) {
     return <AdminActivityScreenSkeleton />;
   }
 
@@ -38,9 +57,10 @@ export default function AdminActivityScreen() {
     action: `Collected stamp on ${s.customerCard?.loyaltyCard?.title || 'Card'}`,
     amount: `+${s.stampsAdded || 1}`,
     isPositive: true,
-    time: new Date(s.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    date: new Date(s.createdAt).toLocaleDateString(),
-    avatarBg: '#EEF2FF',
+    time: new Date(s.createdAt).toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    }),
   }));
 
   const rewardItems = (rewardHistory || []).map((r: any) => ({
@@ -50,37 +70,38 @@ export default function AdminActivityScreen() {
     action: `Redeemed: ${r.reward || 'Reward'}`,
     amount: `-${r.loyaltyCard?.totalStamps || 10}`,
     isPositive: false,
-    time: new Date(r.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-    date: new Date(r.createdAt).toLocaleDateString(),
-    avatarBg: '#FEF3C7',
+    time: new Date(r.createdAt).toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    }),
   }));
 
-  const allItems = [...stampItems, ...rewardItems].sort((a, b) => (a.id > b.id ? -1 : 1));
+  const allItems = [...stampItems, ...rewardItems].sort((a, b) =>
+    a.id > b.id ? -1 : 1
+  );
 
   const filtered = allItems.filter(item => {
     if (filter === 'All') return true;
     if (filter === 'Stamps') return item.type === 'stamp';
-    if (filter === 'Rewards') return item.type === 'reward';
-    return true;
+    return item.type === 'reward';
   });
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <StatusBar barStyle="dark-content" backgroundColor={PALETTE.surfaceAlt} />
 
-      {/* Header */}
       <View style={styles.header}>
+        <Text style={styles.eyebrow}>Ledger</Text>
         <Text style={styles.title}>All Activity</Text>
       </View>
 
-      {/* Filter Tabs */}
       <View style={styles.filterRow}>
-        {(['All', 'Stamps', 'Rewards'] as const).map(tab => (
+        {FILTERS.map(tab => (
           <TouchableOpacity
             key={tab}
             style={[styles.filterPill, filter === tab && styles.filterPillActive]}
             onPress={() => setFilter(tab)}
-            activeOpacity={0.8}
+            activeOpacity={0.85}
           >
             <Text
               style={[
@@ -98,16 +119,15 @@ export default function AdminActivityScreen() {
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={handleRefresh} />
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={handleRefresh}
+            tintColor={PALETTE.primary}
+          />
         }
       >
-        {loading ? (
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#7B3FF2" />
-            <Text style={styles.loadingText}>Loading activity...</Text>
-          </View>
-        ) : error ? (
-          <View style={styles.errorContainer}>
+        {error ? (
+          <View style={styles.errorCard}>
             <Text style={styles.errorText}>{error}</Text>
             <TouchableOpacity style={styles.retryButton} onPress={handleRefresh}>
               <Text style={styles.retryButtonText}>Retry</Text>
@@ -117,29 +137,54 @@ export default function AdminActivityScreen() {
           filtered.map(item => (
             <View key={item.id} style={styles.activityCard}>
               <View
-                style={[styles.avatarCircle, { backgroundColor: item.avatarBg }]}
+                style={[
+                  styles.avatarCircle,
+                  item.type === 'stamp'
+                    ? styles.avatarStamp
+                    : styles.avatarReward,
+                ]}
               >
-                <MaterialDesignIcons
-                  name={item.type === 'stamp' ? 'star' : 'gift'}
-                  size={20}
-                  color={item.type === 'stamp' ? '#4F46E5' : '#D97706'}
-                />
+                {item.type === 'stamp' ? (
+                  <Star
+                    size={18}
+                    strokeWidth={2}
+                    color={PALETTE.warning}
+                    fill={PALETTE.warning}
+                  />
+                ) : (
+                  <Gift size={18} strokeWidth={2} color={PALETTE.primary} />
+                )}
               </View>
 
               <View style={styles.itemInfo}>
-                <Text style={styles.name}>{item.name}</Text>
-                <Text style={styles.action}>{item.action}</Text>
+                <Text style={styles.name} numberOfLines={1}>
+                  {item.name}
+                </Text>
+                <Text style={styles.action} numberOfLines={1}>
+                  {item.action}
+                </Text>
               </View>
 
               <View style={styles.rightCol}>
-                <Text
+                <View
                   style={[
-                    styles.amount,
-                    item.isPositive ? styles.amountPositive : styles.amountNegative,
+                    styles.amountPill,
+                    item.isPositive
+                      ? styles.amountPillPositive
+                      : styles.amountPillNegative,
                   ]}
                 >
-                  {item.amount}
-                </Text>
+                  <Text
+                    style={[
+                      styles.amount,
+                      item.isPositive
+                        ? styles.amountPositive
+                        : styles.amountNegative,
+                    ]}
+                  >
+                    {item.amount}
+                  </Text>
+                </View>
                 <Text style={styles.time}>{item.time}</Text>
               </View>
             </View>
@@ -147,11 +192,11 @@ export default function AdminActivityScreen() {
         ) : (
           <View style={styles.emptyState}>
             <View style={styles.emptyIconCircle}>
-              <MaterialDesignIcons name="history" size={42} color="#94A3B8" />
+              <History size={28} strokeWidth={2} color={PALETTE.primary} />
             </View>
             <Text style={styles.emptyTitle}>No Activity Recorded</Text>
             <Text style={styles.emptySubtitle}>
-              Activity will appear here as customers collect stamps and redeem rewards.
+              Activity appears here as customers collect stamps and redeem perks.
             </Text>
           </View>
         )}
@@ -163,157 +208,174 @@ export default function AdminActivityScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: PALETTE.surfaceAlt,
   },
   header: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     paddingTop: 16,
-    paddingBottom: 14,
+    paddingBottom: 10,
+  },
+  eyebrow: {
+    ...TYPOGRAPHY.labelUppercase,
+    color: PALETTE.onSurfaceVariant,
+    marginBottom: 4,
   },
   title: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#1E293B',
+    ...TYPOGRAPHY.displayMd,
+    color: PALETTE.onSurface,
   },
   filterRow: {
     flexDirection: 'row',
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     gap: 10,
-    marginBottom: 16,
+    marginBottom: 14,
   },
   filterPill: {
-    paddingHorizontal: 18,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: PALETTE.surface,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: PALETTE.border,
+    paddingHorizontal: 18,
+    paddingVertical: 9,
+    borderRadius: RADII.full,
   },
   filterPillActive: {
-    backgroundColor: '#7B3FF2',
-    borderColor: '#7B3FF2',
+    backgroundColor: PALETTE.surfaceContrast,
+    borderColor: PALETTE.surfaceContrast,
   },
   filterText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#64748B',
+    ...TYPOGRAPHY.labelSm,
+    color: PALETTE.onSurfaceVariant,
   },
   filterTextActive: {
-    color: '#FFFFFF',
+    color: PALETTE.surface,
   },
   listContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 100,
+    paddingHorizontal: 24,
+    paddingBottom: 120,
+    gap: 10,
   },
   activityCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderColor: '#F1F5F9',
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.lg,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    padding: 16,
+    ...SHADOWS.softCard,
   },
   avatarCircle: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
+    width: 44,
+    height: 44,
+    borderRadius: RADII.full,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 14,
+    marginRight: 12,
   },
-  avatarInitial: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#334155',
+  avatarStamp: {
+    backgroundColor: PALETTE.border,
+  },
+  avatarReward: {
+    backgroundColor: PALETTE.illusCoralBg,
   },
   itemInfo: {
     flex: 1,
+    marginRight: 10,
   },
   name: {
+    ...TYPOGRAPHY.labelMd,
     fontSize: 15,
-    fontWeight: '700',
-    color: '#1E293B',
-    marginBottom: 3,
+    color: PALETTE.onSurface,
   },
   action: {
-    fontSize: 13,
-    color: '#64748B',
+    ...TYPOGRAPHY.caption,
+    color: PALETTE.onSurfaceVariant,
+    marginTop: 2,
   },
   rightCol: {
     alignItems: 'flex-end',
   },
+  amountPill: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: RADII.sm,
+  },
+  amountPillPositive: {
+    backgroundColor: PALETTE.surfaceContrast,
+  },
+  amountPillNegative: {
+    backgroundColor: PALETTE.illusCoralBg,
+  },
   amount: {
-    fontSize: 16,
-    fontWeight: '800',
-    marginBottom: 3,
+    ...TYPOGRAPHY.labelSm,
   },
   amountPositive: {
-    color: '#16A34A',
+    color: PALETTE.surface,
   },
   amountNegative: {
-    color: '#DC2626',
+    color: PALETTE.primary,
   },
   time: {
-    fontSize: 12,
-    color: '#94A3B8',
+    ...TYPOGRAPHY.caption,
+    fontSize: 11,
+    color: PALETTE.onSurfaceMuted,
+    marginTop: 4,
   },
-  loadingContainer: {
-    flex: 1,
+  errorCard: {
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    padding: 28,
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 60,
-  },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#64748B',
-  },
-  errorContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 24,
+    gap: 12,
+    ...SHADOWS.softCard,
   },
   errorText: {
-    fontSize: 16,
-    color: '#EF4444',
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurface,
     textAlign: 'center',
-    marginBottom: 16,
   },
   retryButton: {
-    backgroundColor: '#7B3FF2',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
+    backgroundColor: PALETTE.primary,
+    paddingHorizontal: 28,
+    height: 48,
+    borderRadius: RADII.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...SHADOWS.btn,
   },
   retryButtonText: {
-    fontSize: 16,
-    color: '#FFFFFF',
-    fontWeight: '600',
+    ...TYPOGRAPHY.labelMd,
+    color: PALETTE.onPrimary,
   },
   emptyState: {
-    alignItems: 'center',
-    paddingVertical: 60,
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    paddingVertical: 40,
     paddingHorizontal: 24,
+    alignItems: 'center',
+    ...SHADOWS.softCard,
   },
   emptyIconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#F1F5F9',
+    width: 64,
+    height: 64,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.illusCoralBg,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
   },
   emptyTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#1E293B',
-    marginBottom: 8,
+    ...TYPOGRAPHY.headlineMd,
+    color: PALETTE.onSurface,
+    marginBottom: 6,
   },
   emptySubtitle: {
-    fontSize: 15,
-    color: '#64748B',
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurfaceVariant,
     textAlign: 'center',
-    lineHeight: 22,
   },
 });

@@ -2,16 +2,21 @@ import React, { useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import PrimaryInputField from '../../../components/input/PrimaryInputField';
-import PrimaryButton from '../../../components/button/PrimaryButton';
+import { ArrowLeft } from 'lucide-react-native';
+import { PrimaryButton, PrimaryInputField } from '../../../components';
+import {
+  PALETTE,
+  RADII,
+  SHADOWS,
+  SPACING,
+  TYPOGRAPHY,
+} from '../../../constants/theme';
 
 interface BusinessSetupScreen1Props {
   onBack?: () => void;
@@ -42,159 +47,170 @@ export default function BusinessSetupScreen1({
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    <KeyboardAvoidingView
+      style={styles.screen}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-        >
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity onPress={onBack} style={styles.backButton}>
-              <Text style={styles.backArrow}>←</Text>
-            </TouchableOpacity>
+        <View style={styles.topRow}>
+          <TouchableOpacity
+            onPress={onBack}
+            activeOpacity={0.8}
+            style={styles.backButton}
+            accessibilityLabel="Go back"
+          >
+            <ArrowLeft
+              size={20}
+              color={PALETTE.onSurface}
+              strokeWidth={2}
+            />
+          </TouchableOpacity>
 
-            {/* Stepper Progress */}
-            <View style={styles.stepperContainer}>
-              <View style={[styles.stepDot, styles.stepDotActive]} />
-              <View style={[styles.stepLine, styles.stepLineActive]} />
-              <View style={styles.stepDot} />
-              <View style={styles.stepLine} />
-              <View style={styles.stepDot} />
-            </View>
-
-            <View style={styles.placeholder} />
+          <View style={styles.stepper}>
+            <View style={[styles.stepPill, styles.stepActive]} />
+            <View style={styles.stepLine} />
+            <View style={styles.stepDot} />
+            <View style={styles.stepLine} />
+            <View style={styles.stepDot} />
           </View>
 
-          {/* Title Section */}
-          <View style={styles.titleSection}>
-            <Text style={styles.title}>Let's Set Up{'\n'}Your Business</Text>
-            <Text style={styles.stepIndicator}>Step 1 of 3</Text>
-          </View>
+          <View style={styles.topSpacer} />
+        </View>
 
-          {/* Form Fields */}
-          <View style={styles.formContainer}>
-            <PrimaryInputField
-              label="Business Name"
-              placeholder="Enter business name"
-              value={businessName}
-              onChangeText={setBusinessName}
-            />
+        <View style={styles.headerBlock}>
+          <Text style={styles.eyebrow}>STEP 1 OF 3</Text>
+          <Text style={styles.title}>Business Details</Text>
+          <Text style={styles.subtitle}>
+            Share your store name and location so customers can recognize your
+            loyalty cards.
+          </Text>
+        </View>
 
-            <PrimaryInputField
-              label="Business Category"
-              placeholder="Select category (e.g. Coffee Shop, Salon)"
-              value={category}
-              onChangeText={setCategory}
-            />
-
-            <PrimaryInputField
-              label="Business Address"
-              placeholder="Enter address"
-              value={address}
-              onChangeText={setAddress}
-            />
-
-            <PrimaryInputField
-              label="City"
-              placeholder="Enter city"
-              value={city}
-              onChangeText={setCity}
-            />
-          </View>
-
-          {/* Next Button */}
-          <PrimaryButton
-            title="Next"
-            onPress={handleNext}
+        <View style={styles.formCard}>
+          <PrimaryInputField
+            label="Business Name"
+            placeholder="Brew & Beans"
+            value={businessName}
+            onChangeText={setBusinessName}
           />
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+          <PrimaryInputField
+            label="Business Category"
+            placeholder="Coffee Shop"
+            value={category}
+            onChangeText={setCategory}
+          />
+          <PrimaryInputField
+            label="Business Address"
+            placeholder="123, MG Road"
+            value={address}
+            onChangeText={setAddress}
+          />
+          <PrimaryInputField
+            label="City"
+            placeholder="Indore"
+            value={city}
+            onChangeText={setCity}
+            containerStyle={styles.lastInput}
+          />
+        </View>
+
+        <View style={styles.footer}>
+          <PrimaryButton title="Next" onPress={handleNext} />
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  flex: {
-    flex: 1,
+    backgroundColor: PALETTE.surfaceAlt,
   },
   scrollContent: {
-    paddingHorizontal: 24,
-    paddingBottom: 32,
+    flexGrow: 1,
+    paddingHorizontal: SPACING.gutter,
+    paddingTop: 20,
+    paddingBottom: 36,
   },
-  header: {
+  topRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 12,
+    marginBottom: 28,
   },
   backButton: {
     width: 44,
     height: 44,
-    borderRadius: 14,
-    backgroundColor: '#F8FAFC',
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.surface,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
     alignItems: 'center',
     justifyContent: 'center',
+    ...SHADOWS.softCard,
   },
-  backArrow: {
-    fontSize: 22,
-    color: '#1E293B',
-    fontWeight: '600',
-  },
-  stepperContainer: {
+  stepper: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  stepDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#E2E8F0',
+  stepPill: {
+    width: 24,
+    height: 8,
+    borderRadius: RADII.full,
   },
-  stepDotActive: {
-    backgroundColor: '#7B3FF2',
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+  stepDot: {
+    width: 8,
+    height: 8,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.border,
+  },
+  stepActive: {
+    backgroundColor: PALETTE.primary,
   },
   stepLine: {
-    width: 24,
+    width: 20,
     height: 2,
-    backgroundColor: '#E2E8F0',
-    marginHorizontal: 4,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.border,
+    marginHorizontal: 6,
   },
-  stepLineActive: {
-    backgroundColor: '#7B3FF2',
-  },
-  placeholder: {
+  topSpacer: {
     width: 44,
   },
-  titleSection: {
-    marginTop: 18,
-    marginBottom: 28,
+  headerBlock: {
+    marginBottom: 24,
+  },
+  eyebrow: {
+    ...TYPOGRAPHY.labelUppercase,
+    color: PALETTE.primary,
+    marginBottom: 8,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#1E293B',
-    lineHeight: 36,
+    ...TYPOGRAPHY.displayMd,
+    marginBottom: 8,
   },
-  stepIndicator: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#7B3FF2',
-    marginTop: 8,
+  subtitle: {
+    ...TYPOGRAPHY.bodyMd,
+    color: PALETTE.onSurfaceVariant,
   },
-  formContainer: {
-    marginBottom: 16,
+  formCard: {
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    padding: SPACING.lg,
+    marginBottom: 24,
+    ...SHADOWS.softCard,
+  },
+  lastInput: {
+    marginBottom: 0,
+  },
+  footer: {
+    marginTop: 'auto',
   },
 });

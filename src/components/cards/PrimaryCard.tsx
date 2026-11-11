@@ -6,6 +6,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
+import { PALETTE, RADII, SHADOWS, SPACING } from '../../constants/theme';
 
 export interface PrimaryCardProps {
   children?: React.ReactNode;
@@ -37,15 +38,11 @@ export default function PrimaryCard({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    padding: SPACING.cardPadding,
+    ...SHADOWS.softCard,
   },
 });

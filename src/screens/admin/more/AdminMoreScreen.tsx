@@ -1,106 +1,71 @@
 import React from 'react';
 import {
-  SafeAreaView,
+  Alert,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  Alert,
 } from 'react-native';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  BarChart3,
+  ChevronRight,
+  Gift,
+  History,
+  LogOut,
+  QrCode,
+  Store,
+  Ticket,
+  Users,
+} from 'lucide-react-native';
 import { clearAuthData } from '../../../services/authService';
+import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../../constants/theme';
 
 interface AdminMoreScreenProps {
   onSelectOption?: (option: string) => void;
   onLogout?: () => void;
 }
 
-interface MenuItem {
-  id: string;
-  label: string;
-  icon: React.ComponentProps<typeof MaterialDesignIcons>['name'];
-  iconColor: string;
-  iconBg: string;
-}
+const MENU_ITEMS = [
+  { id: 'profile', label: 'Business Profile', Icon: Store },
+  { id: 'customers', label: 'Customer Management', Icon: Users },
+  { id: 'qr', label: 'Business QR Code', Icon: QrCode },
+  { id: 'analytics', label: 'Analytics & Insights', Icon: BarChart3 },
+  { id: 'activity', label: 'Transactions & Activity', Icon: History },
+  { id: 'stamps', label: 'Manage Stamp Cards', Icon: Ticket },
+  { id: 'rewards', label: 'Manage Rewards', Icon: Gift },
+] as const;
 
 export default function AdminMoreScreen({
   onSelectOption,
   onLogout,
 }: AdminMoreScreenProps) {
-  const menuItems: MenuItem[] = [
-    {
-      id: 'profile',
-      label: 'Business Profile',
-      icon: 'storefront-outline',
-      iconColor: '#7C3AED',
-      iconBg: '#F3E8FF',
-    },
-    {
-      id: 'customers',
-      label: 'Customer Management',
-      icon: 'account-group-outline',
-      iconColor: '#2563EB',
-      iconBg: '#DBEAFE',
-    },
-    {
-      id: 'qr',
-      label: 'Business QR Code',
-      icon: 'qrcode-scan',
-      iconColor: '#059669',
-      iconBg: '#D1FAE5',
-    },
-    {
-      id: 'analytics',
-      label: 'Analytics & Insights',
-      icon: 'chart-bar',
-      iconColor: '#D97706',
-      iconBg: '#FEF3C7',
-    },
-    {
-      id: 'activity',
-      label: 'All Transactions & Activity',
-      icon: 'history',
-      iconColor: '#4F46E5',
-      iconBg: '#EEF2FF',
-    },
-    {
-      id: 'stamps',
-      label: 'Manage Stamp Cards',
-      icon: 'ticket-percent-outline',
-      iconColor: '#0891B2',
-      iconBg: '#CFFAFE',
-    },
-    {
-      id: 'rewards',
-      label: 'Manage Rewards',
-      icon: 'gift-outline',
-      iconColor: '#E11D48',
-      iconBg: '#FFE4E6',
-    },
-  ];
-
   const handleLogout = () => {
-    Alert.alert('Logout', 'Are you sure you want to log out of your business account?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Logout',
-        style: 'destructive',
-        onPress: () => {
-          clearAuthData();
-          onLogout?.();
+    Alert.alert(
+      'Sign Out',
+      'Are you sure you want to log out of your business account?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Sign Out',
+          style: 'destructive',
+          onPress: async () => {
+            await clearAuthData();
+            onLogout?.();
+          },
         },
-      },
-    ]);
+      ]
+    );
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <StatusBar barStyle="dark-content" backgroundColor={PALETTE.surfaceAlt} />
 
-      {/* Header */}
       <View style={styles.header}>
+        <Text style={styles.eyebrow}>Workspace</Text>
         <Text style={styles.title}>More</Text>
       </View>
 
@@ -108,41 +73,40 @@ export default function AdminMoreScreen({
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
       >
-        {menuItems.map(item => (
+        {MENU_ITEMS.map(({ id, label, Icon }) => (
           <TouchableOpacity
-            key={item.id}
+            key={id}
             style={styles.menuRow}
-            onPress={() => onSelectOption?.(item.id)}
-            activeOpacity={0.7}
+            onPress={() => onSelectOption?.(id)}
+            activeOpacity={0.8}
           >
             <View style={styles.leftRow}>
-              <View style={[styles.iconCircle, { backgroundColor: item.iconBg }]}>
-                <MaterialDesignIcons
-                  name={item.icon}
-                  size={22}
-                  color={item.iconColor}
-                />
+              <View style={styles.iconCircle}>
+                <Icon size={20} strokeWidth={2} color={PALETTE.onSurface} />
               </View>
-              <Text style={styles.menuLabel}>{item.label}</Text>
+              <Text style={styles.menuLabel}>{label}</Text>
             </View>
 
-            <MaterialDesignIcons name="chevron-right" size={22} color="#94A3B8" />
+            <ChevronRight
+              size={20}
+              strokeWidth={2}
+              color={PALETTE.onSurfaceMuted}
+            />
           </TouchableOpacity>
         ))}
 
-        {/* Logout Row */}
         <TouchableOpacity
           style={[styles.menuRow, styles.logoutRow]}
           onPress={handleLogout}
-          activeOpacity={0.7}
+          activeOpacity={0.8}
         >
           <View style={styles.leftRow}>
             <View style={[styles.iconCircle, styles.logoutIconCircle]}>
-              <MaterialDesignIcons name="logout" size={20} color="#DC2626" />
+              <LogOut size={20} strokeWidth={2} color={PALETTE.primary} />
             </View>
-            <Text style={styles.logoutLabel}>Logout</Text>
+            <Text style={styles.logoutLabel}>Sign Out</Text>
           </View>
-          <MaterialDesignIcons name="chevron-right" size={22} color="#DC2626" />
+          <ChevronRight size={20} strokeWidth={2} color={PALETTE.primary} />
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
@@ -152,69 +116,65 @@ export default function AdminMoreScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: PALETTE.surfaceAlt,
   },
   header: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     paddingTop: 16,
-    paddingBottom: 16,
+    paddingBottom: 14,
+  },
+  eyebrow: {
+    ...TYPOGRAPHY.labelUppercase,
+    color: PALETTE.onSurfaceVariant,
+    marginBottom: 4,
   },
   title: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#1E293B',
+    ...TYPOGRAPHY.displayMd,
+    color: PALETTE.onSurface,
   },
   listContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 100,
+    paddingHorizontal: 24,
+    paddingBottom: 120,
+    gap: 10,
   },
   menuRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderColor: '#F1F5F9',
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.lg,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    padding: 16,
+    ...SHADOWS.softCard,
   },
   leftRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 14,
   },
   iconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    backgroundColor: '#F8FAFC',
+    width: 40,
+    height: 40,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.surfaceAlt,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 14,
-  },
-  iconEmoji: {
-    fontSize: 18,
   },
   menuLabel: {
+    ...TYPOGRAPHY.labelMd,
     fontSize: 15,
-    fontWeight: '600',
-    color: '#1E293B',
-  },
-  arrowIcon: {
-    fontSize: 22,
-    color: '#CBD5E1',
-    fontWeight: '300',
+    color: PALETTE.onSurface,
   },
   logoutRow: {
-    marginTop: 14,
-    borderBottomWidth: 0,
+    marginTop: 8,
   },
   logoutIconCircle: {
-    backgroundColor: '#FEF2F2',
-  },
-  logoutEmoji: {
-    fontSize: 18,
+    backgroundColor: PALETTE.illusCoralBg,
   },
   logoutLabel: {
+    ...TYPOGRAPHY.labelMd,
     fontSize: 15,
-    fontWeight: '700',
-    color: '#DC2626',
+    color: PALETTE.primary,
   },
 });

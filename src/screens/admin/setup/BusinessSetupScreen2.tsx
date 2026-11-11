@@ -2,24 +2,25 @@ import React, { useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
-  SafeAreaView,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
-import PrimaryInputField from '../../../components/input/PrimaryInputField';
-import PrimaryButton from '../../../components/button/PrimaryButton';
+import { ArrowLeft, Upload } from 'lucide-react-native';
+import { PrimaryButton, PrimaryInputField } from '../../../components';
+import {
+  PALETTE,
+  RADII,
+  SHADOWS,
+  SPACING,
+  TYPOGRAPHY,
+} from '../../../constants/theme';
 
 interface BusinessSetupScreen2Props {
   onBack?: () => void;
-  onNext?: (data: {
-    contactNumber: string;
-    email: string;
-  }) => void;
+  onNext?: (data: { contactNumber: string; email: string }) => void;
 }
 
 export default function BusinessSetupScreen2({
@@ -37,194 +38,200 @@ export default function BusinessSetupScreen2({
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    <KeyboardAvoidingView
+      style={styles.screen}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-        >
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity onPress={onBack} style={styles.backButton}>
-              <MaterialDesignIcons name="arrow-left" size={24} color="#1E293B" />
-            </TouchableOpacity>
-
-            {/* Stepper Progress */}
-            <View style={styles.stepperContainer}>
-              <View style={[styles.stepDot, styles.stepDotActive]} />
-              <View style={[styles.stepLine, styles.stepLineActive]} />
-              <View style={[styles.stepDot, styles.stepDotActive]} />
-              <View style={styles.stepLine} />
-              <View style={styles.stepDot} />
-            </View>
-
-            <View style={styles.placeholder} />
-          </View>
-
-          {/* Title Section */}
-          <View style={styles.titleSection}>
-            <Text style={styles.title}>Tell us more{'\n'}about your business</Text>
-            <Text style={styles.stepIndicator}>Step 2 of 3</Text>
-          </View>
-
-          {/* Business Logo Upload Card */}
-          <View style={styles.uploadSection}>
-            <Text style={styles.label}>Business Logo</Text>
-            <TouchableOpacity style={styles.uploadCard} activeOpacity={0.8}>
-              <View style={styles.uploadIconCircle}>
-                <MaterialDesignIcons name="cloud-upload-outline" size={26} color="#7C3AED" />
-              </View>
-              <Text style={styles.uploadText}>Upload Logo</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Form Fields */}
-          <View style={styles.formContainer}>
-            <PrimaryInputField
-              label="Contact Number"
-              placeholder="+91  98765 43210"
-              keyboardType="phone-pad"
-              value={contactNumber}
-              onChangeText={setContactNumber}
+        <View style={styles.topRow}>
+          <TouchableOpacity
+            onPress={onBack}
+            activeOpacity={0.8}
+            style={styles.backButton}
+            accessibilityLabel="Go back"
+          >
+            <ArrowLeft
+              size={20}
+              color={PALETTE.onSurface}
+              strokeWidth={2}
             />
+          </TouchableOpacity>
 
-            <PrimaryInputField
-              label="Email"
-              placeholder="business@email.com"
-              keyboardType="email-address"
-              value={email}
-              onChangeText={setEmail}
-            />
+          <View style={styles.stepper}>
+            <View style={[styles.stepDot, styles.stepActive]} />
+            <View style={[styles.stepLine, styles.stepActive]} />
+            <View style={[styles.stepPill, styles.stepActive]} />
+            <View style={styles.stepLine} />
+            <View style={styles.stepDot} />
           </View>
 
-          {/* Next Button */}
-          <PrimaryButton
-            title="Next"
-            onPress={handleNext}
+          <View style={styles.topSpacer} />
+        </View>
+
+        <View style={styles.headerBlock}>
+          <Text style={styles.eyebrow}>STEP 2 OF 3</Text>
+          <Text style={styles.title}>Contact & Branding</Text>
+          <Text style={styles.subtitle}>
+            Add your store logo and contact details so customers can reach you
+            easily.
+          </Text>
+        </View>
+
+        <TouchableOpacity activeOpacity={0.85} style={styles.uploadCard}>
+          <View style={styles.uploadIconCircle}>
+            <Upload size={22} color={PALETTE.primary} strokeWidth={2} />
+          </View>
+          <Text style={styles.uploadText}>Upload Business Logo</Text>
+          <Text style={styles.uploadHint}>PNG or JPG, recommended 512 x 512</Text>
+        </TouchableOpacity>
+
+        <View style={styles.formCard}>
+          <PrimaryInputField
+            label="Contact Number"
+            placeholder="+91 98765 43210"
+            value={contactNumber}
+            onChangeText={setContactNumber}
+            keyboardType="phone-pad"
           />
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+          <PrimaryInputField
+            label="Business Email"
+            placeholder="business@email.com"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            containerStyle={styles.lastInput}
+          />
+        </View>
+
+        <View style={styles.footer}>
+          <PrimaryButton title="Next" onPress={handleNext} />
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  flex: {
-    flex: 1,
+    backgroundColor: PALETTE.surfaceAlt,
   },
   scrollContent: {
-    paddingHorizontal: 24,
-    paddingBottom: 32,
+    flexGrow: 1,
+    paddingHorizontal: SPACING.gutter,
+    paddingTop: 20,
+    paddingBottom: 36,
   },
-  header: {
+  topRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 12,
+    marginBottom: 28,
   },
   backButton: {
     width: 44,
     height: 44,
-    borderRadius: 14,
-    backgroundColor: '#F8FAFC',
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.surface,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
     alignItems: 'center',
     justifyContent: 'center',
+    ...SHADOWS.softCard,
   },
-  backArrow: {
-    fontSize: 22,
-    color: '#1E293B',
-    fontWeight: '600',
-  },
-  stepperContainer: {
+  stepper: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  stepDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#E2E8F0',
+  stepPill: {
+    width: 24,
+    height: 8,
+    borderRadius: RADII.full,
   },
-  stepDotActive: {
-    backgroundColor: '#7B3FF2',
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+  stepDot: {
+    width: 8,
+    height: 8,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.border,
   },
   stepLine: {
-    width: 24,
+    width: 20,
     height: 2,
-    backgroundColor: '#E2E8F0',
-    marginHorizontal: 4,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.border,
+    marginHorizontal: 6,
   },
-  stepLineActive: {
-    backgroundColor: '#7B3FF2',
+  stepActive: {
+    backgroundColor: PALETTE.primary,
   },
-  placeholder: {
+  topSpacer: {
     width: 44,
   },
-  titleSection: {
-    marginTop: 18,
+  headerBlock: {
     marginBottom: 24,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#1E293B',
-    lineHeight: 36,
-  },
-  stepIndicator: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#7B3FF2',
-    marginTop: 8,
-  },
-  uploadSection: {
-    marginBottom: 24,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#334155',
+  eyebrow: {
+    ...TYPOGRAPHY.labelUppercase,
+    color: PALETTE.primary,
     marginBottom: 8,
   },
+  title: {
+    ...TYPOGRAPHY.displayMd,
+    marginBottom: 8,
+  },
+  subtitle: {
+    ...TYPOGRAPHY.bodyMd,
+    color: PALETTE.onSurfaceVariant,
+  },
   uploadCard: {
-    height: 120,
-    borderRadius: 16,
+    borderRadius: RADII.xl,
     borderWidth: 1.5,
-    borderColor: '#C7D2FE',
+    borderColor: PALETTE.border,
     borderStyle: 'dashed',
-    backgroundColor: '#F5F3FF',
+    backgroundColor: PALETTE.surface,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingVertical: 24,
+    paddingHorizontal: 20,
+    marginBottom: 20,
+    ...SHADOWS.softCard,
   },
   uploadIconCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#EDE9FE',
+    width: 52,
+    height: 52,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.illusCoralBg,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 6,
-  },
-  uploadIcon: {
-    fontSize: 18,
+    marginBottom: 12,
   },
   uploadText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#4F46E5',
+    ...TYPOGRAPHY.labelMd,
+    color: PALETTE.onSurface,
+    marginBottom: 4,
   },
-  formContainer: {
-    marginBottom: 16,
+  uploadHint: {
+    ...TYPOGRAPHY.caption,
+    color: PALETTE.onSurfaceMuted,
+  },
+  formCard: {
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    padding: SPACING.lg,
+    marginBottom: 24,
+    ...SHADOWS.softCard,
+  },
+  lastInput: {
+    marginBottom: 0,
+  },
+  footer: {
+    marginTop: 'auto',
   },
 });

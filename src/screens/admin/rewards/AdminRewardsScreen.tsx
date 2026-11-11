@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
-  SafeAreaView,
+  Alert,
+  RefreshControl,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -8,14 +9,14 @@ import {
   Text,
   TouchableOpacity,
   View,
-  RefreshControl,
-  Alert,
 } from 'react-native';
-import MaterialDesignIcons from '@react-native-vector-icons/material-design-icons';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { AlertCircle, Gift, Plus, Star } from 'lucide-react-native';
 import { useBusinessLoyaltyCards } from '../../../hooks/useApi';
 import PrimaryText from '../../../components/text/PrimaryText';
 import { loyaltyCardApi } from '../../../services/api';
 import { AdminRewardsScreenSkeleton } from '../../../components/skeleton';
+import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../../constants/theme';
 
 interface RewardItem {
   _id: string;
@@ -42,13 +43,14 @@ export default function AdminRewardsScreen({
     return <AdminRewardsScreenSkeleton />;
   }
 
-  // Filter cards that have rewards
   const rewards = cards?.filter((card: any) => card.reward) || [];
 
   const toggleReward = async (id: string, currentStatus: boolean) => {
     setTogglingId(id);
     try {
-      const response = await loyaltyCardApi.update(id, { isActive: !currentStatus });
+      const response = await loyaltyCardApi.update(id, {
+        isActive: !currentStatus,
+      });
       if (response.success) {
         refetch();
       } else {
@@ -61,29 +63,26 @@ export default function AdminRewardsScreen({
     }
   };
 
-  const handleRefresh = () => {
-    refetch();
-  };
-
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <StatusBar barStyle="dark-content" backgroundColor={PALETTE.surfaceAlt} />
 
-      {/* Header */}
       <View style={styles.header}>
         <View>
+          <PrimaryText text="Perks Management" customStyle={styles.eyebrow} />
           <PrimaryText text="Rewards Catalog" customStyle={styles.title} />
           <Text style={styles.subtitle}>
-            {rewards.length} active {rewards.length === 1 ? 'reward' : 'rewards'} configured
+            {rewards.length} active{' '}
+            {rewards.length === 1 ? 'reward' : 'rewards'} configured
           </Text>
         </View>
 
         <TouchableOpacity
           onPress={onAddReward}
           style={styles.addButton}
-          activeOpacity={0.8}
+          activeOpacity={0.85}
         >
-          <MaterialDesignIcons name="plus" size={18} color="#FFFFFF" style={styles.mr4} />
+          <Plus size={16} strokeWidth={2.5} color={PALETTE.onPrimary} />
           <Text style={styles.addButtonText}>New Reward</Text>
         </TouchableOpacity>
       </View>
@@ -92,45 +91,62 @@ export default function AdminRewardsScreen({
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={loading} onRefresh={handleRefresh} />
+          <RefreshControl
+            refreshing={loading}
+            onRefresh={refetch}
+            tintColor={PALETTE.primary}
+          />
         }
       >
         {error ? (
-          <View style={styles.errorContainer}>
-            <MaterialDesignIcons name="alert-circle-outline" size={40} color="#EF4444" style={styles.mb8} />
+          <View style={styles.errorCard}>
+            <AlertCircle size={36} strokeWidth={2} color={PALETTE.primary} />
             <Text style={styles.errorText}>{error}</Text>
-            <TouchableOpacity style={styles.retryButton} onPress={handleRefresh}>
+            <TouchableOpacity style={styles.retryButton} onPress={refetch}>
               <Text style={styles.retryButtonText}>Retry</Text>
             </TouchableOpacity>
           </View>
         ) : rewards.length > 0 ? (
           rewards.map((reward: RewardItem) => (
             <View key={reward._id} style={styles.rewardCard}>
-              <View
-                style={[
-                  styles.iconCircle,
-                  { backgroundColor: reward.backgroundColor || '#EDE9FE' },
-                ]}
-              >
-                <MaterialDesignIcons name="gift" size={24} color="#7C3AED" />
+              <View style={styles.iconCircle}>
+                <Gift size={22} strokeWidth={2} color={PALETTE.primary} />
               </View>
 
               <View style={styles.rewardInfo}>
-                <PrimaryText text={reward.reward || 'Reward'} customStyle={styles.rewardName} />
+                <PrimaryText
+                  text={reward.reward || 'Reward'}
+                  customStyle={styles.rewardName}
+                />
                 <View style={styles.metaRow}>
-                  <MaterialDesignIcons name="star" size={13} color="#F59E0B" style={styles.mr4} />
+                  <Star
+                    size={13}
+                    strokeWidth={2}
+                    color={PALETTE.warning}
+                    fill={PALETTE.warning}
+                  />
                   <PrimaryText
-                    text={`${reward.totalStamps || 10} Stamps Required • ${reward.title}`}
+                    text={`${reward.totalStamps || 10} Stamps • ${reward.title}`}
                     customStyle={styles.rewardStamps}
+                    numberOfLines={1}
                   />
                 </View>
               </View>
 
               <Switch
-                trackColor={{ false: '#CBD5E1', true: '#C4B5FD' }}
-                thumbColor={reward.isActive !== false ? '#7B3FF2' : '#F1F5F9'}
+                trackColor={{
+                  false: PALETTE.border,
+                  true: PALETTE.illusCoralBg,
+                }}
+                thumbColor={
+                  reward.isActive !== false
+                    ? PALETTE.primary
+                    : PALETTE.onSurfaceMuted
+                }
                 value={reward.isActive !== false}
-                onValueChange={() => toggleReward(reward._id, reward.isActive !== false)}
+                onValueChange={() =>
+                  toggleReward(reward._id, reward.isActive !== false)
+                }
                 disabled={togglingId === reward._id}
               />
             </View>
@@ -138,18 +154,18 @@ export default function AdminRewardsScreen({
         ) : (
           <View style={styles.emptyState}>
             <View style={styles.emptyIconCircle}>
-              <MaterialDesignIcons name="gift-open-outline" size={48} color="#94A3B8" />
+              <Gift size={28} strokeWidth={2} color={PALETTE.primary} />
             </View>
             <Text style={styles.emptyTitle}>No Rewards Yet</Text>
             <Text style={styles.emptySubtitle}>
-              Create loyalty cards with rewards to start rewarding your customers!
+              Create loyalty cards with perks to keep your customers returning.
             </Text>
             <TouchableOpacity
               style={styles.emptyActionButton}
               onPress={onAddReward}
-              activeOpacity={0.8}
+              activeOpacity={0.85}
             >
-              <MaterialDesignIcons name="plus" size={18} color="#FFFFFF" style={styles.mr6} />
+              <Plus size={18} strokeWidth={2.5} color={PALETTE.onPrimary} />
               <Text style={styles.emptyActionText}>Add Reward</Text>
             </TouchableOpacity>
           </View>
@@ -162,156 +178,159 @@ export default function AdminRewardsScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: PALETTE.surfaceAlt,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     paddingTop: 16,
-    paddingBottom: 12,
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 1,
-    borderBottomColor: '#F1F5F9',
+    paddingBottom: 14,
+  },
+  eyebrow: {
+    ...TYPOGRAPHY.labelUppercase,
+    color: PALETTE.onSurfaceVariant,
+    marginBottom: 4,
   },
   title: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#0F172A',
+    ...TYPOGRAPHY.displayMd,
+    fontSize: 28,
+    lineHeight: 34,
+    color: PALETTE.onSurface,
   },
   subtitle: {
-    fontSize: 12,
-    color: '#64748B',
+    ...TYPOGRAPHY.caption,
+    color: PALETTE.onSurfaceVariant,
     marginTop: 2,
   },
   addButton: {
-    backgroundColor: '#7C3AED',
+    backgroundColor: PALETTE.primary,
     paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 14,
+    height: 42,
+    borderRadius: RADII.full,
     flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#7C3AED',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
-    elevation: 3,
+    gap: 5,
+    ...SHADOWS.btn,
   },
   addButtonText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-    fontSize: 13,
+    ...TYPOGRAPHY.labelSm,
+    color: PALETTE.onPrimary,
   },
   listContent: {
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 90,
-    gap: 14,
+    paddingHorizontal: 24,
+    paddingBottom: 120,
+    gap: 12,
   },
   rewardCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 18,
-    padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: '#E2E8F0',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 2,
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    padding: 18,
+    ...SHADOWS.softCard,
   },
   iconCircle: {
     width: 48,
     height: 48,
-    borderRadius: 14,
+    borderRadius: RADII.lg,
+    backgroundColor: PALETTE.illusCoralBg,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 14,
   },
   rewardInfo: {
     flex: 1,
-    marginRight: 12,
+    marginRight: 10,
   },
   rewardName: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#0F172A',
-    marginBottom: 3,
+    ...TYPOGRAPHY.headlineSm,
+    color: PALETTE.onSurface,
   },
   metaRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 5,
+    marginTop: 4,
   },
   rewardStamps: {
-    fontSize: 12,
-    color: '#64748B',
-    fontWeight: '500',
+    ...TYPOGRAPHY.caption,
+    color: PALETTE.onSurfaceVariant,
+    flex: 1,
+  },
+  errorCard: {
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    padding: 28,
+    alignItems: 'center',
+    gap: 12,
+    ...SHADOWS.softCard,
+  },
+  errorText: {
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurface,
+    textAlign: 'center',
+  },
+  retryButton: {
+    backgroundColor: PALETTE.primary,
+    paddingHorizontal: 28,
+    height: 48,
+    borderRadius: RADII.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...SHADOWS.btn,
+  },
+  retryButtonText: {
+    ...TYPOGRAPHY.labelMd,
+    color: PALETTE.onPrimary,
   },
   emptyState: {
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.xl,
+    borderWidth: 1,
+    borderColor: PALETTE.border,
+    paddingVertical: 40,
+    paddingHorizontal: 24,
     alignItems: 'center',
-    paddingVertical: 50,
-    paddingHorizontal: 20,
+    ...SHADOWS.softCard,
   },
   emptyIconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#F1F5F9',
+    width: 64,
+    height: 64,
+    borderRadius: RADII.full,
+    backgroundColor: PALETTE.illusCoralBg,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
   },
   emptyTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1E293B',
+    ...TYPOGRAPHY.headlineMd,
+    color: PALETTE.onSurface,
     marginBottom: 6,
   },
   emptySubtitle: {
-    fontSize: 14,
-    color: '#64748B',
+    ...TYPOGRAPHY.bodySm,
+    color: PALETTE.onSurfaceVariant,
     textAlign: 'center',
-    lineHeight: 20,
     marginBottom: 20,
   },
   emptyActionButton: {
-    backgroundColor: '#7C3AED',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderRadius: 14,
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
+    backgroundColor: PALETTE.primary,
+    paddingHorizontal: 24,
+    height: 50,
+    borderRadius: RADII.full,
+    ...SHADOWS.btn,
   },
   emptyActionText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-    fontSize: 14,
+    ...TYPOGRAPHY.labelMd,
+    color: PALETTE.onPrimary,
   },
-  errorContainer: {
-    alignItems: 'center',
-    paddingVertical: 40,
-  },
-  errorText: {
-    fontSize: 14,
-    color: '#EF4444',
-    textAlign: 'center',
-    marginBottom: 12,
-  },
-  retryButton: {
-    backgroundColor: '#7C3AED',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 10,
-  },
-  retryButtonText: {
-    color: '#FFFFFF',
-    fontWeight: '600',
-    fontSize: 13,
-  },
-  mr4: { marginRight: 4 },
-  mr6: { marginRight: 6 },
-  mb8: { marginBottom: 8 },
 });
