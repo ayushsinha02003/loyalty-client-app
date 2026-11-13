@@ -8,9 +8,11 @@ import {
     ViewStyle,
 } from 'react-native';
 import Svg, { Defs, LinearGradient, Stop, Circle } from 'react-native-svg';
-import { Award, Gift, Star, Ticket } from 'lucide-react-native';
+import { Gift, Star, Ticket } from 'lucide-react-native';
 import PrimaryText from '../../text/PrimaryText';
 import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../../constants/theme';
+
+const defaultStampReward = require('../../../assets/images/stamp-reward.png');
 
 interface PrimaryStampProgressCardProps {
     currentStamps: number;
@@ -48,28 +50,40 @@ const PrimaryStampProgressCard = ({
     const remaining = Math.max(totalStamps - currentStamps, 0);
 
     const renderLeadingIcon = () => {
-        if (icon.includes('gift')) {
-            return <Gift size={26} strokeWidth={2} color={PALETTE.primary} />;
+        if (icon && icon.includes('gift')) {
+            return (
+                <View style={styles.vectorIconBox}>
+                    <Gift size={26} strokeWidth={2} color={PALETTE.primary} />
+                </View>
+            );
         }
-        if (icon.includes('star')) {
-            return <Star size={26} strokeWidth={2} color={PALETTE.warning} />;
+        if (icon && icon.includes('star')) {
+            return (
+                <View style={styles.vectorIconBox}>
+                    <Star size={26} strokeWidth={2} color={PALETTE.warning} />
+                </View>
+            );
         }
-        return <Award size={26} strokeWidth={2} color={PALETTE.primary} />;
+        return (
+            <Image
+                source={image || defaultStampReward}
+                style={styles.image}
+                resizeMode="contain"
+            />
+        );
     };
 
     return (
         <View style={[styles.card, customStyle]}>
             <View style={styles.iconContainer}>
                 {image ? (
-                    <View style={styles.vectorIconBox}>
-                        <Image
-                            source={image}
-                            style={styles.image}
-                            resizeMode="contain"
-                        />
-                    </View>
+                    <Image
+                        source={image}
+                        style={styles.image}
+                        resizeMode="contain"
+                    />
                 ) : (
-                    <View style={styles.vectorIconBox}>{renderLeadingIcon()}</View>
+                    renderLeadingIcon()
                 )}
             </View>
             <View style={styles.content}>
@@ -162,6 +176,10 @@ const styles = StyleSheet.create({
     iconContainer: {
         width: 56,
         height: 56,
+        borderRadius: RADII.lg,
+        overflow: 'hidden',
+        alignItems: 'center',
+        justifyContent: 'center',
         marginRight: 14,
     },
     vectorIconBox: {
@@ -173,9 +191,9 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     image: {
-        width: 36,
-        height: 36,
-        borderRadius: RADII.sm,
+        width: 56,
+        height: 56,
+        borderRadius: RADII.lg,
     },
     content: {
         flex: 1,

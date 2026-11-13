@@ -25,6 +25,7 @@ import LoyaltySteps from '../../components/loyalty/PrimaryLoyaltyStampCard';
 import { useCustomerDashboard } from '../../hooks/useApi';
 import { HomeScreenSkeleton } from '../../components/skeleton';
 import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../constants/theme';
+const cardImage = require('../../assets/images/stamp-reward.png');
 
 interface HomeScreenProps {
   onOpenScanner?: () => void;
@@ -149,6 +150,7 @@ const HomeScreen = ({ onOpenScanner, onSeeAll }: HomeScreenProps) => {
         {displayCard ? (
           <PrimaryStampProgressCard
             title={displayCard.loyaltyCard?.title || 'Featured Card'}
+            image={cardImage}
             icon={displayCard.loyaltyCard?.icon || 'trophy-award'}
             currentStamps={displayCard.currentStamps || 0}
             totalStamps={displayCard.loyaltyCard?.totalStamps || 10}
