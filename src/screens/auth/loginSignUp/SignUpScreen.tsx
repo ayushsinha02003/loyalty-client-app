@@ -33,9 +33,16 @@ import PrimaryRoleButton from '../../../components/button/PrimaryRoleButton';
 interface SignUpScreenProps {
   onSignup?: (data?: RegisterResponse) => void;
   onLogin?: () => void;
+  onViewTerms?: () => void;
+  onViewPrivacy?: () => void;
 }
 
-const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignup, onLogin }) => {
+const SignUpScreen: React.FC<SignUpScreenProps> = ({
+  onSignup,
+  onLogin,
+  onViewTerms,
+  onViewPrivacy,
+}) => {
   const [role, setRole] = useState<'customer' | 'business'>('customer');
   const [adminStep, setAdminStep] = useState<1 | 2 | 3>(1);
   const [loading, setLoading] = useState(false);
@@ -715,6 +722,21 @@ const SignUpScreen: React.FC<SignUpScreenProps> = ({ onSignup, onLogin }) => {
             </View>
           )}
 
+          {/* Terms & Privacy Policy Link */}
+          <View style={styles.legalNoticeContainer}>
+            <Text style={styles.legalNoticeText}>
+              By registering, you agree to our{' '}
+              <Text style={styles.legalLink} onPress={onViewTerms}>
+                Terms of Service
+              </Text>{' '}
+              and{' '}
+              <Text style={styles.legalLink} onPress={onViewPrivacy}>
+                Privacy Policy
+              </Text>
+              .
+            </Text>
+          </View>
+
           {/* Footer - Switch to Login */}
           <View style={styles.footer}>
             <Text style={styles.footerText}>Already have an account?</Text>
@@ -921,6 +943,22 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.bodySm,
     color: PALETTE.onSurfaceVariant,
     flex: 1,
+  },
+  legalNoticeContainer: {
+    paddingHorizontal: 12,
+    marginTop: 20,
+    marginBottom: 8,
+    alignItems: 'center',
+  },
+  legalNoticeText: {
+    ...TYPOGRAPHY.caption,
+    textAlign: 'center',
+    color: PALETTE.onSurfaceVariant,
+    lineHeight: 18,
+  },
+  legalLink: {
+    color: PALETTE.primary,
+    fontWeight: '700',
   },
   footer: {
     flexDirection: 'row',

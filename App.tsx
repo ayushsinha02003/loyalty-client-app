@@ -39,6 +39,9 @@ import QrScannerScreen from './src/screens/qr/QrScannerScreen';
 import ScanSuccessScreen from './src/screens/qr/ScanSuccessScreen';
 import RewardDetailsScreen from './src/screens/rewards/RewardDetailsScreen';
 import ActivityScreen from './src/screens/activity/ActivityScreen';
+import ForgotPasswordScreen from './src/screens/auth/forgotPassword/ForgotPasswordScreen';
+import TermsScreen from './src/screens/legal/TermsScreen';
+import PrivacyPolicyScreen from './src/screens/legal/PrivacyPolicyScreen';
 
 // Admin Screen Imports
 import BusinessSetupScreen1 from './src/screens/admin/setup/BusinessSetupScreen1';
@@ -62,6 +65,9 @@ function App() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
   const [initialScreen, setInitialScreen] = useState<ScreenId | null>(null);
 
   useEffect(() => {
@@ -143,6 +149,15 @@ function App() {
 
       {showSplash || !isSessionRestored ? (
         <SplashScreen onFinish={() => setShowSplash(false)} />
+      ) : showForgotPassword ? (
+        <ForgotPasswordScreen
+          onBack={() => setShowForgotPassword(false)}
+          onSuccess={() => setShowForgotPassword(false)}
+        />
+      ) : showTerms ? (
+        <TermsScreen onBack={() => setShowTerms(false)} />
+      ) : showPrivacy ? (
+        <PrivacyPolicyScreen onBack={() => setShowPrivacy(false)} />
       ) : showOnboarding ? (
         <OnboardingScreen
           onGetStarted={async () => {
@@ -158,6 +173,7 @@ function App() {
             setShowLogin(false);
             setShowSignup(true);
           }}
+          onForgotPassword={() => setShowForgotPassword(true)}
         />
       ) : showSignup ? (
         <SignUpScreen
@@ -166,6 +182,8 @@ function App() {
             setShowLogin(true);
           }}
           onSignup={handleAuthSuccess}
+          onViewTerms={() => setShowTerms(true)}
+          onViewPrivacy={() => setShowPrivacy(true)}
         />
       ) : (
         <AppContent
@@ -327,6 +345,24 @@ function AppContent({
           <ProfileScreen
             onLogout={onLogout}
             onViewActivity={() => setSelectedScreen('Activity')}
+            onViewTerms={() => setSelectedScreen('Terms')}
+            onViewPrivacy={() => setSelectedScreen('PrivacyPolicy')}
+          />
+        );
+
+      case 'Terms':
+        return <TermsScreen onBack={() => setSelectedScreen('Profile')} />;
+
+      case 'PrivacyPolicy':
+        return (
+          <PrivacyPolicyScreen onBack={() => setSelectedScreen('Profile')} />
+        );
+
+      case 'ForgotPassword':
+        return (
+          <ForgotPasswordScreen
+            onBack={() => setSelectedScreen('Login')}
+            onSuccess={() => setSelectedScreen('Login')}
           />
         );
 
@@ -363,6 +399,7 @@ function AppContent({
               }
             }}
             onSignup={() => setSelectedScreen('Signup')}
+            onForgotPassword={() => setSelectedScreen('ForgotPassword')}
           />
         );
 
@@ -382,6 +419,8 @@ function AppContent({
               }
             }}
             onLogin={() => setSelectedScreen('Login')}
+            onViewTerms={() => setSelectedScreen('Terms')}
+            onViewPrivacy={() => setSelectedScreen('PrivacyPolicy')}
           />
         );
 
@@ -558,6 +597,8 @@ function AppContent({
               else if (option === 'activity') setSelectedScreen('AdminActivity');
               else if (option === 'stamps') setSelectedScreen('AdminStampCards');
               else if (option === 'rewards') setSelectedScreen('AdminRewards');
+              else if (option === 'terms') setSelectedScreen('Terms');
+              else if (option === 'privacy') setSelectedScreen('PrivacyPolicy');
             }}
             onLogout={onLogout}
           />

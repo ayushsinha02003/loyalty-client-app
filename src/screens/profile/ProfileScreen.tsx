@@ -10,19 +10,20 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
-  Bell,
   ChevronRight,
   CreditCard,
+  FileText,
   Gift,
   HelpCircle,
   History,
-  IdCard,
   LogOut,
   Mail,
   Phone,
+  Shield,
   Star,
+  Trash2,
 } from 'lucide-react-native';
-import { getCurrentUser, clearAuthData } from '../../services/authService';
+import { getCurrentUser, clearAuthData, deleteUserAccount } from '../../services/authService';
 import { customerApi } from '../../services/api';
 import { ProfileScreenSkeleton } from '../../components/skeleton';
 import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../constants/theme';
@@ -30,16 +31,23 @@ import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../constants/theme';
 interface ProfileScreenProps {
   onLogout?: () => void;
   onViewActivity?: () => void;
+  onViewTerms?: () => void;
+  onViewPrivacy?: () => void;
 }
 
 const MENU_OPTIONS = [
   { id: 'Activity History', label: 'Activity History', Icon: History },
-  { id: 'Membership Details', label: 'Membership Details', Icon: IdCard },
-  { id: 'Notifications', label: 'Notifications', Icon: Bell },
+  { id: 'Terms of Service', label: 'Terms of Service', Icon: FileText },
+  { id: 'Privacy Policy', label: 'Privacy Policy', Icon: Shield },
   { id: 'Help & Support', label: 'Help & Support', Icon: HelpCircle },
 ] as const;
 
-const ProfileScreen = ({ onLogout, onViewActivity }: ProfileScreenProps) => {
+const ProfileScreen = ({
+  onLogout,
+  onViewActivity,
+  onViewTerms,
+  onViewPrivacy,
+}: ProfileScreenProps) => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -96,9 +104,40 @@ const ProfileScreen = ({ onLogout, onViewActivity }: ProfileScreenProps) => {
     ]);
   };
 
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      'Delete Account',
+      'This will permanently delete your account, your loyalty wallet cards, and all stamp records. This action cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete Permanently',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const res = await deleteUserAccount();
+              if (res.success) {
+                Alert.alert('Account Deleted', 'Your account has been deleted successfully.');
+                onLogout?.();
+              } else {
+                Alert.alert('Error', res.message || 'Failed to delete account.');
+              }
+            } catch (err: any) {
+              Alert.alert('Error', err?.message || 'Could not connect to server.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const handleMenuPress = (item: string) => {
     if (item === 'Activity History') {
       onViewActivity?.();
+    } else if (item === 'Terms of Service') {
+      onViewTerms?.();
+    } else if (item === 'Privacy Policy') {
+      onViewPrivacy?.();
     } else {
       Alert.alert(item, `${item} is active for your account.`);
     }
@@ -231,6 +270,20 @@ const ProfileScreen = ({ onLogout, onViewActivity }: ProfileScreenProps) => {
               <Text style={styles.logoutText}>Sign Out</Text>
             </View>
             <ChevronRight size={20} strokeWidth={2} color={PALETTE.primary} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.deleteAccountCard}
+            onPress={handleDeleteAccount}
+            activeOpacity={0.8}
+          >
+            <View style={styles.menuItemLeft}>
+              <View style={styles.deleteIconBox}>
+                <Trash2 size={20} strokeWidth={2} color="#DC2626" />
+              </View>
+              <Text style={styles.deleteAccountText}>Delete Account</Text>
+            </View>
+            <ChevronRight size={20} strokeWidth={2} color="#DC2626" />
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -436,5 +489,30 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.labelMd,
     fontSize: 15,
     color: PALETTE.primary,
+  },
+  deleteAccountCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: PALETTE.surface,
+    borderRadius: RADII.lg,
+    borderWidth: 1,
+    borderColor: '#FEE2E2',
+    padding: 16,
+    marginTop: 6,
+    ...SHADOWS.softCard,
+  },
+  deleteIconBox: {
+    width: 40,
+    height: 40,
+    borderRadius: RADII.full,
+    backgroundColor: '#FEF2F2',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  deleteAccountText: {
+    ...TYPOGRAPHY.labelMd,
+    fontSize: 15,
+    color: '#DC2626',
   },
 });

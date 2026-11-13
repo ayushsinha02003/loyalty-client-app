@@ -110,7 +110,7 @@ export default function AdminLoginScreen({
               <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </TouchableOpacity>
 
-            <PrimaryButton title="Login" onPress={onLogin || (() => {})} />
+            <PrimaryButton title="Login" onPress={onLogin || (() => { })} />
           </View>
 
           <View style={styles.dividerRow}>

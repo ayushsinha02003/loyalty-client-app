@@ -18,6 +18,9 @@ export type ScreenId =
   | 'Welcome'
   | 'Login'
   | 'Signup'
+  | 'ForgotPassword'
+  | 'Terms'
+  | 'PrivacyPolicy'
   | 'Otp'
   | 'Home'
   | 'MyCards'
@@ -54,6 +57,9 @@ export const SCREEN_OPTIONS: Array<{
   { id: 'Welcome', label: '5. Welcome Screen' },
   { id: 'Login', label: '6. Sign In Screen' },
   { id: 'Signup', label: '7. Sign Up Screen' },
+  { id: 'ForgotPassword', label: '7a. Forgot Password Screen' },
+  { id: 'Terms', label: '7b. Terms of Service Screen' },
+  { id: 'PrivacyPolicy', label: '7c. Privacy Policy Screen' },
   { id: 'Home', label: '8. Home Screen' },
   { id: 'MyCards', label: '9. My Cards Screen' },
   { id: 'Search', label: '10. Discover & Search Screen' },

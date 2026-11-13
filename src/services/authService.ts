@@ -270,3 +270,85 @@ export async function getProfile(): Promise<LoginResponse> {
   }
   return result;
 }
+
+/**
+ * Initiates forgot password request (generates 6-digit OTP)
+ */
+export async function forgotPassword(identifier: string): Promise<{
+  success: boolean;
+  message: string;
+  otp?: string;
+  phone?: string;
+  email?: string;
+}> {
+  const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ identifier }),
+  });
+
+  return await response.json();
+}
+
+/**
+ * Verifies 6-digit OTP for password reset
+ */
+export async function verifyResetOtp(
+  identifier: string,
+  otp: string
+): Promise<{ success: boolean; message: string }> {
+  const response = await fetch(`${API_BASE_URL}/api/auth/verify-reset-otp`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ identifier, otp }),
+  });
+
+  return await response.json();
+}
+
+/**
+ * Resets user password with verified OTP
+ */
+export async function resetPassword(
+  identifier: string,
+  otp: string,
+  newPassword: string
+): Promise<{ success: boolean; message: string }> {
+  const response = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ identifier, otp, newPassword }),
+  });
+
+  return await response.json();
+}
+
+/**
+ * Deletes user account and associated loyalty data (Google Play Compliance)
+ */
+export async function deleteUserAccount(): Promise<{ success: boolean; message: string }> {
+  const token = getAuthToken();
+  if (!token) {
+    return { success: false, message: 'Not authenticated' };
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/auth/delete-account`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const result = await response.json();
+  if (result.success) {
+    await clearAuthData();
+  }
+  return result;
+}

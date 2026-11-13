@@ -21,12 +21,14 @@ interface LoginScreenProps {
   role?: 'customer' | 'business';
   onLogin: (data?: LoginResponse) => void;
   onSignup: () => void;
+  onForgotPassword?: () => void;
 }
 
 const LoginScreen: React.FC<LoginScreenProps> = ({
   role: _role = 'customer',
   onLogin,
   onSignup,
+  onForgotPassword,
 }) => {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
@@ -89,7 +91,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
     } catch (error: any) {
       setGeneralError(
         error?.message ||
-          'Unable to connect to the server. Please check your internet connection.'
+        'Unable to connect to the server. Please check your internet connection.'
       );
     } finally {
       setLoading(false);
@@ -152,7 +154,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({
             />
 
             <TouchableOpacity
-              onPress={() => {}}
+              onPress={onForgotPassword}
               disabled={loading}
               style={styles.forgotPasswordTouchable}
             >
