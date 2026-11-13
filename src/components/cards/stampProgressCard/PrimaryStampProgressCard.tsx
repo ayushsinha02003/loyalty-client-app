@@ -61,11 +61,13 @@ const PrimaryStampProgressCard = ({
         <View style={[styles.card, customStyle]}>
             <View style={styles.iconContainer}>
                 {image ? (
-                    <Image
-                        source={image}
-                        style={styles.image}
-                        resizeMode="contain"
-                    />
+                    <View style={styles.vectorIconBox}>
+                        <Image
+                            source={image}
+                            style={styles.image}
+                            resizeMode="contain"
+                        />
+                    </View>
                 ) : (
                     <View style={styles.vectorIconBox}>{renderLeadingIcon()}</View>
                 )}
@@ -160,9 +162,6 @@ const styles = StyleSheet.create({
     iconContainer: {
         width: 56,
         height: 56,
-        borderRadius: RADII.lg,
-        alignItems: 'center',
-        justifyContent: 'center',
         marginRight: 14,
     },
     vectorIconBox: {
@@ -174,9 +173,9 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     image: {
-        width: 52,
-        height: 52,
-        borderRadius: RADII.md,
+        width: 36,
+        height: 36,
+        borderRadius: RADII.sm,
     },
     content: {
         flex: 1,
