@@ -30,6 +30,7 @@ export type ScreenId =
   | 'Rewards'
   | 'RewardDetails'
   | 'Activity'
+  | 'Notifications'
   | 'Profile'
   | 'AdminLogin'
   | 'BusinessSetup1'
@@ -67,6 +68,7 @@ export const SCREEN_OPTIONS: Array<{
   { id: 'ScanSuccess', label: '12. Scan Success Screen' },
   { id: 'Rewards', label: '13. Rewards Screen' },
   { id: 'Activity', label: '14. Activity History Screen' },
+  { id: 'Notifications', label: '14b. Notifications Screen' },
   { id: 'Profile', label: '15. Profile Screen' },
   { id: 'AdminHome', label: '1. Admin Dashboard', section: 'ADMIN' },
   { id: 'AdminCustomers', label: '2. Customers Screen (Manage & Stamp)' },

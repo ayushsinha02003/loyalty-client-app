@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
+  Bell,
   ChevronRight,
   CreditCard,
   FileText,
@@ -30,11 +31,13 @@ import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../constants/theme';
 interface ProfileScreenProps {
   onLogout?: () => void;
   onViewActivity?: () => void;
+  onViewNotifications?: () => void;
   onViewTerms?: () => void;
   onViewPrivacy?: () => void;
 }
 
 const MENU_OPTIONS = [
+  { id: 'Notifications', label: 'Notifications', Icon: Bell },
   { id: 'Activity History', label: 'Activity History', Icon: History },
   { id: 'Terms of Service', label: 'Terms of Service', Icon: FileText },
   { id: 'Privacy Policy', label: 'Privacy Policy', Icon: Shield },
@@ -44,6 +47,7 @@ const MENU_OPTIONS = [
 const ProfileScreen = ({
   onLogout,
   onViewActivity,
+  onViewNotifications,
   onViewTerms,
   onViewPrivacy,
 }: ProfileScreenProps) => {
@@ -104,7 +108,9 @@ const ProfileScreen = ({
   };
 
   const handleMenuPress = (item: string) => {
-    if (item === 'Activity History') {
+    if (item === 'Notifications') {
+      onViewNotifications?.();
+    } else if (item === 'Activity History') {
       onViewActivity?.();
     } else if (item === 'Terms of Service') {
       onViewTerms?.();

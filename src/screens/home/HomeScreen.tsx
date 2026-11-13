@@ -30,6 +30,7 @@ const cardImage = require('../../assets/images/stamp-reward.png');
 interface HomeScreenProps {
   onOpenScanner?: () => void;
   onSeeAll?: () => void;
+  onOpenNotifications?: () => void;
 }
 
 const FEATURED_CATEGORIES = [
@@ -75,7 +76,11 @@ const FEATURED_CATEGORIES = [
   },
 ] as const;
 
-const HomeScreen = ({ onOpenScanner, onSeeAll }: HomeScreenProps) => {
+const HomeScreen = ({
+  onOpenScanner,
+  onSeeAll,
+  onOpenNotifications,
+}: HomeScreenProps) => {
   const { dashboard, loading, error, refetch } = useCustomerDashboard();
   const [userName, setUserName] = useState('Friend');
 
@@ -131,7 +136,11 @@ const HomeScreen = ({ onOpenScanner, onSeeAll }: HomeScreenProps) => {
         subtitle="Loyalty Wallet"
         notificationCount={rewardReadyCount}
         onNotificationPress={() => {
-          onSeeAll?.();
+          if (onOpenNotifications) {
+            onOpenNotifications();
+          } else {
+            onSeeAll?.();
+          }
         }}
       />
 

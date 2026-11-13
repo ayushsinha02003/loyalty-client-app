@@ -39,6 +39,7 @@ import QrScannerScreen from './src/screens/qr/QrScannerScreen';
 import ScanSuccessScreen from './src/screens/qr/ScanSuccessScreen';
 import RewardDetailsScreen from './src/screens/rewards/RewardDetailsScreen';
 import ActivityScreen from './src/screens/activity/ActivityScreen';
+import NotificationsScreen from './src/screens/notifications/NotificationsScreen';
 import ForgotPasswordScreen from './src/screens/auth/forgotPassword/ForgotPasswordScreen';
 import TermsScreen from './src/screens/legal/TermsScreen';
 import PrivacyPolicyScreen from './src/screens/legal/PrivacyPolicyScreen';
@@ -321,6 +322,7 @@ function AppContent({
               setActiveTab('MyCards');
               setSelectedScreen('MyCards');
             }}
+            onOpenNotifications={() => setSelectedScreen('Notifications')}
           />
         );
 
@@ -340,11 +342,27 @@ function AppContent({
       case 'Rewards':
         return <RewardsScreen />;
 
+      case 'Notifications':
+        return (
+          <NotificationsScreen
+            onBack={() => setSelectedScreen('Home')}
+            onNavigateToRewards={() => {
+              setActiveTab('Rewards');
+              setSelectedScreen('Rewards');
+            }}
+            onNavigateToCards={() => {
+              setActiveTab('MyCards');
+              setSelectedScreen('MyCards');
+            }}
+          />
+        );
+
       case 'Profile':
         return (
           <ProfileScreen
             onLogout={onLogout}
             onViewActivity={() => setSelectedScreen('Activity')}
+            onViewNotifications={() => setSelectedScreen('Notifications')}
             onViewTerms={() => setSelectedScreen('Terms')}
             onViewPrivacy={() => setSelectedScreen('PrivacyPolicy')}
           />
