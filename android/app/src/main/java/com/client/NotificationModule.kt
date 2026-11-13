@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
@@ -111,14 +112,15 @@ class NotificationModule(private val reactContext: ReactApplicationContext) :
     @ReactMethod
     fun requestPermission(promise: Promise) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            val activity = currentActivity
+            val activity = reactApplicationContext.currentActivity
             if (activity != null) {
                 val status = ContextCompat.checkSelfPermission(
                     reactContext,
                     Manifest.permission.POST_NOTIFICATIONS
                 )
                 if (status != PackageManager.PERMISSION_GRANTED) {
-                    activity.requestPermissions(
+                    ActivityCompat.requestPermissions(
+                        activity,
                         arrayOf(Manifest.permission.POST_NOTIFICATIONS),
                         101
                     )
