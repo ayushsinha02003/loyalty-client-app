@@ -19,12 +19,14 @@ interface AdminLoginScreenProps {
   onBack?: () => void;
   onLogin?: () => void;
   onSignUp?: () => void;
+  onForgotPassword?: () => void;
 }
 
 export default function AdminLoginScreen({
   onBack,
   onLogin,
   onSignUp,
+  onForgotPassword,
 }: AdminLoginScreenProps) {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
@@ -106,7 +108,10 @@ export default function AdminLoginScreen({
               </View>
             </View>
 
-            <TouchableOpacity style={styles.forgotPasswordContainer}>
+            <TouchableOpacity
+              style={styles.forgotPasswordContainer}
+              onPress={onForgotPassword}
+            >
               <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </TouchableOpacity>
 

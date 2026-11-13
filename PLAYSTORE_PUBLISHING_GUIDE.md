@@ -56,7 +56,7 @@ When filling out the **Data Safety** questionnaire in Google Play Console:
 - **Is all user data encrypted in transit?** &rarr; **Yes** (All API communication occurs over TLS/HTTPS)
 - **Do you provide a way for users to request that their data be deleted?** &rarr; **Yes**
   - Add deletion link: `https://loyalty-api-zubc.onrender.com/delete-account`
-  - In-app deletion path: `Profile > Delete Account`
+  - Support contact email: `codestudiolabsupport@gmail.com`
 
 ### 2. Data Types Collected
 - **Personal Info &rarr; Name:**
@@ -102,7 +102,7 @@ FOR CUSTOMERS:
 • Track Progress in Real Time: See your stamps accumulate on beautiful progress cards.
 • Redeem Exciting Rewards: Unlock exclusive freebies, discounts, and treats as soon as your stamp card is complete.
 • Discover Participating Businesses: Explore nearby stores and view their loyalty rewards.
-• Secure & Private: Complete ownership of your account and data, with one-tap account deletion whenever you choose.
+• Secure & Private: Complete ownership of your account and data, with dedicated email data deletion support at codestudiolabsupport@gmail.com.
 
 FOR BUSINESS OWNERS:
 • Launch a Digital Loyalty Program: Set up stamp cards in minutes without plastic cards or expensive POS hardware.
@@ -136,7 +136,7 @@ Before publishing on Google Play Console, upload the following assets in **Store
 3. [x] Production Keystore generated & release signing configured
 4. [x] Privacy Policy & Terms screens added in app
 5. [x] Live Privacy Policy, Terms, and Account Deletion URLs hosted on server
-6. [x] In-app Account Deletion implemented (Google Play compliance)
+6. [x] Data deletion request web page & email support configured (codestudiolabsupport@gmail.com)
 7. [x] Forgot Password flow implemented (Backend + App UI)
 8. [x] TypeScript & ESLint checks: 0 errors, 0 warnings
 9. [x] Release App Bundle (`.aab`) & Release APK (`.apk`) built successfully

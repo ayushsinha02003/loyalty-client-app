@@ -92,8 +92,9 @@ export default function TermsScreen({ onBack }: TermsScreenProps) {
 
           <Text style={styles.sectionHeading}>5. Account Deletion & Rights</Text>
           <Text style={styles.paragraph}>
-            You may delete your account and associated loyalty data at any time from your Profile
-            settings in the application or by contacting support.
+            You may request deletion of your account and associated loyalty data at any time
+            by emailing our support team at codestudiolabsupport@gmail.com. All personal
+            records and stamps will be permanently removed.
           </Text>
 
           <Text style={styles.sectionHeading}>6. Limitation of Liability</Text>
@@ -106,8 +107,8 @@ export default function TermsScreen({ onBack }: TermsScreenProps) {
           <View style={styles.highlightNotice}>
             <ShieldCheck size={20} color={PALETTE.primary} strokeWidth={2} />
             <Text style={styles.highlightText}>
-              For inquiries or assistance regarding these terms, reach our support team at
-              support@loyaltyapp.com.
+              For inquiries, account deletion requests, or support, email us at
+              codestudiolabsupport@gmail.com.
             </Text>
           </View>
         </View>

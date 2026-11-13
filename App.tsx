@@ -493,6 +493,7 @@ function AppContent({
               }
             }}
             onSignup={() => setSelectedScreen('Signup')}
+            onForgotPassword={() => setSelectedScreen('ForgotPassword')}
           />
         );
 

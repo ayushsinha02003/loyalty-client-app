@@ -10,7 +10,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, CheckCircle2, KeyRound } from 'lucide-react-native';
+import { ArrowLeft, CheckCircle2, Mail } from 'lucide-react-native';
 import {
   forgotPassword,
   verifyResetOtp,
@@ -60,7 +60,7 @@ export default function ForgotPasswordScreen({
     setError('');
     const target = identifier.trim();
     if (!target) {
-      setError('Please enter your phone number or email');
+      setError('Please enter your registered email address');
       return;
     }
 
@@ -205,26 +205,28 @@ export default function ForgotPasswordScreen({
             <View style={styles.headerSpacer} />
           </View>
 
-          {/* Step 1: Identifier Entry */}
+          {/* Step 1: Email Entry */}
           {step === 'REQUEST' && (
             <>
               <View style={styles.headerBlock}>
-                <Text style={styles.eyebrow}>ACCOUNT RECOVERY</Text>
+                <Text style={styles.eyebrow}>EMAIL RECOVERY</Text>
                 <Text style={styles.title}>Forgot Password?</Text>
                 <Text style={styles.subtitle}>
-                  Enter your registered phone number or email and we will generate
-                  a verification code.
+                  Enter your registered email address and we will send you a 6-digit
+                  verification code to reset your password.
                 </Text>
               </View>
 
               <View style={styles.formCard}>
                 <View style={styles.cardIconCircle}>
-                  <KeyRound size={24} color={PALETTE.primary} strokeWidth={2} />
+                  <Mail size={24} color={PALETTE.primary} strokeWidth={2} />
                 </View>
 
                 <PrimaryInputField
-                  label="Registered Phone or Email"
-                  placeholder="Enter phone or email"
+                  label="Registered Email Address"
+                  placeholder="name@example.com"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
                   value={identifier}
                   onChangeText={t => {
                     setIdentifier(t);
@@ -237,7 +239,7 @@ export default function ForgotPasswordScreen({
                 <PrimaryErrorBanner message={error} />
 
                 <PrimaryButton
-                  title="Send Verification Code"
+                  title="Send Code to Email"
                   loading={loading}
                   onPress={handleRequestOtp}
                   style={styles.actionBtn}
@@ -251,10 +253,11 @@ export default function ForgotPasswordScreen({
             <>
               <View style={styles.headerBlock}>
                 <Text style={styles.eyebrow}>STEP 2 OF 3</Text>
-                <Text style={styles.title}>Enter Verification Code</Text>
+                <Text style={styles.title}>Check Your Email</Text>
                 <Text style={styles.subtitle}>
                   We sent a 6-digit verification code to{' '}
-                  <Text style={styles.boldText}>{identifier}</Text>.
+                  <Text style={styles.boldText}>{identifier}</Text>. Please check your
+                  inbox and spam folder.
                 </Text>
               </View>
 
@@ -267,7 +270,7 @@ export default function ForgotPasswordScreen({
                 ) : null}
 
                 <PrimaryInputField
-                  label="6-Digit Code"
+                  label="6-Digit Verification Code"
                   placeholder="e.g. 123456"
                   keyboardType="number-pad"
                   maxLength={6}
@@ -296,8 +299,8 @@ export default function ForgotPasswordScreen({
                 >
                   <Text style={styles.resendText}>
                     {resendCooldown > 0
-                      ? `Resend code in ${resendCooldown}s`
-                      : 'Did not receive code? Resend'}
+                      ? `Resend email in ${resendCooldown}s`
+                      : 'Did not receive email? Resend'}
                   </Text>
                 </TouchableOpacity>
               </View>

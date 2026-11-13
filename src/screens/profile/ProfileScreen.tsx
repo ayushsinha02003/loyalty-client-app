@@ -21,9 +21,8 @@ import {
   Phone,
   Shield,
   Star,
-  Trash2,
 } from 'lucide-react-native';
-import { getCurrentUser, clearAuthData, deleteUserAccount } from '../../services/authService';
+import { getCurrentUser, clearAuthData } from '../../services/authService';
 import { customerApi } from '../../services/api';
 import { ProfileScreenSkeleton } from '../../components/skeleton';
 import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../constants/theme';
@@ -102,33 +101,6 @@ const ProfileScreen = ({
         },
       },
     ]);
-  };
-
-  const handleDeleteAccount = () => {
-    Alert.alert(
-      'Delete Account',
-      'This will permanently delete your account, your loyalty wallet cards, and all stamp records. This action cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete Permanently',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              const res = await deleteUserAccount();
-              if (res.success) {
-                Alert.alert('Account Deleted', 'Your account has been deleted successfully.');
-                onLogout?.();
-              } else {
-                Alert.alert('Error', res.message || 'Failed to delete account.');
-              }
-            } catch (err: any) {
-              Alert.alert('Error', err?.message || 'Could not connect to server.');
-            }
-          },
-        },
-      ]
-    );
   };
 
   const handleMenuPress = (item: string) => {
@@ -270,20 +242,6 @@ const ProfileScreen = ({
               <Text style={styles.logoutText}>Sign Out</Text>
             </View>
             <ChevronRight size={20} strokeWidth={2} color={PALETTE.primary} />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.deleteAccountCard}
-            onPress={handleDeleteAccount}
-            activeOpacity={0.8}
-          >
-            <View style={styles.menuItemLeft}>
-              <View style={styles.deleteIconBox}>
-                <Trash2 size={20} strokeWidth={2} color="#DC2626" />
-              </View>
-              <Text style={styles.deleteAccountText}>Delete Account</Text>
-            </View>
-            <ChevronRight size={20} strokeWidth={2} color="#DC2626" />
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -489,30 +447,5 @@ const styles = StyleSheet.create({
     ...TYPOGRAPHY.labelMd,
     fontSize: 15,
     color: PALETTE.primary,
-  },
-  deleteAccountCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: PALETTE.surface,
-    borderRadius: RADII.lg,
-    borderWidth: 1,
-    borderColor: '#FEE2E2',
-    padding: 16,
-    marginTop: 6,
-    ...SHADOWS.softCard,
-  },
-  deleteIconBox: {
-    width: 40,
-    height: 40,
-    borderRadius: RADII.full,
-    backgroundColor: '#FEF2F2',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  deleteAccountText: {
-    ...TYPOGRAPHY.labelMd,
-    fontSize: 15,
-    color: '#DC2626',
   },
 });

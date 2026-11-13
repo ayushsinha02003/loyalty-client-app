@@ -8,7 +8,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ArrowLeft, Camera, Shield, Trash2 } from 'lucide-react-native';
+import { ArrowLeft, Camera, Mail, Shield } from 'lucide-react-native';
 import { PALETTE, RADII, SHADOWS, SPACING, TYPOGRAPHY } from '../../constants/theme';
 
 interface PrivacyPolicyScreenProps {
@@ -97,13 +97,14 @@ export default function PrivacyPolicyScreen({ onBack }: PrivacyPolicyScreenProps
           {/* Account Deletion Highlight */}
           <View style={styles.highlightCard}>
             <View style={styles.highlightHeader}>
-              <Trash2 size={18} color={PALETTE.primary} strokeWidth={2} />
+              <Mail size={18} color={PALETTE.primary} strokeWidth={2} />
               <Text style={styles.highlightTitle}>Right to Delete Account & Data</Text>
             </View>
             <Text style={styles.highlightBody}>
-              You have complete ownership of your data. You can delete your account at any time
-              by navigating to Profile &rarr; Delete Account. Deleting your account permanently
-              removes your profile, stamp cards, and transaction records from our servers.
+              You have complete ownership of your data. You can request the permanent deletion
+              of your account and all associated loyalty records at any time by emailing our
+              support team at codestudiolabsupport@gmail.com. All personal data, stamp cards,
+              and transaction logs will be permanently deleted.
             </Text>
           </View>
 
@@ -115,8 +116,8 @@ export default function PrivacyPolicyScreen({ onBack }: PrivacyPolicyScreenProps
 
           <Text style={styles.sectionHeading}>5. Contact & Inquiries</Text>
           <Text style={styles.paragraph}>
-            If you have questions about our privacy practices, contact us at:
-            {'\n'}support@loyaltyapp.com
+            If you have questions about our privacy practices or wish to request data deletion, contact us at:
+            {'\n'}codestudiolabsupport@gmail.com
           </Text>
         </View>
       </ScrollView>
