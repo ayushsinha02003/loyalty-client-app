@@ -25,6 +25,7 @@ import LoyaltySteps from '../../components/loyalty/PrimaryLoyaltyStampCard';
 import { useCustomerDashboard } from '../../hooks/useApi';
 import { HomeScreenSkeleton } from '../../components/skeleton';
 import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../constants/theme';
+import { setupBackgroundNotificationWatcher } from '../../services/nativeNotification';
 const cardImage = require('../../assets/images/stamp-reward.png');
 
 interface HomeScreenProps {
@@ -90,6 +91,13 @@ const HomeScreen = ({
       setUserName(user.name);
     }
   }, []);
+
+  useEffect(() => {
+    const cleanup = setupBackgroundNotificationWatcher(
+      () => dashboard?.customerCards || []
+    );
+    return cleanup;
+  }, [dashboard]);
 
   const handleRefresh = () => {
     refetch();

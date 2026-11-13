@@ -19,6 +19,7 @@ import {
   setHasCompletedOnboarding,
   clearAuthData,
 } from './src/services/authService';
+import { requestNotificationPermission } from './src/services/nativeNotification';
 
 import HomeScreen from './src/screens/home/HomeScreen';
 import AdminHomeScreen from './src/screens/home/AdminHomeScreen';
@@ -76,6 +77,7 @@ function App() {
 
     async function restoreSession() {
       try {
+        requestNotificationPermission().catch(() => {});
         const [authSession, hasCompletedOnboarding] = await Promise.all([
           initializeAuthSession(),
           getHasCompletedOnboarding(),

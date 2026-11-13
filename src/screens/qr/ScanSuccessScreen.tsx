@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   StatusBar,
   StyleSheet,
@@ -11,6 +11,7 @@ import Svg, { Circle, Path, Rect } from 'react-native-svg';
 import { Check, Gift, Star } from 'lucide-react-native';
 import PrimaryButton from '../../components/button/PrimaryButton';
 import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../constants/theme';
+import { notifyStampEarned } from '../../services/nativeNotification';
 
 interface ScanSuccessScreenProps {
   businessName?: string;
@@ -29,6 +30,9 @@ export default function ScanSuccessScreen({
   onViewCard,
   onDone,
 }: ScanSuccessScreenProps) {
+  useEffect(() => {
+    notifyStampEarned(businessName, currentStamps, totalStamps).catch(() => {});
+  }, [businessName, currentStamps, totalStamps]);
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <StatusBar barStyle="dark-content" backgroundColor={PALETTE.surfaceAlt} />
