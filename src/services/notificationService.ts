@@ -109,17 +109,6 @@ export function generateNotificationsFromCards(
     }
   });
 
-  // 3. Welcome / System Notification
-  const welcomeId = 'system_welcome_loyalty';
-  notifications.push({
-    id: welcomeId,
-    type: 'system',
-    title: '👋 Welcome to LoyaltyApp',
-    message: 'Explore local shops, scan QR codes at checkout, and earn free loyalty rewards on every visit.',
-    timestamp: 'Always active',
-    isRead: readIds.includes(welcomeId),
-  });
-
   return notifications;
 }
 
