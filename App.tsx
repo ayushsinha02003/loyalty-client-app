@@ -4,6 +4,8 @@ import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
+import { queryClient, asyncStoragePersister } from './src/services/queryClient';
 
 import {
   PALETTE,
@@ -144,57 +146,62 @@ function App() {
   };
 
   return (
-    <SafeAreaProvider>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={isDarkMode ? PALETTE.surfaceContrast : PALETTE.surfaceAlt}
-      />
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{ persister: asyncStoragePersister }}
+    >
+      <SafeAreaProvider>
+        <StatusBar
+          barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+          backgroundColor={isDarkMode ? PALETTE.surfaceContrast : PALETTE.surfaceAlt}
+        />
 
-      {showSplash || !isSessionRestored ? (
-        <SplashScreen onFinish={() => setShowSplash(false)} />
-      ) : showForgotPassword ? (
-        <ForgotPasswordScreen
-          onBack={() => setShowForgotPassword(false)}
-          onSuccess={() => setShowForgotPassword(false)}
-        />
-      ) : showTerms ? (
-        <TermsScreen onBack={() => setShowTerms(false)} />
-      ) : showPrivacy ? (
-        <PrivacyPolicyScreen onBack={() => setShowPrivacy(false)} />
-      ) : showOnboarding ? (
-        <OnboardingScreen
-          onGetStarted={async () => {
-            await setHasCompletedOnboarding(true);
-            setShowOnboarding(false);
-            setShowLogin(true);
-          }}
-        />
-      ) : showLogin ? (
-        <LoginScreen
-          onLogin={handleAuthSuccess}
-          onSignup={() => {
-            setShowLogin(false);
-            setShowSignup(true);
-          }}
-          onForgotPassword={() => setShowForgotPassword(true)}
-        />
-      ) : showSignup ? (
-        <SignUpScreen
-          onLogin={() => {
-            setShowSignup(false);
-            setShowLogin(true);
-          }}
-          onSignup={handleAuthSuccess}
-          onViewTerms={() => setShowTerms(true)}
-          onViewPrivacy={() => setShowPrivacy(true)}
-        />
-      ) : (
-        <AppContent
-          initialScreen={initialScreen || undefined}
-          onLogout={handleLogout}
-        />
-      )}
-    </SafeAreaProvider>
+        {showSplash || !isSessionRestored ? (
+          <SplashScreen onFinish={() => setShowSplash(false)} />
+        ) : showForgotPassword ? (
+          <ForgotPasswordScreen
+            onBack={() => setShowForgotPassword(false)}
+            onSuccess={() => setShowForgotPassword(false)}
+          />
+        ) : showTerms ? (
+          <TermsScreen onBack={() => setShowTerms(false)} />
+        ) : showPrivacy ? (
+          <PrivacyPolicyScreen onBack={() => setShowPrivacy(false)} />
+        ) : showOnboarding ? (
+          <OnboardingScreen
+            onGetStarted={async () => {
+              await setHasCompletedOnboarding(true);
+              setShowOnboarding(false);
+              setShowLogin(true);
+            }}
+          />
+        ) : showLogin ? (
+          <LoginScreen
+            onLogin={handleAuthSuccess}
+            onSignup={() => {
+              setShowLogin(false);
+              setShowSignup(true);
+            }}
+            onForgotPassword={() => setShowForgotPassword(true)}
+          />
+        ) : showSignup ? (
+          <SignUpScreen
+            onLogin={() => {
+              setShowSignup(false);
+              setShowLogin(true);
+            }}
+            onSignup={handleAuthSuccess}
+            onViewTerms={() => setShowTerms(true)}
+            onViewPrivacy={() => setShowPrivacy(true)}
+          />
+        ) : (
+          <AppContent
+            initialScreen={initialScreen || undefined}
+            onLogout={handleLogout}
+          />
+        )}
+      </SafeAreaProvider>
+    </PersistQueryClientProvider>
   );
 }
 

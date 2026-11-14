@@ -22,6 +22,7 @@ import {
   Keyboard,
 } from 'lucide-react-native';
 import { qrApi } from '../../services/api';
+import { invalidateCustomerQueries } from '../../services/queryClient';
 import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../constants/theme';
 
 interface BarcodeReadEvent {
@@ -99,6 +100,7 @@ export default function QrScannerScreen({
     try {
       const response = await qrApi.scan(trimmed);
       if (response.success) {
+        invalidateCustomerQueries().catch(() => {});
         const customerCard = response.data?.customerCard || response.customerCard;
         const stampsEarned =
           response.data?.stampsEarned ?? response.stampsEarned ?? 1;

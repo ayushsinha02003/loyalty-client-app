@@ -12,6 +12,7 @@ import { Check, Gift, Star } from 'lucide-react-native';
 import PrimaryButton from '../../components/button/PrimaryButton';
 import { PALETTE, RADII, SHADOWS, TYPOGRAPHY } from '../../constants/theme';
 import { notifyStampEarned } from '../../services/nativeNotification';
+import { invalidateCustomerQueries } from '../../services/queryClient';
 
 interface ScanSuccessScreenProps {
   businessName?: string;
@@ -32,6 +33,7 @@ export default function ScanSuccessScreen({
 }: ScanSuccessScreenProps) {
   useEffect(() => {
     notifyStampEarned(businessName, currentStamps, totalStamps).catch(() => {});
+    invalidateCustomerQueries().catch(() => {});
   }, [businessName, currentStamps, totalStamps]);
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>

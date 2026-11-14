@@ -1,4 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { QUERY_KEYS } from '../services/queryClient';
 import {
   customerApi,
   businessApi,
@@ -16,229 +18,204 @@ import {
 } from '../services/api';
 
 export const useCustomerDashboard = () => {
-  const [dashboard, setDashboard] = useState<CustomerDashboard | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchDashboard = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  const query = useQuery({
+    queryKey: QUERY_KEYS.customerDashboard,
+    queryFn: async () => {
       const response = await customerApi.getDashboard();
-      if (response.success) {
-        const raw = response.data || response;
-        const customerCards =
-          raw.customerCards ||
-          response.customerCards ||
-          response.data?.customerCards ||
-          [];
-        const customer =
-          raw.customer || response.customer || response.data?.customer || {};
-
-        setDashboard({
-          customer,
-          customerCards,
-        });
-      } else {
-        setError(response.message || 'Failed to load dashboard');
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to load dashboard');
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load dashboard');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      const raw = response.data || response;
+      const customerCards: CustomerCard[] =
+        raw.customerCards ||
+        response.customerCards ||
+        response.data?.customerCards ||
+        [];
+      const customer =
+        raw.customer || response.customer || response.data?.customer || {};
 
-  useEffect(() => {
-    fetchDashboard();
-  }, [fetchDashboard]);
+      const dashboardData: CustomerDashboard = { customer, customerCards };
+      return dashboardData;
+    },
+  });
 
-  return { dashboard, loading, error, refetch: fetchDashboard };
+  const refetch = useCallback(() => {
+    query.refetch();
+  }, [query]);
+
+  return {
+    dashboard: query.data || null,
+    loading: query.isLoading && !query.data,
+    isFetching: query.isFetching,
+    error: query.error ? (query.error as Error).message : null,
+    refetch,
+  };
 };
 
 export const useCustomerCards = () => {
-  const [cards, setCards] = useState<CustomerCard[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchCards = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  const query = useQuery({
+    queryKey: QUERY_KEYS.customerCards,
+    queryFn: async () => {
       const response = await customerApi.getDashboard();
-      if (response.success) {
-        const list =
-          response.data?.customerCards ||
-          response.customerCards ||
-          (response as any).data?.cards ||
-          (response as any).cards ||
-          [];
-        setCards(list);
-      } else {
-        setError(response.message || 'Failed to load cards');
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to load cards');
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load cards');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      const list: CustomerCard[] =
+        response.data?.customerCards ||
+        response.customerCards ||
+        (response as any).data?.cards ||
+        (response as any).cards ||
+        [];
+      return list;
+    },
+  });
 
-  useEffect(() => {
-    fetchCards();
-  }, [fetchCards]);
+  const refetch = useCallback(() => {
+    query.refetch();
+  }, [query]);
 
-  return { cards, loading, error, refetch: fetchCards };
+  return {
+    cards: query.data || [],
+    loading: query.isLoading && !query.data,
+    isFetching: query.isFetching,
+    error: query.error ? (query.error as Error).message : null,
+    refetch,
+  };
 };
 
 export const useAvailableRewards = () => {
-  const [rewards, setRewards] = useState<CustomerCard[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchRewards = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  const query = useQuery({
+    queryKey: QUERY_KEYS.availableRewards,
+    queryFn: async () => {
       const response = await customerApi.getAvailableRewards();
-      if (response.success) {
-        const list = response.data?.rewards || response.rewards || [];
-        setRewards(list);
-      } else {
-        setError(response.message || 'Failed to load rewards');
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to load rewards');
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load rewards');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      const list: CustomerCard[] =
+        response.data?.rewards || response.rewards || [];
+      return list;
+    },
+  });
 
-  useEffect(() => {
-    fetchRewards();
-  }, [fetchRewards]);
+  const refetch = useCallback(() => {
+    query.refetch();
+  }, [query]);
 
-  return { rewards, loading, error, refetch: fetchRewards };
+  return {
+    rewards: query.data || [],
+    loading: query.isLoading && !query.data,
+    isFetching: query.isFetching,
+    error: query.error ? (query.error as Error).message : null,
+    refetch,
+  };
 };
 
 export const useStampHistory = () => {
-  const [history, setHistory] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchHistory = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  const query = useQuery({
+    queryKey: QUERY_KEYS.stampHistory,
+    queryFn: async () => {
       const response = await customerApi.getStampHistory();
-      if (response.success) {
-        const list = response.data?.history || response.history || [];
-        setHistory(list);
-      } else {
-        setError(response.message || 'Failed to load stamp history');
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to load stamp history');
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load stamp history');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      const list: any[] = response.data?.history || response.history || [];
+      return list;
+    },
+  });
 
-  useEffect(() => {
-    fetchHistory();
-  }, [fetchHistory]);
+  const refetch = useCallback(() => {
+    query.refetch();
+  }, [query]);
 
-  return { history, loading, error, refetch: fetchHistory };
+  return {
+    history: query.data || [],
+    loading: query.isLoading && !query.data,
+    isFetching: query.isFetching,
+    error: query.error ? (query.error as Error).message : null,
+    refetch,
+  };
 };
 
 export const useRewardHistory = () => {
-  const [history, setHistory] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchHistory = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  const query = useQuery({
+    queryKey: QUERY_KEYS.rewardHistory,
+    queryFn: async () => {
       const response = await customerApi.getRewardHistory();
-      if (response.success) {
-        const list = response.data?.history || response.history || [];
-        setHistory(list);
-      } else {
-        setError(response.message || 'Failed to load reward history');
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to load reward history');
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load reward history');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      const list: any[] = response.data?.history || response.history || [];
+      return list;
+    },
+  });
 
-  useEffect(() => {
-    fetchHistory();
-  }, [fetchHistory]);
+  const refetch = useCallback(() => {
+    query.refetch();
+  }, [query]);
 
-  return { history, loading, error, refetch: fetchHistory };
+  return {
+    history: query.data || [],
+    loading: query.isLoading && !query.data,
+    isFetching: query.isFetching,
+    error: query.error ? (query.error as Error).message : null,
+    refetch,
+  };
 };
 
 export const useBusinessDashboard = () => {
-  const [dashboard, setDashboard] = useState<BusinessDashboard | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchDashboard = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  const query = useQuery({
+    queryKey: QUERY_KEYS.businessDashboard,
+    queryFn: async () => {
       const response = await businessApi.getDashboard();
-      if (response.success) {
-        const data = (response as any).data?.dashboard || (response as any).dashboard || response.data;
-        setDashboard(data);
-      } else {
-        setError(response.message || 'Failed to load dashboard');
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to load dashboard');
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load dashboard');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      const data: BusinessDashboard =
+        (response as any).data?.dashboard ||
+        (response as any).dashboard ||
+        response.data;
+      return data;
+    },
+  });
 
-  useEffect(() => {
-    fetchDashboard();
-  }, [fetchDashboard]);
+  const refetch = useCallback(() => {
+    query.refetch();
+  }, [query]);
 
-  return { dashboard, loading, error, refetch: fetchDashboard };
+  return {
+    dashboard: query.data || null,
+    loading: query.isLoading && !query.data,
+    isFetching: query.isFetching,
+    error: query.error ? (query.error as Error).message : null,
+    refetch,
+  };
 };
 
 export const useBusinessCustomers = () => {
-  const [customers, setCustomers] = useState<BusinessCustomer[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchCustomers = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  const query = useQuery({
+    queryKey: QUERY_KEYS.businessCustomers,
+    queryFn: async () => {
       const response = await businessApi.getCustomers();
-      if (response.success) {
-        const list = response.data?.customers || response.customers || [];
-        setCustomers(list);
-      } else {
-        setError(response.message || 'Failed to load customers');
+      if (!response.success) {
+        throw new Error(response.message || 'Failed to load customers');
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load customers');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      const list: BusinessCustomer[] =
+        response.data?.customers || response.customers || [];
+      return list;
+    },
+  });
 
-  useEffect(() => {
-    fetchCustomers();
-  }, [fetchCustomers]);
+  const refetch = useCallback(() => {
+    query.refetch();
+  }, [query]);
 
-  return { customers, loading, error, refetch: fetchCustomers };
+  return {
+    customers: query.data || [],
+    loading: query.isLoading && !query.data,
+    isFetching: query.isFetching,
+    error: query.error ? (query.error as Error).message : null,
+    refetch,
+  };
 };
 
 export const useBusinessLoyaltyCards = () => {
